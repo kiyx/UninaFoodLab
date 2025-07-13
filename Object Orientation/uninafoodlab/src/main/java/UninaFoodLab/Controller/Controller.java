@@ -279,8 +279,6 @@ public class Controller
                 currFrame.dispose();
                 new ReportFrame().setVisible(true);
             } 
-            // else
-            	//((ReportFrame) currFrame).resetView();
         });
     }
 
@@ -296,8 +294,6 @@ public class Controller
                 currFrame.dispose();
                 new ProfileFrame().setVisible(true);
             } 
-            //else 
-            	//((ProfileFrame) currFrame).resetView();
         });
     }
 
@@ -371,7 +367,6 @@ public class Controller
     	LOGGER.log(Level.WARNING, "Tentativo di registrazione fallito: {0}", message);
         currFrame.showError(message);
     }
-    
     
     /**
      * Registra un nuovo partecipante dopo aver verificato che:
@@ -650,6 +645,10 @@ public class Controller
      *  -------------------------
 	*/
 
+	
+	
+	
+	
 	/**
      *  -------------------------
      * 

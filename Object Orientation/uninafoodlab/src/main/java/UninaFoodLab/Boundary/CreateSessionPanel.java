@@ -123,15 +123,20 @@ public class CreateSessionPanel extends JXPanel
 		return ore * 60 + minuti;
 	}
 	
-	 /**
-     * Restituisce la ricetta selezionata (solo per sessioni pratiche).
-     *
-     */
-	public String getRicetta()
+	/**
+	 * Restituisce l'ID della ricetta selezionata (solo per sessioni pratiche).
+	 *
+	 * @return L'ID della ricetta oppure -1 se nulla è selezionato o se la sessione è online
+	 */
+	public int getIdRicetta()
 	{
-		return pratica && ricettaCombo.getSelectedItem() != null ? ricettaCombo.getSelectedItem().toString().trim() : null;
+		if (pratica && ricettaCombo.getSelectedItem() instanceof Ricetta)
+		{
+			Ricetta r = (Ricetta) ricettaCombo.getSelectedItem();
+			return r.getId();
+		}
+		return -1;
 	}
-
 	
 	/**
      * Restituisce il link riunione (solo per sessioni online).
@@ -254,7 +259,6 @@ public class CreateSessionPanel extends JXPanel
      */
 	private void initListeners()
 	{
-	    // Remove button listener
 	    removeBtnActionListener = new ActionListener()
 	    {
 	        @Override
@@ -264,9 +268,8 @@ public class CreateSessionPanel extends JXPanel
 	        }
 	    };
 	    removeBtn.addActionListener(removeBtnActionListener);
-
-	    // DocumentListener for addressField (only if pratica)
-	    if (pratica && addressField != null)
+	    
+	    if(pratica && addressField != null)
 	    {
 	        addressListener = new DocumentListener()
 	        {
@@ -286,7 +289,7 @@ public class CreateSessionPanel extends JXPanel
 	    }
 
 	    // DocumentListener for linkField (only if non pratica)
-	    if (!pratica && linkField != null)
+	    if(!pratica && linkField != null)
 	    {
 	        linkListener = new DocumentListener()
 	        {
@@ -305,7 +308,6 @@ public class CreateSessionPanel extends JXPanel
 	        linkField.getDocument().addDocumentListener(linkListener);
 	    }
 
-	    // ChangeListener for durata spinners (ore and minuti)
 	    durataChangeListener = new ChangeListener()
 	    {
 	        @Override
@@ -320,7 +322,6 @@ public class CreateSessionPanel extends JXPanel
 	    oreSpinner.addChangeListener(durataChangeListener);
 	    minutiSpinner.addChangeListener(durataChangeListener);
 
-	    // DateChangeListener for datePicker
 	    dateListener = new DateChangeListener()
 	    {
 	        @Override
@@ -331,7 +332,6 @@ public class CreateSessionPanel extends JXPanel
 	    };
 	    datePicker.addDateChangeListener(dateListener);
 
-	    // TimeChangeListener for timePicker
 	    timeListener = new TimeChangeListener()
 	    {
 	        @Override
@@ -342,8 +342,7 @@ public class CreateSessionPanel extends JXPanel
 	    };
 	    timePicker.addTimeChangeListener(timeListener);
 
-	    // ItemListener for ricettaCombo (only if pratica)
-	    if (pratica && ricettaCombo != null)
+	    if(pratica && ricettaCombo != null)
 	    {
 	        ricettaListener = new ItemListener()
 	        {
