@@ -130,11 +130,10 @@ public class CreateSessionPanel extends JXPanel
 	 */
 	public int getIdRicetta()
 	{
-		if (pratica && ricettaCombo.getSelectedItem() instanceof Ricetta)
-		{
-			Ricetta r = (Ricetta) ricettaCombo.getSelectedItem();
-			return r.getId();
-		}
+		Ricetta selected = (Ricetta) ricettaCombo.getSelectedItem();
+		if(selected != null)
+		    return selected.getId();
+
 		return -1;
 	}
 	
@@ -193,13 +192,13 @@ public class CreateSessionPanel extends JXPanel
 		add(timePicker, "h 30!");
 
 		// Spinner per ore
-		oreSpinner = new JSpinner(new SpinnerNumberModel(1, 0, 24, 1));
+		oreSpinner = new JSpinner(new SpinnerNumberModel(1, 0, 23, 1));
 		oreSpinner.setFont(fieldFont);
 		((JSpinner.DefaultEditor) oreSpinner.getEditor()).getTextField().setHorizontalAlignment(SwingConstants.CENTER);
 		oreSpinner.setToolTipText("Ore di durata");
 
 		// Spinner per minuti 
-		minutiSpinner = new JSpinner(new SpinnerListModel(new Integer[] {0, 15, 30, 45, 59}));
+		minutiSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 59, 5));
 		((JSpinner.DefaultEditor) minutiSpinner.getEditor()).getTextField().setHorizontalAlignment(SwingConstants.CENTER);
 		minutiSpinner.setFont(fieldFont);
 		minutiSpinner.setToolTipText("Minuti di durata");
@@ -288,7 +287,6 @@ public class CreateSessionPanel extends JXPanel
 	        addressField.getDocument().addDocumentListener(addressListener);
 	    }
 
-	    // DocumentListener for linkField (only if non pratica)
 	    if(!pratica && linkField != null)
 	    {
 	        linkListener = new DocumentListener()
@@ -352,7 +350,7 @@ public class CreateSessionPanel extends JXPanel
 	                if(e.getStateChange() == ItemEvent.SELECTED)
 	                {
 	                    Ricetta selected = (Ricetta) ricettaCombo.getSelectedItem();
-	                    boolean errore = (selected == null || selected.toString().trim().isEmpty());
+	                    boolean errore = (selected == null || selected.getId() <= 0);
 	                    showError(ricettaCombo, errore, "Ricetta obbligatoria");
 	                }
 	            }

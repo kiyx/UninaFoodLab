@@ -37,7 +37,7 @@ public class CreateCourseDialog extends JDialog
     );
 
     private JPanel argomentiPanel, scrollContentWrapper;
-    private JXPanel buttons, container, detailPanel, infoPanel, leftPanel, mainPanel, sessionPanel, sessionsContainer;
+    private JXPanel buttons, container, detailPanel, infoPanel, formPanel, leftPanel, mainPanel, sessionPanel, sessionsContainer;
     private JXLabel aggiungiSessioneLabel, limitLabel, sessionTitle, title;
     private JXButton addBtn, cancelBtn, confirmBtn, goBackBtn;
     private JScrollPane rootScroll, scrollArgomenti, scrollDescrizione, scrollSessions;
@@ -52,7 +52,7 @@ public class CreateCourseDialog extends JDialog
     
     private ActionListener addSessionsListener, cancelAddSessionsListener, confirmBtnListener, goBackBtnListener;
     private MouseListener aggiungiSessioniMouseListener;
-    private ItemListener praticoCheckListener;
+    private ItemListener praticoCheckListener, argomentiCheckBoxListener;
 
     private List<CreateSessionPanel> sessionCards;
     private List<JCheckBox> argumentsCheck;
@@ -85,47 +85,82 @@ public class CreateCourseDialog extends JDialog
         rootScroll.setViewportView(container);
         setContentPane(rootScroll);
 
-        mainPanel = new JXPanel(new MigLayout("fill, insets 20", "[min!][grow, fill]", "[grow]"));
+        mainPanel = new JXPanel(new MigLayout("fill, insets 20", "[pref!][grow, fill]", "[grow, fill]"));
         mainPanel.setBackground(BACKGROUND_COLOR);
         container.add(mainPanel, BorderLayout.CENTER);
 
         initLeftPanel(mainPanel);
         initRightPanel(mainPanel);
+        SwingUtilities.invokeLater(() -> nameField.requestFocusInWindow());
     }
 
     private void initLeftPanel(JXPanel mainPanel)
     {
-        leftPanel = new JXPanel(new MigLayout("wrap 1, gapy 20", "[grow,fill]"));
-        leftPanel.setBackground(BACKGROUND_COLOR);
-        leftPanel.setPreferredSize(new Dimension(700, 700));
+    	leftPanel = new JXPanel(new MigLayout(
+    		    "fill, wrap 1",   // layout: riempi tutto, una colonna per riga
+    		    "[grow, fill]",   // una colonna che cresce e riempie in orizzontale
+    		    "[]10[grow, fill]10[]" // prima riga fissa, poi riga centrale che cresce con padding sopra e sotto, infine riga fissa per i bottoni
+    		));
+    	leftPanel.setBackground(BACKGROUND_COLOR);
+    	leftPanel.setMinimumSize(new Dimension(400, 400));
 
         title = new JXLabel("Inserisci i dettagli del nuovo corso");
         title.setFont(new Font("Segoe UI", Font.BOLD, 20));
         leftPanel.add(title, "align center");
 
-        // Info panel
-        infoPanel = new JXPanel(new MigLayout("wrap 2", "[right][grow,fill]"));
+        formPanel = new JXPanel(new MigLayout("wrap 1, gap 10 10", "[grow, fill]", "[][grow 0]"));
+        formPanel.setBackground(BACKGROUND_COLOR);
+
+        infoPanel = new JXPanel(new MigLayout(
+        	    "wrap 2, fill, insets 10",
+        	    "[right][grow, fill]",
+        	    "[][][][]"
+        	));
         infoPanel.setBackground(Color.WHITE);
         infoPanel.setBorder(mainBorder);
 
         nameField = new JXTextField();
-        infoPanel.add(new JLabel("Nome corso:"));
-        infoPanel.add(nameField, "h 30!");
+        nameField.setToolTipText("Inserisci il nome del corso");
+        infoPanel.add(new JXLabel("Nome corso:"));
+        infoPanel.add(nameField, "h 36!, growx");
 
         descrizioneArea = new JXTextArea();
-        descrizioneArea.setRows(4);
-        descrizioneArea.setColumns(20);
+        descrizioneArea.setToolTipText("Inserisci una breve descrizione del corso");
         descrizioneArea.setLineWrap(true);
         descrizioneArea.setWrapStyleWord(true);
         scrollDescrizione = new JScrollPane(descrizioneArea);
         scrollDescrizione.setBorder(BorderFactory.createLineBorder(BORDER_COLOR));
-        infoPanel.add(new JLabel("Descrizione:"));
-        infoPanel.add(scrollDescrizione, "h 80!");
+        scrollDescrizione.setMinimumSize(new Dimension(100, 100));
+        scrollDescrizione.setPreferredSize(new Dimension(100, 150));
+        infoPanel.add(new JXLabel("Descrizione:"));
+        infoPanel.add(scrollDescrizione, "span 2, growx, hmin 60, hmax 120");
 
         frequencyList = new JComboBox<>(FrequenzaSessioni.values());
-        infoPanel.add(new JLabel("Frequenza:"));
-        infoPanel.add(frequencyList, "h 30!");
+        infoPanel.add(new JXLabel("Frequenza:"));
+        infoPanel.add(frequencyList, "h 36!, growx");
 
+        argomentiCheckBoxListener = new ItemListener()
+        {
+            @Override
+            public void itemStateChanged(ItemEvent e)
+            {
+                int selectedCount = 0;
+                for(JCheckBox cb : argumentsCheck)
+                    if(cb.isSelected())
+                        selectedCount++;
+
+                if(selectedCount >= 5)
+                {
+                    for(JCheckBox cb : argumentsCheck)
+                        if(!cb.isSelected())
+                            cb.setEnabled(false);
+                }
+                else
+                   for(JCheckBox cb : argumentsCheck)
+                       cb.setEnabled(true);
+            }
+        };
+        
         argumentsCheck = new ArrayList<>();
         argomentiPanel = new JPanel(new GridLayout(0, 1));
         argomentiPanel.setOpaque(false);
@@ -133,42 +168,48 @@ public class CreateCourseDialog extends JDialog
         for(Argomento a : Controller.getController().loadArgomenti())
         {
             JCheckBox cb = new JCheckBox(a.getNome());
+            cb.addItemListener(argomentiCheckBoxListener);
             argumentsCheck.add(cb);
             argomentiPanel.add(cb);
         }
 
         scrollArgomenti = new JScrollPane(argomentiPanel);
-        scrollArgomenti.setPreferredSize(new Dimension(200, 100));
+        scrollArgomenti.setMinimumSize(new Dimension(100, 100));
+        scrollArgomenti.setPreferredSize(new Dimension(100, 140));
         scrollArgomenti.setOpaque(false);
         scrollArgomenti.getViewport().setOpaque(false);
         scrollArgomenti.getVerticalScrollBar().setUnitIncrement(14);
 
-        infoPanel.add(new JLabel("Argomenti:"));
-        infoPanel.add(scrollArgomenti, "span 2");
+        infoPanel.add(new JXLabel("Argomenti:"));
+        infoPanel.add(scrollArgomenti, "span 2, growx, hmin 80, hmax 140");
 
-        leftPanel.add(infoPanel);
+        formPanel.add(infoPanel, "growx");
 
-        // Dettagli corso
-        detailPanel = new JXPanel(new MigLayout("wrap 3", "[right][grow,fill][]"));
+        detailPanel = new JXPanel(new MigLayout(
+        	    "wrap 3",
+        	    "[right][grow, fill][]",
+        	    "[][grow 0]"  // riga 1 fissa, riga 2 non cresce
+        	));
         detailPanel.setBackground(Color.WHITE);
         detailPanel.setBorder(mainBorder);
+        detailPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 180));
 
         DateVetoPolicy vetoPolicy = new DateVetoPolicyMinimumMaximumDate(LocalDate.now().plusDays(1), null);
         DatePickerSettings settings = new DatePickerSettings();
         dataInizioField = new DatePicker(settings);
         settings.setVetoPolicy(vetoPolicy);
-        detailPanel.add(new JLabel("Data Inizio:"));
-        detailPanel.add(dataInizioField, "h 30!, span 2");
+        detailPanel.add(new JXLabel("Data Inizio:"));
+        detailPanel.add(dataInizioField, "h 36!, growx, span 2");
 
         costField = new JFormattedTextField(euroFormatter());
         costField.setValue(0.0);
-        detailPanel.add(new JLabel("Costo:"));
-        detailPanel.add(costField, "h 30!");
-        detailPanel.add(new JLabel("€"));
+        detailPanel.add(new JXLabel("Costo:"));
+        detailPanel.add(costField, "h 36!, growx");
+        detailPanel.add(new JXLabel("€"));
 
         praticoCheck = new JCheckBox();
         praticoCheck.setBackground(Color.WHITE);
-        detailPanel.add(new JLabel("Pratico:"));
+        detailPanel.add(new JXLabel("Pratico:"));
         detailPanel.add(praticoCheck, "span 2, left");
 
         limitLabel = new JXLabel("Limite partecipanti:");
@@ -176,10 +217,11 @@ public class CreateCourseDialog extends JDialog
         limitField = new JFormattedTextField(integerFormatter());
         limitField.setVisible(false);
         detailPanel.add(limitLabel, "newline");
-        detailPanel.add(limitField, "h 30!, span 2");
+        detailPanel.add(limitField, "h 36!, growx, span 2");
 
-        leftPanel.add(detailPanel);
-
+        formPanel.add(detailPanel, "growx");
+        leftPanel.add(formPanel, "grow, push");
+        
         // Pulsanti
         buttons = new JXPanel(new MigLayout("center", "[]20[]"));
         buttons.setBackground(BACKGROUND_COLOR);
@@ -192,10 +234,11 @@ public class CreateCourseDialog extends JDialog
 
         buttons.add(confirmBtn, "w 120!, h 35!");
         buttons.add(goBackBtn, "w 120!, h 35!");
+        
+        leftPanel.add(Box.createVerticalGlue(), "growy");
+        leftPanel.add(buttons, "align center");
 
-        leftPanel.add(buttons);
-
-        mainPanel.add(leftPanel, "cell 0 0, growy");
+        mainPanel.add(leftPanel, "cell 0 0, grow, push");
     }
 
     private void initRightPanel(JXPanel mainPanel)
@@ -235,7 +278,7 @@ public class CreateCourseDialog extends JDialog
         scrollSessions.setBackground(Color.WHITE);
 
         sessionPanel.add(scrollSessions, "grow, push");
-        mainPanel.add(sessionPanel, "cell 1 0, grow");
+        mainPanel.add(sessionPanel, "cell 1 0, grow, push");
     }
 
     private void initListeners()
@@ -287,7 +330,7 @@ public class CreateCourseDialog extends JDialog
             }
         };
         goBackBtn.addActionListener(goBackBtnListener);
-
+        
         praticoCheckListener = new ItemListener()
         {
             @Override
@@ -344,6 +387,13 @@ public class CreateCourseDialog extends JDialog
         	goBackBtnListener = null;
         }      
 
+        if(argumentsCheck != null && argomentiCheckBoxListener != null)
+        {
+            for(JCheckBox cb : argumentsCheck)
+                cb.removeItemListener(argomentiCheckBoxListener);
+            argomentiCheckBoxListener = null;
+        }
+        
         if(praticoCheck != null && praticoCheckListener != null)
         {
         	praticoCheck.removeItemListener(praticoCheckListener);
@@ -382,11 +432,11 @@ public class CreateCourseDialog extends JDialog
             if(result == JOptionPane.YES_OPTION)
             {
                 rimuoviSessioniPratiche();
-                praticoCheck.setSelected(false); // Disattiva il checkbox perché hai rimosso le pratiche
+                praticoCheck.setSelected(false);
                 mostraLimitePartecipanti(false);
             }
             else
-                praticoCheck.setSelected(true); // Ripristina lo stato perché non si vogliono rimuovere
+                praticoCheck.setSelected(true); 
         }
         else
             mostraLimitePartecipanti(false);
@@ -474,7 +524,6 @@ public class CreateCourseDialog extends JDialog
         sessionCards.add(card);
         sessionsContainer.add(card, "growx, growy, w 33%");
 
-
         updateSessionLayout();
         sessionsContainer.revalidate();
         sessionsContainer.repaint();
@@ -486,7 +535,7 @@ public class CreateCourseDialog extends JDialog
         sessionCards.remove(panel);
         sessionsContainer.remove(panel);
 
-        for(int i=0; i<sessionCards.size(); i++)
+        for(int i = 0; i < sessionCards.size(); i++)
             sessionCards.get(i).aggiornaNumero(i + 1);
         
         updateSessionLayout();

@@ -1,70 +1,25 @@
 package UninaFoodLab.Boundary;
 
-import java.awt.AWTEvent;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Desktop;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.Font;
-import java.awt.Image;
-import java.awt.Point;
-import java.awt.Toolkit;
-import java.awt.event.AWTEventListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.time.LocalDate;
-import java.time.Period;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
+import java.time.*;
 
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JLayeredPane;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
-import javax.swing.JToggleButton;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
-import javax.swing.border.MatteBorder;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.*;
+import javax.swing.border.*;
+import javax.swing.event.*;
+import javax.swing.filechooser.*;
 
-import org.jdesktop.swingx.JXButton;
-import org.jdesktop.swingx.JXFrame;
-import org.jdesktop.swingx.JXLabel;
-import org.jdesktop.swingx.JXPanel;
-import org.jdesktop.swingx.JXTextField;
+import org.jdesktop.swingx.*;
 import org.kordamp.ikonli.materialdesign.MaterialDesign;
 import org.kordamp.ikonli.swing.FontIcon;
 
-import com.formdev.flatlaf.FlatLightLaf;
-import com.github.lgooddatepicker.components.DatePicker;
-import com.github.lgooddatepicker.components.DatePickerSettings;
+import com.github.lgooddatepicker.components.*;
 import com.github.lgooddatepicker.optionalusertools.DateVetoPolicy;
 import com.github.lgooddatepicker.zinternaltools.DateVetoPolicyMinimumMaximumDate;
 
 import UninaFoodLab.Controller.Controller;
 import UninaFoodLab.DTO.Chef;
-import UninaFoodLab.DTO.Utente;
 import net.miginfocom.swing.MigLayout;
 
 public class ProfileFrame extends JXFrame
@@ -72,45 +27,6 @@ public class ProfileFrame extends JXFrame
 
 	private static final long serialVersionUID = 1L;
 	
-	private JXLabel logoLabel;
-	
-    private ImageIcon windowLogo;
-    private ImageIcon paneLogo;
-    
-	private JPanel contentPane;
-	
-	//private JXButton hamburgerBtn;
-	//private JXButton profileBtn;
-	private JXButton modifyBtn;
-	//private SidebarPanel sidebar;
-	private JXPanel rootPanel;
-	private HeaderPanel header;
-	private JXPanel mainContentPanel;
-	
-	private ProfileDropdownPanel dropdownPanel;
-	private JXLabel BenvenutoLabel;
-	private JXLabel DatiLabel;
-	private JXLabel NomeLabel;
-	private JXTextField NomeField;
-	private JXLabel CognomeLabel;
-	private JXTextField CognomeField;
-	private JXLabel CodFiscaleLabel;
-	private JXLabel CodFiscaleEffettivoField;
-	private JXLabel EmailLabel;
-	private JXTextField EmailField;
-	private JXLabel CurriculumLabel;
-	private JXButton VisualizzaCurriculumBtn;
-	private JXLabel UsernameLabel;
-	private JXTextField UsernameField;
-	private JXButton EliminaProfiloBtn;
-	private JXButton AnnullaBtn;
-	private JXButton ConfermaBtn;
-	private JXButton ScegliCurriculumBtn;
-	private JFileChooser fileChooser;
-	private JXLabel fileLabel;
-	private File selectedFile;
-	
-	private JXLabel nomeErrorLabel;
 	private CompoundBorder defaultBorder = BorderFactory.createCompoundBorder(
             new LineBorder(new Color(0xFFDAB9)),
             BorderFactory.createEmptyBorder(5, 10, 5, 10)
@@ -118,43 +34,27 @@ public class ProfileFrame extends JXFrame
 	private CompoundBorder errorBorder = BorderFactory.createCompoundBorder(
         	new LineBorder(Color.RED),
         	BorderFactory.createEmptyBorder(5, 10, 5, 10));
-	private JXLabel cognomeErrorLabel;
-	private JXLabel dataErrorLabel;
-	private JXLabel dataLabel;
+    private ImageIcon windowLogo;
+    private HeaderPanel header;
+	private JXButton modifyBtn, visualizzaCurriculumBtn, eliminaProfiloBtn, annullaBtn, confermaBtn, scegliCurriculumBtn;
+	private JButton datePickerButton;
+	private JXPanel rootPanel, mainContentPanel;
+	private JXLabel benvenutoLabel, datiLabel, nomeLabel, cognomeLabel, codFiscaleLabel, codFiscaleEffettivoField, 
+					emailLabel, curriculumLabel, usernameLabel, fileLabel, nomeErrorLabel, cognomeErrorLabel, 
+					dataErrorLabel, dataLabel, luogoErrorLabel, luogoLabel, codFiscErrorLabel, emailErrorLabel, userErrorLabel;
+	private JTextField datePickerTextField, nomeField, cognomeField, emailField, usernameField, luogoField;
+	private JFileChooser fileChooser;
+	private File selectedFile;
 	private DatePicker dataPicker;
-	private JXLabel luogoErrorLabel;
-	private JXLabel luogoLabel;
-	private JXTextField luogoField;
-	private JXLabel codFiscErrorLabel;
-	private JXLabel emailErrorLabel;
-	/*private JXLabel passwordErrorLabel;
-	private JXLabel passwordLabel;
-	private JToggleButton showPassBtn;
-	FontIcon eyeIcon = FontIcon.of(MaterialDesign.MDI_EYE, 18);
-	FontIcon eyeOffIcon = FontIcon.of(MaterialDesign.MDI_EYE_OFF, 18);
-	private JPasswordField passwordField;
-	*/
-	private JXLabel userErrorLabel;
+	
     // Listeners
-	ActionListener scegliBtnActionListener;		
-	private ActionListener CurriculumBtnListener;
-	private ActionListener modifyBtnListener;
-    private ActionListener EliminaBtnListener;
-    private ActionListener AnnullaBtnListener;
-    private ActionListener ConfermaBtnListener;
-    private FocusAdapter nomeFieldFocusListener;   
-    private DocumentListener nomeFieldDocumentListener;
-    private FocusAdapter cognomeFieldFocusListener;   
-    private DocumentListener cognomeFieldDocumentListener;
-    private FocusAdapter luogoFieldFocusListener;   
-    private DocumentListener luogoFieldDocumentListener;
-    private FocusAdapter emailFieldFocusListener;   
-    private DocumentListener emailFieldDocumentListener;
-    private FocusAdapter userFieldFocusListener;   
-    private DocumentListener userFieldDocumentListener;
-    private MouseListener logoLabelMouseListener;
-    private ComponentAdapter frameComponentListener;
-    boolean passChange = false;
+	private ActionListener scegliBtnActionListener, CurriculumBtnListener, modifyBtnListener, EliminaBtnListener, AnnullaBtnListener,
+						   ConfermaBtnListener;		
+
+    private FocusAdapter nomeFieldFocusListener, cognomeFieldFocusListener, luogoFieldFocusListener, emailFieldFocusListener, userFieldFocusListener; 
+    
+    private DocumentListener nomeFieldDocumentListener, cognomeFieldDocumentListener, luogoFieldDocumentListener, emailFieldDocumentListener,
+    					     userFieldDocumentListener;
     
 	public ProfileFrame()
 	{
@@ -170,7 +70,6 @@ public class ProfileFrame extends JXFrame
         initListeners();
         
         setVisible(true);
-
 	}
 	
     private void initComponents()
@@ -184,7 +83,10 @@ public class ProfileFrame extends JXFrame
         setIconImage(windowLogo.getImage());
 
     	modifyBtn = new JXButton();
-        mainContentPanel = new JXPanel(new MigLayout("fill, insets 40", "200[grow, 20::]10[grow, 100::300]30[]10[grow, 100::300]200","[]20[]10[]10[]10[]10[]10[]10[]10[]10[]10[]30[]"));
+    	mainContentPanel = new JXPanel(new MigLayout("fill, insets 40",
+    		    "[push][grow]10[grow]30[grow]10[grow][push]",
+    		    "[]20[]10[]10[]10[]10[]10[]10[]10[]10[]10[]30[]"));
+    	
         mainContentPanel.setBackground(Color.WHITE);
         mainContentPanel.setBorder(BorderFactory.createCompoundBorder(
             new LineBorder(new Color(0xFFE5B4), 1), 
@@ -192,73 +94,73 @@ public class ProfileFrame extends JXFrame
         ));
         rootPanel.add(mainContentPanel, "grow, align center");
         
-    	BenvenutoLabel = new JXLabel("BENVENUTO "+ Controller.getController().getLoggedUser().getNome().toUpperCase() +" !");
-    	BenvenutoLabel.setFont(new Font("Roboto", Font.BOLD, 36));
-    	BenvenutoLabel.setForeground(new Color(0x9C5B17)); 
-    	mainContentPanel.add(BenvenutoLabel, "span 4, center, wrap 50");	
+    	benvenutoLabel = new JXLabel("BENVENUTO "+ Controller.getController().getLoggedUser().getNome().toUpperCase() +" !");
+    	benvenutoLabel.setFont(new Font("Roboto", Font.BOLD, 36));
+    	benvenutoLabel.setForeground(new Color(0x9C5B17)); 
+    	mainContentPanel.add(benvenutoLabel, "span 4, cell 1 0, center, wrap 50");
     	    	
-    	DatiLabel = new JXLabel("I tuoi dati:");
-    	DatiLabel.setFont(new Font("SansSerif", Font.BOLD, 26));
-    	DatiLabel.setForeground(new Color(0x9C5B17));
-    	mainContentPanel.add(DatiLabel, "cell 0 1, right, gaptop 10");	
+    	datiLabel = new JXLabel("I tuoi dati:");
+    	datiLabel.setFont(new Font("SansSerif", Font.BOLD, 26));
+    	datiLabel.setForeground(new Color(0x9C5B17));
+    	mainContentPanel.add(datiLabel, "cell 1 1, right, gaptop 10");	
     	
     	modifyBtn.setIcon(FontIcon.of(MaterialDesign.MDI_PENCIL, 24, new Color(0x604A3C)));
         modifyBtn.setContentAreaFilled(false);
         modifyBtn.setBorder(BorderFactory.createEmptyBorder());
         modifyBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         modifyBtn.setToolTipText("Modifica i tuoi dati");
-        mainContentPanel.add(modifyBtn, "cell 1 1, left, gaptop 10");
+        mainContentPanel.add(modifyBtn, "cell 2 1, left, gaptop 10");
         
         nomeErrorLabel = new JXLabel(" ");
         nomeErrorLabel.setFont(new Font("SansSerif", Font.BOLD, 13));
 		nomeErrorLabel.setForeground(Color.RED);
-		mainContentPanel.add(nomeErrorLabel, "span 2, cell 0 2, center");
+		mainContentPanel.add(nomeErrorLabel, "span 2, cell 1 2, center");
 		
-    	NomeLabel = new JXLabel("Nome:");
-    	NomeLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
-    	NomeLabel.setForeground(new Color(0xD86F00)); 
-    	mainContentPanel.add(NomeLabel, "cell 0 3, right");	
+    	nomeLabel = new JXLabel("Nome:");
+    	nomeLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
+    	nomeLabel.setForeground(new Color(0xD86F00)); 
+    	mainContentPanel.add(nomeLabel, "cell 1 3, right");
     	
-    	NomeField = new JXTextField();
-    	NomeField.setFont(new Font("SansSerif", Font.PLAIN, 16));
-    	NomeField.setForeground(new Color(0x333333));
-    	NomeField.setText(Controller.getController().getLoggedUser().getNome());
-    	NomeField.setEditable(false);
-    	NomeField.setFocusable(false);
-    	NomeField.setBorder(defaultBorder);
-    	NomeField.setBackground(new Color(0xFFFBF5));
-    	mainContentPanel.add(NomeField, "cell 1 3, growx");	
+    	nomeField = new JXTextField();
+    	nomeField.setFont(new Font("SansSerif", Font.PLAIN, 16));
+    	nomeField.setForeground(new Color(0x333333));
+    	nomeField.setText(Controller.getController().getLoggedUser().getNome());
+    	nomeField.setEditable(false);
+    	nomeField.setFocusable(false);
+    	nomeField.setBorder(defaultBorder);
+    	nomeField.setBackground(new Color(0xFFFBF5));
+    	mainContentPanel.add(nomeField, "cell 2 3, growx");
     	
     	cognomeErrorLabel = new JXLabel(" ");
         cognomeErrorLabel.setFont(new Font("SansSerif", Font.BOLD, 13));
 		cognomeErrorLabel.setForeground(Color.RED);
-		mainContentPanel.add(cognomeErrorLabel, "span 2, cell 2 2, center");
+		mainContentPanel.add(cognomeErrorLabel, "span 2, cell 3 2, center");
 		
-    	CognomeLabel = new JXLabel("Cognome:");
-    	CognomeLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
-    	CognomeLabel.setForeground(new Color(0xD86F00));
-    	mainContentPanel.add(CognomeLabel, "cell 2 3, right");	
+    	cognomeLabel = new JXLabel("Cognome:");
+    	cognomeLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
+    	cognomeLabel.setForeground(new Color(0xD86F00));
+    	mainContentPanel.add(cognomeLabel, "cell 3 3, right");
     	
-    	CognomeField = new JXTextField();
-    	CognomeField.setFont(new Font("SansSerif", Font.PLAIN, 16));
-    	CognomeField.setForeground(new Color(0x333333));
-    	CognomeField.setText(Controller.getController().getLoggedUser().getCognome());
-    	CognomeField.setEditable(false);
-    	CognomeField.setFocusable(false);
-    	CognomeField.setBorder(defaultBorder);
-    	CognomeField.setBackground(new Color(0xFFFBF5));
-    	mainContentPanel.add(CognomeField, "cell 3 3, growx, left");	
+    	cognomeField = new JXTextField();
+    	cognomeField.setFont(new Font("SansSerif", Font.PLAIN, 16));
+    	cognomeField.setForeground(new Color(0x333333));
+    	cognomeField.setText(Controller.getController().getLoggedUser().getCognome());
+    	cognomeField.setEditable(false);
+    	cognomeField.setFocusable(false);
+    	cognomeField.setBorder(defaultBorder);
+    	cognomeField.setBackground(new Color(0xFFFBF5));
+    	mainContentPanel.add(cognomeField, "cell 4 3, growx, left"); 
     	
     	dataErrorLabel = new JXLabel(" ");
     	dataErrorLabel.setFont(new Font("SansSerif", Font.BOLD, 13));
     	dataErrorLabel.setForeground(Color.RED);
-		mainContentPanel.add(dataErrorLabel, "span 2, cell 0 4, center");
+    	mainContentPanel.add(dataErrorLabel, "span 2, cell 1 4, center");
 		
 		dataLabel = new JXLabel("Data di nascita: ");
 		dataLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
 		dataLabel.setForeground(new Color(0xD86F00));
 		dataLabel.setSize(getMaximumSize());
-		mainContentPanel.add(dataLabel, "cell 0 5, right");	
+		mainContentPanel.add(dataLabel, "cell 1 5, right");
 		
 		DateVetoPolicy vetoPolicy = new DateVetoPolicyMinimumMaximumDate(null, LocalDate.now());
 		DatePickerSettings settings = new DatePickerSettings();
@@ -267,8 +169,9 @@ public class ProfileFrame extends JXFrame
 		settings.setVetoPolicy(vetoPolicy);
 		
         
-		JTextField datePickerTextField = dataPicker.getComponentDateTextField();
-        if (datePickerTextField != null) {
+		datePickerTextField = dataPicker.getComponentDateTextField();
+        if(datePickerTextField != null) 
+        {
             datePickerTextField.setBorder(BorderFactory.createCompoundBorder(
                 new LineBorder(new Color(0xFFDAB9)),
                 BorderFactory.createEmptyBorder(5, 10, 5, 10)
@@ -278,9 +181,9 @@ public class ProfileFrame extends JXFrame
             datePickerTextField.setForeground(new Color(0xD86F00));
         }
 
-        
-        JButton datePickerButton = dataPicker.getComponentToggleCalendarButton();
-        if (datePickerButton != null) {
+        datePickerButton = dataPicker.getComponentToggleCalendarButton();
+        if(datePickerButton != null) 
+        {
             datePickerButton.setBackground(new Color(0xFFA726));
             datePickerButton.setForeground(Color.WHITE);
             datePickerButton.setOpaque(true);
@@ -293,17 +196,17 @@ public class ProfileFrame extends JXFrame
 		dataPicker.setBackground(new Color(0xFFFBF5));
 		dataPicker.setFont(new Font("SansSerif", Font.PLAIN, 16));
 		dataPicker.setForeground(new Color(0x333333));
-		mainContentPanel.add(dataPicker, "cell 1 5, left");	
+		mainContentPanel.add(dataPicker, "cell 2 5, left");
 		
 		luogoErrorLabel = new JXLabel(" ");
 		luogoErrorLabel.setFont(new Font("SansSerif", Font.BOLD, 13));
 		luogoErrorLabel.setForeground(Color.RED);
-		mainContentPanel.add(luogoErrorLabel, "span 2, cell 2 4, center");
+		mainContentPanel.add(luogoErrorLabel, "span 2, cell 3 4, center");
 		
 		luogoLabel = new JXLabel("Luogo di nascita:");
 		luogoLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
 		luogoLabel.setForeground(new Color(0xD86F00));
-    	mainContentPanel.add(luogoLabel, "cell 2 5, right");	
+		mainContentPanel.add(luogoLabel, "cell 3 5, right");
     	
 		luogoField = new JXTextField();
 		luogoField.setFont(new Font("SansSerif", Font.PLAIN, 16));
@@ -313,196 +216,198 @@ public class ProfileFrame extends JXFrame
 		luogoField.setFocusable(false);
 		luogoField.setBorder(defaultBorder);
 		luogoField.setBackground(new Color(0xFFFBF5));
-    	mainContentPanel.add(luogoField, "cell 3 5, growx, left");	
+		mainContentPanel.add(luogoField, "cell 4 5, growx, left");
 		
     	codFiscErrorLabel = new JXLabel(" ");
     	codFiscErrorLabel.setFont(new Font("SansSerif", Font.BOLD, 13));
     	codFiscErrorLabel.setForeground(Color.RED);
-		mainContentPanel.add(codFiscErrorLabel, "span 2, cell 0 6, center");	
+    	mainContentPanel.add(codFiscErrorLabel, "span 2, cell 1 6, center");
 		
-    	CodFiscaleLabel = new JXLabel("Codice Fiscale:");
-    	CodFiscaleLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
-    	CodFiscaleLabel.setForeground(new Color(0xD86F00));
-    	mainContentPanel.add(CodFiscaleLabel, "cell 0 7, right");	
+    	codFiscaleLabel = new JXLabel("Codice Fiscale:");
+    	codFiscaleLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
+    	codFiscaleLabel.setForeground(new Color(0xD86F00));
+    	mainContentPanel.add(codFiscaleLabel, "cell 1 7, right");
     	
-    	CodFiscaleEffettivoField = new JXLabel(Controller.getController().getLoggedUser().getCodiceFiscale());
-    	CodFiscaleEffettivoField.setFont(new Font("SansSerif", Font.PLAIN, 16));
-    	CodFiscaleEffettivoField.setForeground(new Color(0x333333));
-    	CodFiscaleEffettivoField.setBackground(new Color(0xFFFBF5));
-    	CodFiscaleEffettivoField.setOpaque(true);
-    	mainContentPanel.add(CodFiscaleEffettivoField, "cell 1 7, growx");	
+    	codFiscaleEffettivoField = new JXLabel(Controller.getController().getLoggedUser().getCodiceFiscale());
+    	codFiscaleEffettivoField.setFont(new Font("SansSerif", Font.PLAIN, 16));
+    	codFiscaleEffettivoField.setForeground(new Color(0x333333));
+    	codFiscaleEffettivoField.setBackground(new Color(0xFFFBF5));
+    	codFiscaleEffettivoField.setOpaque(true);
+    	mainContentPanel.add(codFiscaleEffettivoField, "cell 2 7, growx");
     	
     	emailErrorLabel = new JXLabel(" ");
     	emailErrorLabel.setFont(new Font("SansSerif", Font.BOLD, 13));
     	emailErrorLabel.setForeground(Color.RED);
-		mainContentPanel.add(emailErrorLabel, "span 2, cell 2 6, center");
+    	mainContentPanel.add(emailErrorLabel, "span 2, cell 3 6, center");
 		
-    	EmailLabel = new JXLabel("Email:");
-    	EmailLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
-    	EmailLabel.setForeground(new Color(0xD86F00));
-    	mainContentPanel.add(EmailLabel, "cell 2 7, right");	
+    	emailLabel = new JXLabel("Email:");
+    	emailLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
+    	emailLabel.setForeground(new Color(0xD86F00));
+    	mainContentPanel.add(emailLabel, "cell 3 7, right");	
 
-    	EmailField = new JXTextField();
-    	EmailField.setFont(new Font("SansSerif", Font.PLAIN, 16));
-    	EmailField.setForeground(new Color(0x333333));
-    	EmailField.setText(Controller.getController().getLoggedUser().getEmail());
-    	EmailField.setEditable(false);
-    	EmailField.setFocusable(false);
-    	EmailField.setBorder(defaultBorder);
-    	EmailField.setBackground(new Color(0xFFFBF5));
-    	mainContentPanel.add(EmailField, "cell 3 7, growx");	
+    	emailField = new JXTextField();
+    	emailField.setFont(new Font("SansSerif", Font.PLAIN, 16));
+    	emailField.setForeground(new Color(0x333333));
+    	emailField.setText(Controller.getController().getLoggedUser().getEmail());
+    	emailField.setEditable(false);
+    	emailField.setFocusable(false);
+    	emailField.setBorder(defaultBorder);
+    	emailField.setBackground(new Color(0xFFFBF5));
+    	mainContentPanel.add(emailField, "cell 4 7, growx");
     	
     	userErrorLabel = new JXLabel(" ");
     	userErrorLabel.setFont(new Font("SansSerif", Font.BOLD, 13));
     	userErrorLabel.setForeground(Color.RED);
-		mainContentPanel.add(userErrorLabel, "span 2, cell 0 8, center");
+    	mainContentPanel.add(userErrorLabel, "span 2, cell 1 8, center");
 		
-    	UsernameLabel = new JXLabel("Username:") ;
-    	UsernameLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
-    	UsernameLabel.setForeground(new Color(0xD86F00));
-    	mainContentPanel.add(UsernameLabel, "cell 0 9, right");	
+    	usernameLabel = new JXLabel("Username:") ;
+    	usernameLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
+    	usernameLabel.setForeground(new Color(0xD86F00));
+    	mainContentPanel.add(usernameLabel, "cell 1 9, right"); 
   
-    	UsernameField = new JXTextField();
-    	UsernameField.setFont(new Font("SansSerif", Font.PLAIN, 16));
-    	UsernameField.setForeground(new Color(0x333333));
-    	UsernameField.setText(Controller.getController().getLoggedUser().getUsername());
-    	UsernameField.setEditable(false);
-    	UsernameField.setFocusable(false);
-    	UsernameField.setBorder(defaultBorder);
-    	UsernameField.setBackground(new Color(0xFFFBF5));
-    	mainContentPanel.add(UsernameField, "cell 1 9, growx");	
+    	usernameField = new JXTextField();
+    	usernameField.setFont(new Font("SansSerif", Font.PLAIN, 16));
+    	usernameField.setForeground(new Color(0x333333));
+    	usernameField.setText(Controller.getController().getLoggedUser().getUsername());
+    	usernameField.setEditable(false);
+    	usernameField.setFocusable(false);
+    	usernameField.setBorder(defaultBorder);
+    	usernameField.setBackground(new Color(0xFFFBF5));
+    	mainContentPanel.add(usernameField, "cell 2 9, growx");
     	
-    	CurriculumLabel = new JXLabel ("Curriculum:");
-    	CurriculumLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
-    	CurriculumLabel.setForeground(new Color(0xD86F00));
-    	mainContentPanel.add(CurriculumLabel, "cell 0 11, right");
+    	curriculumLabel = new JXLabel ("Curriculum:");
+    	curriculumLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
+    	curriculumLabel.setForeground(new Color(0xD86F00));
+    	mainContentPanel.add(curriculumLabel, "cell 1 11, right");
     	
-    	VisualizzaCurriculumBtn = new JXButton ("Vedi curriculum");
-    	VisualizzaCurriculumBtn.setFont(new Font("SansSerif", Font.BOLD, 15));
-    	VisualizzaCurriculumBtn.setPreferredSize(new Dimension(150, 35));
-    	VisualizzaCurriculumBtn.setBackground(new Color(0xFFA726));
-    	VisualizzaCurriculumBtn.setForeground(Color.WHITE);
-    	VisualizzaCurriculumBtn.setOpaque(true);
-    	VisualizzaCurriculumBtn.setFocusPainted(false);
-    	VisualizzaCurriculumBtn.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
-    	VisualizzaCurriculumBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-    	mainContentPanel.add(VisualizzaCurriculumBtn, "cell 1 11, left");
+    	visualizzaCurriculumBtn = new JXButton ("Vedi curriculum");
+    	visualizzaCurriculumBtn.setFont(new Font("SansSerif", Font.BOLD, 15));
+    	visualizzaCurriculumBtn.setPreferredSize(new Dimension(150, 35));
+    	visualizzaCurriculumBtn.setBackground(new Color(0xFFA726));
+    	visualizzaCurriculumBtn.setForeground(Color.WHITE);
+    	visualizzaCurriculumBtn.setOpaque(true);
+    	visualizzaCurriculumBtn.setFocusPainted(false);
+    	visualizzaCurriculumBtn.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
+    	visualizzaCurriculumBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+    	mainContentPanel.add(visualizzaCurriculumBtn, "cell 2 11, left");
     	
-    	ScegliCurriculumBtn = new JXButton("Cambia curriculum");
-    	ScegliCurriculumBtn.setFont(new Font("SansSerif", Font.BOLD, 15));
-    	ScegliCurriculumBtn.setPreferredSize(new Dimension(150, 35));
-    	ScegliCurriculumBtn.setBackground(new Color(0xFF9800)); // Orange for action buttons
-    	ScegliCurriculumBtn.setForeground(Color.WHITE);
-    	ScegliCurriculumBtn.setOpaque(true);
-    	ScegliCurriculumBtn.setFocusPainted(false);
-    	ScegliCurriculumBtn.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
-    	ScegliCurriculumBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-    	mainContentPanel.add(ScegliCurriculumBtn, "cell 1 11, left");
+    	scegliCurriculumBtn = new JXButton("Cambia curriculum");
+    	scegliCurriculumBtn.setFont(new Font("SansSerif", Font.BOLD, 15));
+    	scegliCurriculumBtn.setPreferredSize(new Dimension(150, 35));
+    	scegliCurriculumBtn.setBackground(new Color(0xFF9800)); // Orange for action buttons
+    	scegliCurriculumBtn.setForeground(Color.WHITE);
+    	scegliCurriculumBtn.setOpaque(true);
+    	scegliCurriculumBtn.setFocusPainted(false);
+    	scegliCurriculumBtn.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
+    	scegliCurriculumBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+    	mainContentPanel.add(scegliCurriculumBtn, "cell 2 11, left");
     	
     	fileLabel = new JXLabel("Nessun file selezionato");
 		fileLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
 		fileLabel.setForeground(new Color(0x604A3C));
-		mainContentPanel.add(fileLabel,  "cell 2 11, span 2, left, gapleft 20");
+		mainContentPanel.add(fileLabel,  "cell 3 11, span 2, left, gapleft 20");
 		
 		if(Controller.getController().isPartecipanteLogged())
 		{
-			CurriculumLabel.setEnabled(false);
-			CurriculumLabel.setVisible(false);
-			VisualizzaCurriculumBtn.setEnabled(false);
-			VisualizzaCurriculumBtn.setVisible(false);
-			ScegliCurriculumBtn.setEnabled(false);
-			ScegliCurriculumBtn.setEnabled(false);
+			curriculumLabel.setEnabled(false);
+			curriculumLabel.setVisible(false);
+			visualizzaCurriculumBtn.setEnabled(false);
+			visualizzaCurriculumBtn.setVisible(false);
+			scegliCurriculumBtn.setEnabled(false);
+			scegliCurriculumBtn.setEnabled(false);
 			fileLabel.setEnabled(false);
 			fileLabel.setVisible(false);
 		}
 		else
-		{
-			selectedFile = new File(System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" + File.separator + ((Chef)Controller.getController().getLoggedUser()).getCurriculum());
-		}
+			selectedFile = new File(System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" + File.separator
+								    + ((Chef)Controller.getController().getLoggedUser()).getCurriculum());
+
 		
-    	EliminaProfiloBtn = new JXButton ("Elimina Profilo");
-    	EliminaProfiloBtn.setFont(new Font("SansSerif", Font.BOLD, 15));
-    	EliminaProfiloBtn.setPreferredSize(new Dimension(150, 35));
-    	EliminaProfiloBtn.setBackground(new Color(0xD32F2F));
-    	EliminaProfiloBtn.setForeground(Color.WHITE);
-		EliminaProfiloBtn.setOpaque(true);
-		EliminaProfiloBtn.setFocusPainted(false);
-		EliminaProfiloBtn.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
-		EliminaProfiloBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-		mainContentPanel.add(EliminaProfiloBtn, "cell 3 12, right, gaptop 40, span 2");
+    	eliminaProfiloBtn = new JXButton ("Elimina Profilo");
+    	eliminaProfiloBtn.setFont(new Font("SansSerif", Font.BOLD, 15));
+    	eliminaProfiloBtn.setPreferredSize(new Dimension(150, 35));
+    	eliminaProfiloBtn.setBackground(new Color(0xD32F2F));
+    	eliminaProfiloBtn.setForeground(Color.WHITE);
+		eliminaProfiloBtn.setOpaque(true);
+		eliminaProfiloBtn.setFocusPainted(false);
+		eliminaProfiloBtn.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
+		eliminaProfiloBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+		mainContentPanel.add(eliminaProfiloBtn, "cell 4 12, right, gaptop 40, span 2");
 		
-		ConfermaBtn = new JXButton ("Conferma");
-		ConfermaBtn.setFont(new Font("SansSerif", Font.BOLD, 15));
-		ConfermaBtn.setPreferredSize(new Dimension(120, 35));
-		ConfermaBtn.setBackground(new Color(0x4CAF50));
-		ConfermaBtn.setForeground(Color.WHITE);
-		ConfermaBtn.setOpaque(true);
-		ConfermaBtn.setFocusPainted(false);
-		ConfermaBtn.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
-		ConfermaBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-		mainContentPanel.add(ConfermaBtn, "cell 2 12, right, gaptop 40");
+		confermaBtn = new JXButton ("Conferma");
+		confermaBtn.setFont(new Font("SansSerif", Font.BOLD, 15));
+		confermaBtn.setPreferredSize(new Dimension(120, 35));
+		confermaBtn.setBackground(new Color(0x4CAF50));
+		confermaBtn.setForeground(Color.WHITE);
+		confermaBtn.setOpaque(true);
+		confermaBtn.setFocusPainted(false);
+		confermaBtn.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
+		confermaBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+		mainContentPanel.add(confermaBtn, "cell 3 12, right, gaptop 40");
 		
-		AnnullaBtn = new JXButton ("Annulla");
-		AnnullaBtn.setFont(new Font("SansSerif", Font.BOLD, 15));
-		AnnullaBtn.setPreferredSize(new Dimension(120, 35));
-		AnnullaBtn.setBackground(new Color(0x9E9E9E));
-		AnnullaBtn.setForeground(Color.WHITE);
-		AnnullaBtn.setOpaque(true);
-		AnnullaBtn.setFocusPainted(false);
-		AnnullaBtn.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
-		AnnullaBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-		mainContentPanel.add(AnnullaBtn, "cell 1 12, right, gaptop 40");
+		annullaBtn = new JXButton ("Annulla");
+		annullaBtn.setFont(new Font("SansSerif", Font.BOLD, 15));
+		annullaBtn.setPreferredSize(new Dimension(120, 35));
+		annullaBtn.setBackground(new Color(0x9E9E9E));
+		annullaBtn.setForeground(Color.WHITE);
+		annullaBtn.setOpaque(true);
+		annullaBtn.setFocusPainted(false);
+		annullaBtn.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
+		annullaBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+		mainContentPanel.add(annullaBtn, "cell 2 12, right, gaptop 40");
 		
 		
 		setEditMode(false);
     }
     
-    private void setEditMode(boolean editable) {
-        NomeField.setEditable(editable);
-        NomeField.setFocusable(editable);
+    private void setEditMode(boolean editable) 
+    {
+        nomeField.setEditable(editable);
+        nomeField.setFocusable(editable);
         //NomeField.setBorder(editable ? new LineBorder(new Color(0xFF9800)) : BorderFactory.createCompoundBorder(new LineBorder(new Color(0xFFDAB9)), BorderFactory.createEmptyBorder(5, 10, 5, 10)));
-        NomeField.setBackground(editable ? Color.WHITE : new Color(0xFFFBF5));
+        nomeField.setBackground(editable ? Color.WHITE : new Color(0xFFFBF5));
 
-        CognomeField.setEditable(editable);
-        CognomeField.setFocusable(editable);
+        cognomeField.setEditable(editable);
+        cognomeField.setFocusable(editable);
         //CognomeField.setBorder(editable ? new LineBorder(new Color(0xFF9800)) : BorderFactory.createCompoundBorder(new LineBorder(new Color(0xFFDAB9)), BorderFactory.createEmptyBorder(5, 10, 5, 10)));
-        CognomeField.setBackground(editable ? Color.WHITE : new Color(0xFFFBF5));
+        cognomeField.setBackground(editable ? Color.WHITE : new Color(0xFFFBF5));
         
         luogoField.setEditable(editable);
         luogoField.setFocusable(editable);
         //CognomeField.setBorder(editable ? new LineBorder(new Color(0xFF9800)) : BorderFactory.createCompoundBorder(new LineBorder(new Color(0xFFDAB9)), BorderFactory.createEmptyBorder(5, 10, 5, 10)));
         luogoField.setBackground(editable ? Color.WHITE : new Color(0xFFFBF5));
         
-        EmailField.setEditable(editable);
-        EmailField.setFocusable(editable);
+        emailField.setEditable(editable);
+        emailField.setFocusable(editable);
         //EmailField.setBorder(editable ? new LineBorder(new Color(0xFF9800)) : BorderFactory.createCompoundBorder(new LineBorder(new Color(0xFFDAB9)), BorderFactory.createEmptyBorder(5, 10, 5, 10)));
-        EmailField.setBackground(editable ? Color.WHITE : new Color(0xFFFBF5));
+        emailField.setBackground(editable ? Color.WHITE : new Color(0xFFFBF5));
         
-        UsernameField.setEditable(editable);
-        UsernameField.setFocusable(editable);
+        usernameField.setEditable(editable);
+        usernameField.setFocusable(editable);
         //UsernameField.setBorder(editable ? new LineBorder(new Color(0xFF9800)) : BorderFactory.createCompoundBorder(new LineBorder(new Color(0xFFDAB9)), BorderFactory.createEmptyBorder(5, 10, 5, 10)));
-        UsernameField.setBackground(editable ? Color.WHITE : new Color(0xFFFBF5));
+        usernameField.setBackground(editable ? Color.WHITE : new Color(0xFFFBF5));
         
         modifyBtn.setVisible(!editable);
         modifyBtn.setEnabled(!editable);
         
-        AnnullaBtn.setVisible(editable);
-        AnnullaBtn.setEnabled(editable);
-        ConfermaBtn.setVisible(editable);
-        ConfermaBtn.setEnabled(editable);
-        EliminaProfiloBtn.setVisible(editable);
-        EliminaProfiloBtn.setEnabled(editable);
+        annullaBtn.setVisible(editable);
+        annullaBtn.setEnabled(editable);
+        confermaBtn.setVisible(editable);
+        confermaBtn.setEnabled(editable);
+        eliminaProfiloBtn.setVisible(editable);
+        eliminaProfiloBtn.setEnabled(editable);
+        
         if(Controller.getController().isPartecipanteLogged())
         {
-        	ScegliCurriculumBtn.setVisible(false);
-        	ScegliCurriculumBtn.setEnabled(false);
+        	scegliCurriculumBtn.setVisible(false);
+        	scegliCurriculumBtn.setEnabled(false);
         	fileLabel.setVisible(false);
         	fileLabel.setEnabled(false);
         }
         else
         {
-        	ScegliCurriculumBtn.setVisible(editable);
-        	ScegliCurriculumBtn.setEnabled(editable);
+        	scegliCurriculumBtn.setVisible(editable);
+        	scegliCurriculumBtn.setEnabled(editable);
         	fileLabel.setVisible(editable);
         	fileLabel.setEnabled(editable);
         }       
@@ -514,275 +419,335 @@ public class ProfileFrame extends JXFrame
 		codFiscErrorLabel.setVisible(editable);
 		emailErrorLabel.setVisible(editable);
 
-        if (!editable && Controller.getController().isChefLogged()) {
+        if(!editable && Controller.getController().isChefLogged())
             fileLabel.setText("Nessun file selezionato");
-        }
     }
     
     private void initListeners()
     {
-    	 /*
-         * Listeners di navigazione
-         */
 		   modifyBtnListener = new ActionListener()
-		   {
-			   @Override
-			   public void actionPerformed(ActionEvent e)
-			   {
-				   VisualizzaCurriculumBtn.setEnabled(false);
-				   setEditMode(true);
-			   }
-		   };
+							   {
+								   @Override
+								   public void actionPerformed(ActionEvent e)
+								   {
+									   visualizzaCurriculumBtn.setEnabled(false);
+									   setEditMode(true);
+								   }
+							   };
 		   modifyBtn.addActionListener(modifyBtnListener);
 		   
 		   CurriculumBtnListener = new ActionListener()
-			{
-			   @Override
-			   public void actionPerformed(ActionEvent e)
-			   {
-				 if (Desktop.isDesktopSupported()) {
-				    try {
-				        File myFile = new File(System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" + File.separator + ((Chef)Controller.getController().getLoggedUser()).getCurriculum());
-				        if (myFile.exists()) {
-				            Desktop.getDesktop().open(myFile);
-				        } else {
-				        }
-				    } catch (IOException ex) {
-				        ex.printStackTrace();
-				    }
-				} 
-			   }
-			};
-		   VisualizzaCurriculumBtn.addActionListener(CurriculumBtnListener);
+								{
+								   @Override
+								   public void actionPerformed(ActionEvent e)
+								   {
+									 if(Desktop.isDesktopSupported()) 
+									 {
+									    try 
+									    {
+									        File myFile = new File(System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" 
+									        		               + File.separator + ((Chef)Controller.getController().getLoggedUser()).getCurriculum());
+									        if(myFile.exists()) 
+									            Desktop.getDesktop().open(myFile);
+									    } 
+									    catch (IOException ex) 
+									    {
+									        ex.printStackTrace();
+									    }
+									} 
+								   }
+								};
+		   visualizzaCurriculumBtn.addActionListener(CurriculumBtnListener);
 
 		   AnnullaBtnListener = new ActionListener()
-			{
-			   @Override
-			   public void actionPerformed(ActionEvent e)
-			   {
-			    	NomeField.setText(Controller.getController().getLoggedUser().getNome());
-			    	CognomeField.setText(Controller.getController().getLoggedUser().getCognome());
-			    	dataPicker.setDate(Controller.getController().getLoggedUser().getDataDiNascita().toLocalDate());
-			    	luogoField.setText(Controller.getController().getLoggedUser().getLuogoDiNascita());
-					EmailField.setText(Controller.getController().getLoggedUser().getEmail());
-					UsernameField.setText(Controller.getController().getLoggedUser().getUsername());
-					VisualizzaCurriculumBtn.setEnabled(true);
-					selectedFile = new File(System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" + File.separator + ((Chef)Controller.getController().getLoggedUser()).getCurriculum());
-					setEditMode(false);
-			   }
-			};
-		   AnnullaBtn.addActionListener(AnnullaBtnListener);
+							{
+							   @Override
+							   public void actionPerformed(ActionEvent e)
+							   {
+							    	nomeField.setText(Controller.getController().getLoggedUser().getNome());
+							    	cognomeField.setText(Controller.getController().getLoggedUser().getCognome());
+							    	dataPicker.setDate(Controller.getController().getLoggedUser().getDataDiNascita().toLocalDate());
+							    	luogoField.setText(Controller.getController().getLoggedUser().getLuogoDiNascita());
+									emailField.setText(Controller.getController().getLoggedUser().getEmail());
+									usernameField.setText(Controller.getController().getLoggedUser().getUsername());
+									
+									if(Controller.getController().isChefLogged())
+									{
+										visualizzaCurriculumBtn.setEnabled(true);
+										selectedFile = new File(System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" + 
+															    File.separator + ((Chef)Controller.getController().getLoggedUser()).getCurriculum());
+									}
+									setEditMode(false);
+							   }
+							};
+		   annullaBtn.addActionListener(AnnullaBtnListener);
 		   
 		   ConfermaBtnListener = new ActionListener()
-			{
-			   @Override
-			   public void actionPerformed(ActionEvent e)
-			   {
-				   if(!checkNome())
-						NomeField.requestFocus();
-					else if(!checkCognome())
-						CognomeField.requestFocus();
-					else if(!checkData())
-						dataPicker.requestFocus();
-					else if(!checkLuogo())
-						luogoField.requestFocus();
-					else if(!checkEmail())
-						EmailField.requestFocus();
-					else if(!checkUser())
-			        	UsernameField.requestFocus();
-			        else
-			        {
-						setEditMode(false);
-						VisualizzaCurriculumBtn.setEnabled(true);
-			        	Controller.getController().checkmodifyProfile(ProfileFrame.this,
-							     NomeField.getText(), CognomeField.getText(),dataPicker.getDate(), luogoField.getText(),
-							     EmailField.getText(), UsernameField.getText().trim(), 
-							     selectedFile);
-			        }				   
-			   }
-			};
-		   ConfermaBtn.addActionListener(ConfermaBtnListener);
+								 {
+								    @Override
+								    public void actionPerformed(ActionEvent e)
+								    {
+									     if(!checkNome())
+									 		 nomeField.requestFocus();
+										 else if(!checkCognome())
+										  	 cognomeField.requestFocus();
+										 else if(!checkData())
+											 dataPicker.requestFocus();
+										 else if(!checkLuogo())
+											 luogoField.requestFocus();
+										 else if(!checkEmail())
+											 emailField.requestFocus();
+										 else if(!checkUser())
+								        	 usernameField.requestFocus();
+								         else
+								         { 
+											 setEditMode(false);
+											 visualizzaCurriculumBtn.setEnabled(true);
+								        	 Controller.getController().checkmodifyProfile(ProfileFrame.this,
+												     nomeField.getText(), cognomeField.getText(),dataPicker.getDate(), luogoField.getText(),
+												     emailField.getText(), usernameField.getText().trim(), selectedFile);
+								         }				   
+								    }
+								 };
+		   confermaBtn.addActionListener(ConfermaBtnListener);
 
 		   EliminaBtnListener = new ActionListener()
-				   {
-			   @Override
-			   public void actionPerformed(ActionEvent e)
-			   {
-				   ConfirmEliminationDialog dialog = new ConfirmEliminationDialog(ProfileFrame.this);
-		            dialog.setVisible(true);
-			   }
-				   };
-				   EliminaProfiloBtn.addActionListener(EliminaBtnListener);
-			scegliBtnActionListener = new ActionListener()
-			  {
-				
-				@Override 
-				public void actionPerformed(ActionEvent e)
-				{
-
-			        fileChooser = new JFileChooser();
-
-			        // Opzionale: Filtro per specificare i tipi di file da visualizzare
-			        FileNameExtensionFilter filter = new FileNameExtensionFilter("Pdf file(.pdf)", "pdf");
-			        fileChooser.setFileFilter(filter);
-
-
-			        int returnValue = fileChooser.showOpenDialog(ProfileFrame.this);
-
-			        if (returnValue == JFileChooser.APPROVE_OPTION) {
-			        	selectedFile = fileChooser.getSelectedFile();		        	
-
-			        	System.out.println("stampa1");
-			            fileLabel.setText(selectedFile.getName());
-			            System.out.println(selectedFile.getName());
-			            
-			        } else {
-			            System.out.println("Selezione annullata.");
-			        }
-
-				}				
-			  };
-			  ScegliCurriculumBtn.addActionListener(scegliBtnActionListener);
+							    {
+								   @Override
+								   public void actionPerformed(ActionEvent e)
+								   {
+									   ConfirmEliminationDialog dialog = new ConfirmEliminationDialog(ProfileFrame.this);
+							           dialog.setVisible(true);
+								   }
+							    };
+		  eliminaProfiloBtn.addActionListener(EliminaBtnListener);
+			
+		  scegliBtnActionListener = new ActionListener()
+									 {
+										
+									   @Override 
+									   public void actionPerformed(ActionEvent e)
+									   {
+									       fileChooser = new JFileChooser();
+						
+									       // Opzionale: Filtro per specificare i tipi di file da visualizzare
+									       FileNameExtensionFilter filter = new FileNameExtensionFilter("Pdf file(.pdf)", "pdf");
+									       fileChooser.setFileFilter(filter);
+						
+						
+									       int returnValue = fileChooser.showOpenDialog(ProfileFrame.this);
+						
+									       if(returnValue == JFileChooser.APPROVE_OPTION) 
+									       {
+									    	   selectedFile = fileChooser.getSelectedFile();		        	
+						
+									    	   System.out.println("stampa1");
+									           fileLabel.setText(selectedFile.getName());
+									           System.out.println(selectedFile.getName());
+									            
+									       } 
+									       else
+									    	   System.out.println("Selezione annullata.");
+									   }				
+									 };
+			scegliCurriculumBtn.addActionListener(scegliBtnActionListener);
         
 					  
-					  nomeFieldFocusListener = new FocusAdapter()
-					   {
-
-						@Override
-					    public void focusGained(FocusEvent e)
-						{ 
-							if(!NomeField.getText().isEmpty())
-							    NomeField.selectAll();
-						}
-					   };
-					NomeField.addFocusListener(nomeFieldFocusListener);
+			nomeFieldFocusListener = new FocusAdapter()
+									  {
+										 @Override
+										 public void focusGained(FocusEvent e)
+										 { 
+											if(!nomeField.getText().isEmpty())
+												nomeField.selectAll();
+										 }
+									  };
+			nomeField.addFocusListener(nomeFieldFocusListener);
 					
-					nomeFieldDocumentListener = new DocumentListener()
-					{
-						@Override
-					    public void insertUpdate(DocumentEvent e) { checkNome(); }
-					    @Override
-					    public void removeUpdate(DocumentEvent e) { checkNome(); }
-					    @Override
-					    public void changedUpdate(DocumentEvent e) { checkNome(); }
-					};
-					NomeField.getDocument().addDocumentListener(nomeFieldDocumentListener);
+			nomeFieldDocumentListener = new DocumentListener()
+										 {
+											 @Override
+										     public void insertUpdate(DocumentEvent e) { checkNome(); }
+										     @Override
+										     public void removeUpdate(DocumentEvent e) { checkNome(); }
+										     @Override
+										     public void changedUpdate(DocumentEvent e) { checkNome(); }
+										 };
+			nomeField.getDocument().addDocumentListener(nomeFieldDocumentListener);
 					
-					cognomeFieldFocusListener = new FocusAdapter()
-					   {
-
-						@Override
-					    public void focusGained(FocusEvent e)
-						{ 
-							if(!CognomeField.getText().isEmpty())
-							    CognomeField.selectAll();
-						}
-					   };
-					CognomeField.addFocusListener(cognomeFieldFocusListener);
+			cognomeFieldFocusListener = new FocusAdapter()
+									     {
+											@Override
+										    public void focusGained(FocusEvent e)
+											{ 
+												if(!cognomeField.getText().isEmpty())
+												    cognomeField.selectAll();
+											}
+									     };
+            cognomeField.addFocusListener(cognomeFieldFocusListener);
 					
-					cognomeFieldDocumentListener = new DocumentListener()
-					{
-						@Override
-					    public void insertUpdate(DocumentEvent e) { checkCognome(); }
-					    @Override
-					    public void removeUpdate(DocumentEvent e) { checkCognome(); }
-					    @Override
-					    public void changedUpdate(DocumentEvent e) { checkCognome(); }
-					};
-					CognomeField.getDocument().addDocumentListener(cognomeFieldDocumentListener);
+		    cognomeFieldDocumentListener = new DocumentListener()
+											{
+											   @Override
+											   public void insertUpdate(DocumentEvent e) { checkCognome(); }
+											   @Override
+											   public void removeUpdate(DocumentEvent e) { checkCognome(); }
+											   @Override
+											   public void changedUpdate(DocumentEvent e) { checkCognome(); }
+											};
+			cognomeField.getDocument().addDocumentListener(cognomeFieldDocumentListener);
 					
 					
-					luogoFieldFocusListener = new FocusAdapter()
-					   {
-						@Override
-					    public void focusGained(FocusEvent e)
-						{ 
-							if(!luogoField.getText().isEmpty())
-							    luogoField.selectAll();
-						}
-						
-					   };
-					  
+			luogoFieldFocusListener = new FocusAdapter()
+									  {
+											@Override
+										    public void focusGained(FocusEvent e)
+											{ 
+												if(!luogoField.getText().isEmpty())
+												    luogoField.selectAll();
+											}
+										
+									  };
+			  
 					luogoField.addFocusListener(luogoFieldFocusListener);
 					
-					luogoFieldDocumentListener = new DocumentListener()
-					{
-						@Override
-					    public void insertUpdate(DocumentEvent e) { checkLuogo(); }
-					    @Override
-					    public void removeUpdate(DocumentEvent e) { checkLuogo(); }
-					    @Override
-					    public void changedUpdate(DocumentEvent e) { checkLuogo(); }
-					};
+			luogoFieldDocumentListener = new DocumentListener()
+										 {
+											 @Override
+										     public void insertUpdate(DocumentEvent e) { checkLuogo(); }
+										     @Override
+										     public void removeUpdate(DocumentEvent e) { checkLuogo(); }
+										     @Override
+										     public void changedUpdate(DocumentEvent e) { checkLuogo(); }
+										 };
 					
-					luogoField.getDocument().addDocumentListener(luogoFieldDocumentListener);
+			luogoField.getDocument().addDocumentListener(luogoFieldDocumentListener);
 						
-					emailFieldFocusListener = new FocusAdapter()
-					   {
-
-						@Override
-					    public void focusGained(FocusEvent e)
-						{ 
-							if(!EmailField.getText().isEmpty())
-							    EmailField.selectAll();
-						}
-					   };
+			emailFieldFocusListener = new FocusAdapter()
+									  {
 				
-					EmailField.addFocusListener(emailFieldFocusListener);
-					
-					emailFieldDocumentListener = new DocumentListener()
-					{
-						@Override
-					    public void insertUpdate(DocumentEvent e) { checkEmail(); }
-					    @Override
-					    public void removeUpdate(DocumentEvent e) { checkEmail(); }
-					    @Override
-					    public void changedUpdate(DocumentEvent e) { checkEmail(); }
-					};
-				   
-					EmailField.getDocument().addDocumentListener(emailFieldDocumentListener);
-					
-					userFieldDocumentListener = new DocumentListener()
-					{
-						@Override
-					    public void insertUpdate(DocumentEvent e) { checkUser(); }
-					    @Override
-					    public void removeUpdate(DocumentEvent e) { checkUser(); }
-					    @Override
-					    public void changedUpdate(DocumentEvent e) { checkUser(); }
-					};
-				   
-					UsernameField.getDocument().addDocumentListener(userFieldDocumentListener);
-					
-					userFieldFocusListener = new FocusAdapter()
-					   {
+										 @Override
+										 public void focusGained(FocusEvent e)
+										 { 
+											if(!emailField.getText().isEmpty())
+												emailField.selectAll();
+										 }
+									  };
+		
+			emailField.addFocusListener(emailFieldFocusListener);
+			
+			emailFieldDocumentListener = new DocumentListener()
+										 {
+											 @Override
+										     public void insertUpdate(DocumentEvent e) { checkEmail(); }
+										     @Override
+										     public void removeUpdate(DocumentEvent e) { checkEmail(); }
+										     @Override
+										     public void changedUpdate(DocumentEvent e) { checkEmail(); }
+										 };
+		   
+			emailField.getDocument().addDocumentListener(emailFieldDocumentListener);
+			
+			userFieldDocumentListener = new DocumentListener()
+										{
+											@Override
+										    public void insertUpdate(DocumentEvent e) { checkUser(); }
+										    @Override
+										    public void removeUpdate(DocumentEvent e) { checkUser(); }
+										    @Override
+										    public void changedUpdate(DocumentEvent e) { checkUser(); }
+										};
+		   
+			usernameField.getDocument().addDocumentListener(userFieldDocumentListener);
+			
+			userFieldFocusListener = new FocusAdapter()
+									 {
+											@Override
+											public void focusGained(FocusEvent e)
+											{ 
+												if(!usernameField.getText().isEmpty())
+													usernameField.selectAll();
+											}
+									  };
+			  
+		    usernameField.addFocusListener(userFieldFocusListener);
 
-							@Override
-						    public void focusGained(FocusEvent e)
-							{ 
-								if(!UsernameField.getText().isEmpty())
-									UsernameField.selectAll();
-							}
-					   };
-					  
-					   UsernameField.addFocusListener(userFieldFocusListener);
+    }
+    
+    private void disposeListeners() 
+    {
+    	header.disposeListeners();
 
+        if (scegliCurriculumBtn != null && scegliBtnActionListener != null)
+            scegliCurriculumBtn.removeActionListener(scegliBtnActionListener);
+		
+        if (modifyBtn != null && modifyBtnListener != null)
+        	modifyBtn.removeActionListener(modifyBtnListener);
+
+		if(nomeField != null && nomeFieldFocusListener != null)
+			nomeField.removeFocusListener(nomeFieldFocusListener);
+		
+		if(nomeField != null && nomeFieldDocumentListener != null)
+			nomeField.getDocument().removeDocumentListener(nomeFieldDocumentListener);
+		
+		if(cognomeField != null && cognomeFieldFocusListener != null)
+			cognomeField.removeFocusListener(cognomeFieldFocusListener);
+		
+		if(cognomeField != null && cognomeFieldDocumentListener != null)
+			cognomeField.getDocument().removeDocumentListener(cognomeFieldDocumentListener);
+		
+		if(luogoField != null && luogoFieldFocusListener != null)
+			luogoField.removeFocusListener(luogoFieldFocusListener);
+		
+		if(luogoField != null && luogoFieldDocumentListener != null)
+			luogoField.getDocument().removeDocumentListener(luogoFieldDocumentListener);
+		
+		if(emailField != null && emailFieldFocusListener != null)
+			emailField.removeFocusListener(emailFieldFocusListener);
+		
+		if(emailField != null && emailFieldDocumentListener != null)
+			emailField.getDocument().removeDocumentListener(emailFieldDocumentListener);
+				
+		if(usernameField != null && userFieldDocumentListener != null)
+			usernameField.getDocument().removeDocumentListener(userFieldDocumentListener);
+		
+		if(usernameField != null && userFieldFocusListener != null)
+			usernameField.removeFocusListener(userFieldFocusListener);
+
+		if(eliminaProfiloBtn != null && EliminaBtnListener != null)
+			eliminaProfiloBtn.removeActionListener(EliminaBtnListener);
+		
+		if(confermaBtn != null && ConfermaBtnListener != null)
+			confermaBtn.removeActionListener(ConfermaBtnListener);
+		
+		if(annullaBtn != null && AnnullaBtnListener != null)
+			annullaBtn.removeActionListener(AnnullaBtnListener);
+		
+		if(visualizzaCurriculumBtn != null && CurriculumBtnListener != null)
+			visualizzaCurriculumBtn.removeActionListener(CurriculumBtnListener);
+    }
+    
+    @Override
+    public void dispose()
+    {
+    	disposeListeners();
+        super.dispose();
     }
     
     private boolean checkNome()
 	{
 		boolean check = true;
-	    String text = NomeField.getText().trim();
+	    String text = nomeField.getText().trim();
 	      
 	    if(text.isEmpty())
 	    {
-	    	NomeField.setBorder(errorBorder);
+	    	nomeField.setBorder(errorBorder);
 	    	nomeErrorLabel.setText("Bisogna inserire un nome!");
 	    	check = false;
 	    }
 	    else
 	    {
-	        NomeField.setBorder(defaultBorder);
+	        nomeField.setBorder(defaultBorder);
 	        nomeErrorLabel.setText(" ");
 	    }
 	    
@@ -792,17 +757,17 @@ public class ProfileFrame extends JXFrame
 	private boolean checkCognome()
 	{
 		boolean check = true;
-	    String text = CognomeField.getText().trim();
+	    String text = cognomeField.getText().trim();
 	      
 	    if(text.isEmpty())
 	    {
-	    	CognomeField.setBorder(errorBorder);
+	    	cognomeField.setBorder(errorBorder);
 	    	cognomeErrorLabel.setText("Bisogna inserire un cognome!");
 	    	check = false;
 	    }
 	    else
 	    {
-	        CognomeField.setBorder(defaultBorder);
+	        cognomeField.setBorder(defaultBorder);
 	        cognomeErrorLabel.setText(" ");
 	    }
 	    
@@ -840,7 +805,7 @@ public class ProfileFrame extends JXFrame
 	    	dataErrorLabel.setText("Bisogna inserire la data di nascita!");
 	    	check = false;
 	    }
-	    else if(Period.between(dataPicker.getDate(), oggi).getYears()<18)
+	    else if(Period.between(dataPicker.getDate(), oggi).getYears() < 18)
 	    {
 	    	dataPicker.setBorder(errorBorder);
 	    	dataErrorLabel.setText("L'utente deve avere almeno 18 anni!");
@@ -858,23 +823,23 @@ public class ProfileFrame extends JXFrame
 	private boolean checkEmail()
 	{
 		boolean check = true;
-	    String text = EmailField.getText().trim();
+	    String text = emailField.getText().trim();
 	      
 	    if(text.isEmpty())
 	    {
-	    	EmailField.setBorder(errorBorder);
+	    	emailField.setBorder(errorBorder);
 	    	emailErrorLabel.setText("Bisogna inserire un' email!");
 	    	check = false;
 	    } 
 	    else if(!text.matches("^[\\w.-]+@[\\w.-]+\\.\\w{2,}$")) 
 	    {
-	        EmailField.setBorder(errorBorder);
+	        emailField.setBorder(errorBorder);
 	        emailErrorLabel.setText("Email non valida!");
 	        check = false;
 	    }
 	    else
 	    {
-	    	EmailField.setBorder(defaultBorder);
+	    	emailField.setBorder(defaultBorder);
 	    	emailErrorLabel.setText(" ");
 	    }
 	    
@@ -884,29 +849,29 @@ public class ProfileFrame extends JXFrame
 	private boolean checkUser() 
 	{
 		boolean check = true;
-	    String text = UsernameField.getText().trim();
+	    String text = usernameField.getText().trim();
 	      
 	    if(text.contains(" ") || text.contains("\t") || text.contains("\n"))
 	    {
-	    	UsernameField.setBorder(errorBorder);
+	    	usernameField.setBorder(errorBorder);
 	    	userErrorLabel.setText("L'username non può contenere spazi!");
 	    	check = false;
 	    }
 	    else if(text.isEmpty())
 	    {
-	    	UsernameField.setBorder(errorBorder);
+	    	usernameField.setBorder(errorBorder);
 	    	userErrorLabel.setText("Bisogna inserire un username!");
 	    	check = false;
 	    }
 	    else if(text.length() < 4 || text.length() > 20) 
 	 	{
-	    	UsernameField.setBorder(errorBorder);
+	    	usernameField.setBorder(errorBorder);
 	 	    userErrorLabel.setText("L'username deve essere tra 4 e 20 caratteri!");
 	 	    check = false;
 	 	} 
 	    else
 	    {
-	    	UsernameField.setBorder(defaultBorder);
+	    	usernameField.setBorder(defaultBorder);
 	        userErrorLabel.setText(" ");
 	    }
 	    
@@ -917,78 +882,16 @@ public class ProfileFrame extends JXFrame
 	public void showError(String msg)
 	{
 		JOptionPane.showMessageDialog(this, msg, "Errore", JOptionPane.ERROR_MESSAGE);
-		ConfermaBtn.setEnabled(true);
-	    AnnullaBtn.setEnabled(true);
+		confermaBtn.setEnabled(true);
+	    annullaBtn.setEnabled(true);
 	}	
 	
-	public void showSuccess(String msg) {
+	public void showSuccess(String msg) 
+	{
         JOptionPane.showMessageDialog(this, msg, "Successo", JOptionPane.INFORMATION_MESSAGE);
-        ConfermaBtn.setEnabled(true);
-	    AnnullaBtn.setEnabled(true);
+        confermaBtn.setEnabled(true);
+	    annullaBtn.setEnabled(true);
     }
 	
-    private void disposeListeners() 
-    {
-    	header.disposeListeners();
-
-        if (ScegliCurriculumBtn != null && scegliBtnActionListener != null)
-            ScegliCurriculumBtn.removeActionListener(scegliBtnActionListener);
-		
-        if (modifyBtn != null && modifyBtnListener != null)
-        	modifyBtn.removeActionListener(modifyBtnListener);
-
-		if(NomeField != null && nomeFieldFocusListener != null)
-			NomeField.removeFocusListener(nomeFieldFocusListener);
-		
-		if(NomeField != null && nomeFieldDocumentListener != null)
-			NomeField.getDocument().removeDocumentListener(nomeFieldDocumentListener);
-		
-		if(CognomeField != null && cognomeFieldFocusListener != null)
-			CognomeField.removeFocusListener(cognomeFieldFocusListener);
-		
-		if(CognomeField != null && cognomeFieldDocumentListener != null)
-			CognomeField.getDocument().removeDocumentListener(cognomeFieldDocumentListener);
-		
-		if(luogoField != null && luogoFieldFocusListener != null)
-			luogoField.removeFocusListener(luogoFieldFocusListener);
-		
-		if(luogoField != null && luogoFieldDocumentListener != null)
-			luogoField.getDocument().removeDocumentListener(luogoFieldDocumentListener);
-		
-		if(EmailField != null && emailFieldFocusListener != null)
-			EmailField.removeFocusListener(emailFieldFocusListener);
-		
-		if(EmailField != null && emailFieldDocumentListener != null)
-			EmailField.getDocument().removeDocumentListener(emailFieldDocumentListener);
-				
-		if(UsernameField != null && userFieldDocumentListener != null)
-			UsernameField.getDocument().removeDocumentListener(userFieldDocumentListener);
-		
-		if(UsernameField != null && userFieldFocusListener != null)
-			UsernameField.removeFocusListener(userFieldFocusListener);
-
-		if(EliminaProfiloBtn != null && EliminaBtnListener != null)
-			EliminaProfiloBtn.removeActionListener(EliminaBtnListener);
-		
-		if(ConfermaBtn != null && ConfermaBtnListener != null)
-			ConfermaBtn.removeActionListener(ConfermaBtnListener);
-		
-		if(AnnullaBtn != null && AnnullaBtnListener != null)
-			AnnullaBtn.removeActionListener(AnnullaBtnListener);
-		
-		if(VisualizzaCurriculumBtn != null && CurriculumBtnListener != null)
-			VisualizzaCurriculumBtn.removeActionListener(CurriculumBtnListener);
-    }
     
-    @Override
-    public void dispose()
-    {
-    	disposeListeners();
-        super.dispose();
-    }
-    
-    /*public void resetView()
-    {
-    	dropdownPanel.setVisible(false);
-    }*/
 }
