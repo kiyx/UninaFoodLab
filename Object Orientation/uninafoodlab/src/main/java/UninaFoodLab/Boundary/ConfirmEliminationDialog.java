@@ -201,4 +201,23 @@ public class ConfirmEliminationDialog extends JDialog {
 	        confirmButton.setEnabled(true); // Riabilita il pulsante
 	        dispose(); // Chiude il dialog al successo
 	    }
+	    
+	    private void disposeListeners() 
+	    {		   
+			 if (confirmButton != null && confirmButtonListener != null)
+				 confirmButton.removeActionListener(confirmButtonListener);
+			  
+	        if (showPassBtn != null && showPassBtnActionListener != null)
+	        	showPassBtn.removeActionListener(showPassBtnActionListener);
+
+	        if(passwordField != null && passwordFieldDocumentListener != null)
+	        	passwordField.getDocument().removeDocumentListener(passwordFieldDocumentListener);
+	    }
+	    
+		@Override
+	    public void dispose()
+	    {
+	    	disposeListeners();
+	        super.dispose();
+	    }
 }

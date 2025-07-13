@@ -760,29 +760,28 @@ public class Controller
 	    {
 	        if((!loggedUser.getEmail().equals(email)) && getPartecipanteDAO().existsPartecipanteByEmail(email))
 	            modifyFailed(currFrame, ERR_EMAIL_EXISTING);
-	        else
-	        {
-	        	if(!loggedUser.getUsername().equals(username))
+        	if(!loggedUser.getUsername().equals(username))
+        	{
+        		try
+	            {
+	                tryGetUser(username);
+	                modifyFailed(currFrame, "Username già utilizzato.");
+	            }
+	        	catch(RecordNotFoundException e)
 	        	{
-	        		try
-		            {
-		                tryGetUser(username);
-		                modifyFailed(currFrame, "Username già utilizzato.");
-		            }
-		        	catch(RecordNotFoundException e)
-		        	{
-		        		Partecipante p = new Partecipante(username, nome, cognome, loggedUser.getCodiceFiscale(), data, luogo, email, loggedUser.getHashPassword(), null, null);
-		                getPartecipanteDAO().update((Partecipante)loggedUser, p);
-		                modifySuccess(currFrame, p);
-		        	}
-	        	}
-	        	else
-	        	{
-	        		Partecipante p = new Partecipante(username , nome, cognome, loggedUser.getCodiceFiscale(), data, luogo, email, loggedUser.getHashPassword(), null, null);
+	        		Partecipante p = new Partecipante(username, nome, cognome, loggedUser.getCodiceFiscale(), data, luogo, email, loggedUser.getHashPassword(), null, null);
 	                getPartecipanteDAO().update((Partecipante)loggedUser, p);
+	                p.setId(loggedUser.getId());
 	                modifySuccess(currFrame, p);
-	        	}	        	
-	        }
+	        	}
+        	}
+        	else
+        	{
+        		Partecipante p = new Partecipante(username , nome, cognome, loggedUser.getCodiceFiscale(), data, luogo, email, loggedUser.getHashPassword(), null, null);
+                getPartecipanteDAO().update((Partecipante)loggedUser, p);
+                p.setId(loggedUser.getId());
+                modifySuccess(currFrame, p);
+        	}	        	
 	    }
 	    
 	    private void modifyChef(ProfileFrame currFrame, String username, String nome, String cognome,LocalDate data, String luogo, String email, File selectedFile) 
@@ -790,38 +789,50 @@ public class Controller
 	    {
 	        if((!loggedUser.getEmail().equals(email)) && getChefDAO().existsChefByEmail(email))
 	        	modifyFailed(currFrame, ERR_EMAIL_EXISTING);
-	        else
-	        {
-	        	
-	        	try
-	            {
-	        		if(loggedUser.getUsername()!=username)
-	        		{
-	        			tryGetUser(username);
-	        			modifyFailed(currFrame, "Username già utilizzato.");
-	        		}
-	        		else
-	        		{
-	        			String curriculumPath = changeCurriculumFile(username, selectedFile);
-	        			Chef c = new Chef(username, nome, cognome, loggedUser.getCodiceFiscale(), data, luogo, email, loggedUser.getHashPassword(), curriculumPath, null, null);
-		                getChefDAO().update((Chef)loggedUser, c);
-		                modifySuccess(currFrame, c);
-	        		}
-	                
-	            }
-	            catch(RecordNotFoundException e)
-	            {
-	            	String oldPath = "resources" + File.separator + loggedUser.getUsername();
+
+        	if(!loggedUser.getUsername().equals(username))
+        	{
+        		try
+        		{
+        			tryGetUser(username);
+        			modifyFailed(currFrame, "Username già utilizzato.");
+        		}
+        		catch(RecordNotFoundException e)
+        		{
+        			String oldPath = System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" + File.separator + "resources" + File.separator + loggedUser.getUsername();
 	            	File oldFile = new File(oldPath);
 	            	File newFile = new File(oldFile.getParent(), username);
-	            	oldFile.renameTo(newFile);
+	            	//oldFile.renameTo(newFile);
+        			Path oldPathNIO = Paths.get(oldPath); // oldPath deve essere il percorso completo
+        			Path newPathNIO = Paths.get(newFile.getAbsolutePath());
+
+        			try {
+        			    Files.move(oldPathNIO, newPathNIO, StandardCopyOption.REPLACE_EXISTING);
+        			    LOGGER.log(Level.INFO, "Cartella username rinominata da {0} a {1}", new Object[]{oldPath, newFile.getName()});
+        			} catch (IOException e1) {
+        			    LOGGER.log(Level.SEVERE, "Errore durante la rinomina della cartella username da {0} a {1}: {2}", new Object[]{oldPath, newFile.getName(), e.getMessage()});
+        			    // Questo è un errore grave che dovrebbe probabilmente bloccare la modifica del profilo
+        			    // o almeno farla fallire nell'interfaccia utente.
+        			    throw new IOException("Impossibile rinominare la cartella del profilo. " + e.getMessage(), e);
+        			}
 	            	
 	                String curriculumPath = changeCurriculumFile(username, selectedFile);
 	                Chef c = new Chef(username, nome, cognome, loggedUser.getCodiceFiscale(), data, luogo, email, loggedUser.getHashPassword(), curriculumPath, null, null);
 	                getChefDAO().update((Chef)loggedUser, c);
+	                c.setId(loggedUser.getId());
 	                modifySuccess(currFrame, c);
-	            }
-	        }
+	                
+        		}
+        	}
+        	else
+        	{
+        		String curriculumPath = changeCurriculumFile(username, selectedFile);
+    			Chef c = new Chef(username, nome, cognome, loggedUser.getCodiceFiscale(), data, luogo, email, loggedUser.getHashPassword(), curriculumPath, null, null);
+                getChefDAO().update((Chef)loggedUser, c);
+                c.setId(loggedUser.getId());
+                modifySuccess(currFrame, c);
+        	}
+
 	    }
 	    
 	    
@@ -846,8 +857,8 @@ public class Controller
 	        } catch (IOException e) {
 	        	LOGGER.log(Level.SEVERE, "Errore durante l'accesso alla cartella: {0}", relativePath + ": " + e.getMessage());
 	        }*/
-	        
-	        String toDeleteString = System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" + File.separator + ((Chef) loggedUser).getCurriculum(); 
+	        File curr = new File (((Chef) loggedUser).getCurriculum());
+	        String toDeleteString = System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" + File.separator + "resources" +File.separator+ username+File.separator+ "Curriculum" + File.separator + curr.getName(); 
 	        String fullPathString = System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" + File.separator + relativePath;
 	        try
 	        {
@@ -860,9 +871,24 @@ public class Controller
 	        
 	        Path destinationDir = Paths.get(fullPathString);
 	        Files.createDirectories(destinationDir); 
-
+	        
 	        Path destinationPath = destinationDir.resolve(selectedFile.getName());
-	        Files.copy(selectedFile.toPath(), destinationPath, StandardCopyOption.REPLACE_EXISTING);
+	        if (!selectedFile.exists()) {
+	            LOGGER.log(Level.SEVERE, "Source file does not exist: {0}", selectedFile.getAbsolutePath());
+	            return null; // Or throw a custom exception
+	        }
+	        if (!selectedFile.isFile()) {
+	            LOGGER.log(Level.SEVERE, "Source is not a file: {0}", selectedFile.getAbsolutePath());
+	            return null;
+	        }
+	        try
+	        {
+	        	Files.copy(selectedFile.toPath(), destinationPath, StandardCopyOption.REPLACE_EXISTING);
+	        }
+	        catch(IOException e)
+	        {
+	            LOGGER.log(Level.SEVERE, "File non copiato: " + e.getMessage(), e); // Log the exception message and the exception itself
+	        }
 
 	        LOGGER.log(Level.INFO, "File salvato con successo in: {0}", destinationPath);
 	        return relativePath + File.separator + selectedFile.getName();
@@ -888,8 +914,8 @@ public class Controller
 			}
 			catch(IOException e)
 			{
-				LOGGER.log(Level.SEVERE, "Errore salvataggio file", e);
-				modifyFailed(currFrame, "Errore di salvataggio file.");
+				LOGGER.log(Level.SEVERE, "Errore modifica", e);
+				modifyFailed(currFrame, "Errore di modifica.");
 			}
 	    }
 	    
@@ -950,7 +976,34 @@ public class Controller
 			if(checkPassword(loggedUser.getHashPassword(), pass))
 			{
 				if(isChefLogged())
+				{
 					getChefDAO().delete(loggedUser.getId());
+					if (Files.exists(Paths.get(System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" + File.separator + "resources" +File.separator+ loggedUser.getUsername()))) {
+			            try (Stream<Path> walk = Files.walk(Paths.get(System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" + File.separator + "resources" +File.separator+ loggedUser.getUsername()))) {
+			                walk.sorted(Comparator.reverseOrder()) // Ordina al contrario per eliminare prima i file e le sottocartelle interne
+			                    .forEach(path -> {
+			                        try {
+			                            Files.delete(path);
+			                            LOGGER.log(Level.INFO, "Eliminato: {0}", path);
+			                        } catch (DirectoryNotEmptyException e) {
+			                        	LOGGER.log(Level.WARNING, "Errore: La cartella non è vuota e non può essere eliminata: {0}", path);
+			                        	currDialog.showError("Errore: La cartella non è vuota e non può essere eliminata: " + path);
+			                        } catch (IOException e) {
+			                        	LOGGER.log(Level.WARNING, "Errore durante l'eliminazione di {0}", path + ":" + e.getMessage());
+			                        	currDialog.showError("Errore durante l'eliminazione di " + path + ":" + e.getMessage());
+			                        }
+			                    });
+			                System.out.println("Cartella svuotata e eliminata con successo: " + (Paths.get(System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" + File.separator + "resources" +File.separator+ loggedUser.getUsername())));
+			            }
+			            catch(IOException e)
+			            {
+			            	LOGGER.log(Level.WARNING, "Errori IO");
+			                currDialog.showError("Errori IO");
+			            }
+			        } else {
+			            System.out.println("La directory specificata non esiste o non è una directory: " + (Paths.get(System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" + File.separator + "resources" +File.separator+ loggedUser.getUsername())));
+			        }
+				}					
 				else
 					getPartecipanteDAO().delete(loggedUser.getId());
 				deleteSuccess(parentFrame, loggedUser.getUsername());

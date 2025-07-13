@@ -22,6 +22,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.Period;
 
@@ -62,6 +63,7 @@ import com.github.lgooddatepicker.optionalusertools.DateVetoPolicy;
 import com.github.lgooddatepicker.zinternaltools.DateVetoPolicyMinimumMaximumDate;
 
 import UninaFoodLab.Controller.Controller;
+import UninaFoodLab.DTO.Chef;
 import UninaFoodLab.DTO.Utente;
 import net.miginfocom.swing.MigLayout;
 
@@ -413,6 +415,10 @@ public class ProfileFrame extends JXFrame
 			fileLabel.setEnabled(false);
 			fileLabel.setVisible(false);
 		}
+		else
+		{
+			selectedFile = new File(System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" + File.separator + ((Chef)Controller.getController().getLoggedUser()).getCurriculum());
+		}
 		
     	EliminaProfiloBtn = new JXButton ("Elimina Profilo");
     	EliminaProfiloBtn.setFont(new Font("SansSerif", Font.BOLD, 15));
@@ -508,9 +514,8 @@ public class ProfileFrame extends JXFrame
 		codFiscErrorLabel.setVisible(editable);
 		emailErrorLabel.setVisible(editable);
 
-        if (!editable) {
+        if (!editable && Controller.getController().isChefLogged()) {
             fileLabel.setText("Nessun file selezionato");
-            selectedFile = null;
         }
     }
     
@@ -537,7 +542,7 @@ public class ProfileFrame extends JXFrame
 			   {
 				 if (Desktop.isDesktopSupported()) {
 				    try {
-				        File myFile = new File(System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" + File.separator + "resources" + File.separator + "[Esposito]_[VirginiaAntonia]_[N86004987]_ER1.pdf");
+				        File myFile = new File(System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" + File.separator + ((Chef)Controller.getController().getLoggedUser()).getCurriculum());
 				        if (myFile.exists()) {
 				            Desktop.getDesktop().open(myFile);
 				        } else {
@@ -562,6 +567,7 @@ public class ProfileFrame extends JXFrame
 					EmailField.setText(Controller.getController().getLoggedUser().getEmail());
 					UsernameField.setText(Controller.getController().getLoggedUser().getUsername());
 					VisualizzaCurriculumBtn.setEnabled(true);
+					selectedFile = new File(System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" + File.separator + ((Chef)Controller.getController().getLoggedUser()).getCurriculum());
 					setEditMode(false);
 			   }
 			};
@@ -626,9 +632,9 @@ public class ProfileFrame extends JXFrame
 			        if (returnValue == JFileChooser.APPROVE_OPTION) {
 			        	selectedFile = fileChooser.getSelectedFile();		        	
 
-			            
+			        	System.out.println("stampa1");
 			            fileLabel.setText(selectedFile.getName());
-			            
+			            System.out.println(selectedFile.getName());
 			            
 			        } else {
 			            System.out.println("Selezione annullata.");
@@ -927,8 +933,54 @@ public class ProfileFrame extends JXFrame
 
         if (ScegliCurriculumBtn != null && scegliBtnActionListener != null)
             ScegliCurriculumBtn.removeActionListener(scegliBtnActionListener);
+		
+        if (modifyBtn != null && modifyBtnListener != null)
+        	modifyBtn.removeActionListener(modifyBtnListener);
+
+		if(NomeField != null && nomeFieldFocusListener != null)
+			NomeField.removeFocusListener(nomeFieldFocusListener);
+		
+		if(NomeField != null && nomeFieldDocumentListener != null)
+			NomeField.getDocument().removeDocumentListener(nomeFieldDocumentListener);
+		
+		if(CognomeField != null && cognomeFieldFocusListener != null)
+			CognomeField.removeFocusListener(cognomeFieldFocusListener);
+		
+		if(CognomeField != null && cognomeFieldDocumentListener != null)
+			CognomeField.getDocument().removeDocumentListener(cognomeFieldDocumentListener);
+		
+		if(luogoField != null && luogoFieldFocusListener != null)
+			luogoField.removeFocusListener(luogoFieldFocusListener);
+		
+		if(luogoField != null && luogoFieldDocumentListener != null)
+			luogoField.getDocument().removeDocumentListener(luogoFieldDocumentListener);
+		
+		if(EmailField != null && emailFieldFocusListener != null)
+			EmailField.removeFocusListener(emailFieldFocusListener);
+		
+		if(EmailField != null && emailFieldDocumentListener != null)
+			EmailField.getDocument().removeDocumentListener(emailFieldDocumentListener);
+				
+		if(UsernameField != null && userFieldDocumentListener != null)
+			UsernameField.getDocument().removeDocumentListener(userFieldDocumentListener);
+		
+		if(UsernameField != null && userFieldFocusListener != null)
+			UsernameField.removeFocusListener(userFieldFocusListener);
+
+		if(EliminaProfiloBtn != null && EliminaBtnListener != null)
+			EliminaProfiloBtn.removeActionListener(EliminaBtnListener);
+		
+		if(ConfermaBtn != null && ConfermaBtnListener != null)
+			ConfermaBtn.removeActionListener(ConfermaBtnListener);
+		
+		if(AnnullaBtn != null && AnnullaBtnListener != null)
+			AnnullaBtn.removeActionListener(AnnullaBtnListener);
+		
+		if(VisualizzaCurriculumBtn != null && CurriculumBtnListener != null)
+			VisualizzaCurriculumBtn.removeActionListener(CurriculumBtnListener);
     }
     
+    @Override
     public void dispose()
     {
     	disposeListeners();

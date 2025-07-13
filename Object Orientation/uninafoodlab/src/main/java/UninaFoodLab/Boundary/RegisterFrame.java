@@ -141,14 +141,6 @@ public class RegisterFrame extends JXFrame
 		windowLogo = new ImageIcon(getClass().getResource("/logo_finestra.png"));
 		setIconImage(windowLogo.getImage());
 
-		try
-		{
-			UIManager.setLookAndFeel(new FlatLightLaf());
-		} 
-		catch (UnsupportedLookAndFeelException e)
-		{
-			e.printStackTrace();
-		}
 		initComponents();
 		initListeners();
 		
@@ -930,9 +922,6 @@ public class RegisterFrame extends JXFrame
 		
 		if(emailField != null && emailFieldFocusListener != null)
 			emailField.removeFocusListener(emailFieldFocusListener);
-		
-		if(emailField != null && emailFieldDocumentListener != null)
-			emailField.getDocument().removeDocumentListener(emailFieldDocumentListener);
 		
 		if(emailField != null && emailFieldDocumentListener != null)
 			emailField.getDocument().removeDocumentListener(emailFieldDocumentListener);

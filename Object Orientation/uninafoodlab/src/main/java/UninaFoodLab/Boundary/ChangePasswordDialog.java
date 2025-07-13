@@ -303,4 +303,29 @@ public class ChangePasswordDialog extends JDialog {
         dispose(); 
     }
 
+	   private void disposeListeners() 
+	    {
+		   
+			 if (showOldPassBtn != null && showOldPassBtnActionListener != null)
+				 showOldPassBtn.removeActionListener(showOldPassBtnActionListener);
+			  
+	        if (conferma != null && ConfermaBtnActionListener != null)
+	        	conferma.removeActionListener(ConfermaBtnActionListener);
+			
+	        if (showNewPassBtn != null && showNewPassBtnActionListener != null)
+	        	showNewPassBtn.removeActionListener(showNewPassBtnActionListener);
+
+	        if(oldPasswordField != null && oldPassFieldDocumentListener != null)
+				oldPasswordField.getDocument().removeDocumentListener(oldPassFieldDocumentListener);
+			
+			if(newPasswordField != null && newPassFieldDocumentListener != null)
+				newPasswordField.getDocument().removeDocumentListener(newPassFieldDocumentListener);
+
+	    }
+		@Override
+	    public void dispose()
+	    {
+	    	disposeListeners();
+	        super.dispose();
+	    }
 }
