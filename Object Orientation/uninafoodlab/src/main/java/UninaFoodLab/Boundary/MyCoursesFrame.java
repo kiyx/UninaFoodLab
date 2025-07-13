@@ -97,7 +97,7 @@ public class MyCoursesFrame extends JXFrame
         rootPanel.setBackground(new Color(0xFAFAFA));
         setContentPane(rootPanel);
 
-        // Header riutilizzabile
+        // Header
         header = new HeaderPanel(this, getLayeredPane());
         rootPanel.add(header, "dock north");
 
@@ -112,8 +112,7 @@ public class MyCoursesFrame extends JXFrame
 
         // Esempio: apertura dialog di creazione corso
         CreateCourseDialog dialog = new CreateCourseDialog(this);
-        dialog.setVisible(true);
-
+        SwingUtilities.invokeLater(() -> dialog.setVisible(true));
     }
  
  

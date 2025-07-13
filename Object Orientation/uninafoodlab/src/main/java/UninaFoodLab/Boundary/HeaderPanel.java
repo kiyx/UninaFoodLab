@@ -149,7 +149,7 @@ public class HeaderPanel extends JXPanel
         add(searchField, "cell 5 0, h 40!, growx, wmin 150, wmax 1600");
 
         searchBtn = new JXButton("Cerca");
-        searchBtn.setFont(new Font("SansSerif", Font.BOLD, 16));
+        searchBtn.setFont(new Font("Segoe UI", Font.BOLD, 16));
         searchBtn.setFocusPainted(false);
         searchBtn.setBackground(new Color(225, 126, 47));
         searchBtn.setForeground(Color.WHITE);
