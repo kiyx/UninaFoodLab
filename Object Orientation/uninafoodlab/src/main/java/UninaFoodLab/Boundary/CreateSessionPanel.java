@@ -51,6 +51,7 @@ public class CreateSessionPanel extends JXPanel
 	private boolean pratica;
 	private CreateCourseDialog parent;
 
+	// Componenti principali UI
 	private JXPanel durataPanel;
 	private JXLabel numeroLabel, clearButton;
 	private DatePicker datePicker;
@@ -60,6 +61,7 @@ public class CreateSessionPanel extends JXPanel
 	private JXTextField addressField, linkField;
 	private boolean focusSet = false;
 
+	// Listeners sui campi e di validazione
 	private ActionListener removeBtnActionListener;
 	private DocumentListener addressListener, linkListener, ricercaRicetteFieldListener;
 	private ChangeListener durataChangeListener;
@@ -69,6 +71,7 @@ public class CreateSessionPanel extends JXPanel
 						  oreFocusListener, minutiFocusListener;
 	private MouseAdapter clearButtonListener;
 	
+	// Gestio
 	private JPanel ricettePanel;
 	private JScrollPane scrollRicette;
 	private JXTextField ricercaRicetteField;
@@ -522,15 +525,15 @@ public class CreateSessionPanel extends JXPanel
 	     */
 	    if(pratica && clearButton != null)
 	    {
-	    	clearButtonListener = new MouseAdapter()
-								  {
-								      @Override
-								      public void mouseClicked(MouseEvent e)
-								      {
-								          ricercaRicetteField.setText("");
-								          clearButton.setVisible(false);
-								      }
-								  };
+	    	clearButton.addMouseListener(new MouseAdapter()
+								    	 {
+								    	     @Override
+								    	     public void mouseClicked(MouseEvent e)
+								    	     {
+								    	         ricercaRicetteField.setText("");
+								    	     }
+								    	 });
+
 	        clearButton.addMouseListener(clearButtonListener);
 	    }
 	    
@@ -744,6 +747,17 @@ public class CreateSessionPanel extends JXPanel
 	    return valido;
 	}
 
+	private boolean validateField(JComponent comp, boolean errore, String tooltip)
+	{
+	    showError(comp, errore, tooltip);
+	    if(errore && !focusSet)
+	    {
+	        comp.requestFocusInWindow();
+	        focusSet = true;
+	    }
+	    return !errore;
+	}
+
 	/**
 	 * Verifica che la data sia selezionata.
 	 *
@@ -751,15 +765,7 @@ public class CreateSessionPanel extends JXPanel
 	 */
 	private boolean validateData()
 	{
-	    boolean errore = (datePicker.getDate() == null);
-	    showError(datePicker, errore, "Data obbligatoria");
-	    
-	    if(errore && !focusSet)
-	    {
-	        datePicker.requestFocusInWindow();
-	        focusSet = true;
-	    }
-	    return !errore;
+	    return validateField(datePicker, datePicker.getDate() == null, "Data obbligatoria");
 	}
 
 	/**
@@ -769,15 +775,7 @@ public class CreateSessionPanel extends JXPanel
 	 */
 	private boolean validateTime()
 	{
-	    boolean errore = (timePicker.getTime() == null);
-	    showError(timePicker, errore, "Orario obbligatorio");
-	    
-	    if(errore && !focusSet)
-	    {
-	        timePicker.requestFocusInWindow();
-	        focusSet = true;
-	    }
-	    return !errore;
+	    return validateField(timePicker, timePicker.getTime() == null, "Orario obbligatorio");
 	}
 
 	/**
@@ -787,18 +785,8 @@ public class CreateSessionPanel extends JXPanel
 	 */
 	private boolean validateDurata()
 	{
-	    boolean errore = getDurata() <= 0;
-	    showError(oreSpinner, errore, "Durata non valida");
-	    showError(minutiSpinner, errore, "Durata non valida");
-	    
-	    if(errore && !focusSet)
-	    {
-	        oreSpinner.requestFocusInWindow();
-	        focusSet = true;
-	    }
-	    return !errore;
+	    return validateField(oreSpinner, getDurata() <= 0, "Durata non valida") && validateField(minutiSpinner, getDurata() <= 0, "Durata non valida");
 	}
-
 
 	/**
 	 * Verifica che l'indirizzo sia compilato correttamente (solo per sessioni pratiche).
@@ -807,15 +795,7 @@ public class CreateSessionPanel extends JXPanel
 	 */
 	private boolean validateAddress()
 	{
-	    boolean errore = addressField.getText().trim().isEmpty();
-	    showError(addressField, errore, "Indirizzo obbligatorio");
-	    
-	    if(errore && !focusSet)
-	    {
-	        addressField.requestFocusInWindow();
-	        focusSet = true;
-	    }
-	    return !errore;
+	    return validateField(addressField, addressField.getText().trim().isEmpty(), "Indirizzo obbligatorio");
 	}
 
 	 /**
@@ -841,6 +821,7 @@ public class CreateSessionPanel extends JXPanel
 	                break;
 	            }
 	        }
+	        
 	        // Fallback: campo ricerca
 	        if(!focusSet && ricercaRicetteField != null)
 	        {
@@ -860,15 +841,7 @@ public class CreateSessionPanel extends JXPanel
 	 */
 	private boolean validateLink()
 	{
-	    boolean errore = linkField.getText().trim().isEmpty();
-	    showError(linkField, errore, "Link riunione obbligatorio");
-	    
-	    if(errore && !focusSet)
-	    {
-	        linkField.requestFocusInWindow();
-	        focusSet = true;
-	    }
-	    return !errore;
+	    return validateField(linkField, linkField.getText().trim().isEmpty(), "Link riunione obbligatorio");
 	}
 	 
 }

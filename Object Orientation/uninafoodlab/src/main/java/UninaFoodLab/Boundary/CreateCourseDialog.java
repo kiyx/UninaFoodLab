@@ -2,21 +2,19 @@ package UninaFoodLab.Boundary;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.text.*;
 import java.time.*;
 import java.util.List;
-import java.util.Locale;
 import java.util.ArrayList;
 
 import javax.swing.*;
 import javax.swing.border.*;
-import javax.swing.text.NumberFormatter;
 
 import org.jdesktop.swingx.*;
 
 import com.github.lgooddatepicker.components.*;
-import com.github.lgooddatepicker.optionalusertools.DateVetoPolicy;
-import com.github.lgooddatepicker.zinternaltools.DateVetoPolicyMinimumMaximumDate;
+import com.github.lgooddatepicker.components.DatePickerSettings.*;
+import com.github.lgooddatepicker.optionalusertools.*;
+import com.github.lgooddatepicker.zinternaltools.*;
 
 import UninaFoodLab.Controller.Controller;
 import UninaFoodLab.DTO.Argomento;
@@ -35,17 +33,16 @@ public class CreateCourseDialog extends JDialog
         new LineBorder(BORDER_COLOR, 1, true),
         BorderFactory.createEmptyBorder(12, 12, 12, 12)
     );
-
+    
     private JPanel argomentiPanel, scrollContentWrapper;
     private JXPanel buttons, container, detailPanel, infoPanel, formPanel, leftPanel, mainPanel, sessionPanel, sessionsContainer;
-    private JXLabel aggiungiSessioneLabel, limitLabel, sessionTitle, title;
+    private JXLabel aggiungiSessioneLabel, sessioniLabel, limitLabel, sessionTitle, title;
     private JXButton addBtn, cancelBtn, confirmBtn, goBackBtn;
     private JScrollPane rootScroll, scrollArgomenti, scrollDescrizione, scrollSessions;
     private JComboBox<FrequenzaSessioni> frequencyList;
     private JCheckBox praticoCheck; 
     private JDialog addSessionDialog;
-    private JFormattedTextField costField, limitField;
-    private JSpinner onlineSpinner, praticheSpinner;
+    private JSpinner numeroSessioniSpinner, onlineSpinner, costSpinner, limitSpinner, praticheSpinner;
     private JXTextArea descrizioneArea;
     private JXTextField nameField;
     private DatePicker dataInizioField;
@@ -61,7 +58,7 @@ public class CreateCourseDialog extends JDialog
     public CreateCourseDialog(JXFrame parent)
     {
         super(parent, "Crea nuovo corso", true);
-        setMinimumSize(new Dimension(1670, 700));
+        setMinimumSize(new Dimension(1670, 725));
         setPreferredSize(new Dimension(1200, 700));
         setLocationRelativeTo(parent);
         setResizable(true);
@@ -90,13 +87,14 @@ public class CreateCourseDialog extends JDialog
         initLeftPanel(mainPanel);
         initRightPanel(mainPanel);
         SwingUtilities.invokeLater(() -> nameField.requestFocusInWindow());
+        getRootPane().setDefaultButton(confirmBtn);
     }
 
     private void initLeftPanel(JXPanel mainPanel)
     {
     	leftPanel = new JXPanel(new MigLayout(
-    		    "fill, wrap 1",
-    		    "[grow, fill]",
+    		    "wrap 1, fill, insets 0", // rimosso `dock`, evita confusione
+    		    "[grow]",
     		    "[]10[grow, fill]10[]"
     		));
     	leftPanel.setBackground(BACKGROUND_COLOR);
@@ -106,9 +104,9 @@ public class CreateCourseDialog extends JDialog
         title.setFont(new Font("Segoe UI", Font.BOLD, 20));
         leftPanel.add(title, "align center");
 
-        formPanel = new JXPanel(new MigLayout("wrap 1, gap 10 10", "[grow, fill]", "[][grow 0]"));
+        formPanel = new JXPanel(new MigLayout("wrap 1, gap 10 10", "[grow, fill]", "[][pref!]"));
         formPanel.setBackground(BACKGROUND_COLOR);
-
+        
         infoPanel = new JXPanel(new MigLayout(
         	    "wrap 2, fill, insets 10",
         	    "[right][grow, fill]",
@@ -131,7 +129,7 @@ public class CreateCourseDialog extends JDialog
         scrollDescrizione.setMinimumSize(new Dimension(100, 100));
         scrollDescrizione.setPreferredSize(new Dimension(100, 150));
         infoPanel.add(new JXLabel("Descrizione:"));
-        infoPanel.add(scrollDescrizione, "span 2, growx, hmin 60, hmax 120");
+        infoPanel.add(scrollDescrizione, "span 2, growx, growy");
 
         frequencyList = new JComboBox<>(FrequenzaSessioni.values());
         infoPanel.add(new JXLabel("Frequenza:"));
@@ -180,29 +178,43 @@ public class CreateCourseDialog extends JDialog
         infoPanel.add(new JXLabel("Argomenti:"));
         infoPanel.add(scrollArgomenti, "span 2, growx, hmin 80, hmax 140");
 
-        formPanel.add(infoPanel, "growx");
+        formPanel.add(infoPanel, "grow, push");
 
         detailPanel = new JXPanel(new MigLayout(
         	    "wrap 3",
         	    "[right][grow, fill][]",
-        	    "[][grow 0]"  // riga 1 fissa, riga 2 non cresce
+        	    "[][grow 0]"
         	));
+        detailPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 220));
         detailPanel.setBackground(Color.WHITE);
         detailPanel.setBorder(mainBorder);
-        detailPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 180));
 
         DateVetoPolicy vetoPolicy = new DateVetoPolicyMinimumMaximumDate(LocalDate.now().plusDays(1), null);
-        DatePickerSettings settings = new DatePickerSettings();
+        DatePickerSettings settings = new DatePickerSettings(); 
+        applyOrangeTheme(settings);
         dataInizioField = new DatePicker(settings);
+        dataInizioField.setDate(LocalDate.now().plusDays(1));
         settings.setVetoPolicy(vetoPolicy);
         detailPanel.add(new JXLabel("Data Inizio:"));
         detailPanel.add(dataInizioField, "h 36!, growx, span 2");
 
-        costField = new JFormattedTextField(euroFormatter());
-        costField.setValue(0.0);
+        sessioniLabel = new JXLabel("Numero sessioni:");
+        numeroSessioniSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 100, 1));
+        removeSpinnerButtons(numeroSessioniSpinner);
+        numeroSessioniSpinner.setEnabled(false);
+        numeroSessioniSpinner.setValue(0);
+        ((JSpinner.DefaultEditor)numeroSessioniSpinner.getEditor()).getTextField().setColumns(5);
+
+        detailPanel.add(sessioniLabel, "newline");
+        detailPanel.add(numeroSessioniSpinner, "h 36!, growx, span 2");
+        
+        SpinnerNumberModel costModel = new SpinnerNumberModel(0.0, 0.0, 10000.0, 0.5);
+        costSpinner = new JSpinner(costModel);
+        JSpinner.NumberEditor costEditor = new JSpinner.NumberEditor(costSpinner, "#,##0.00 €");
+        costSpinner.setEditor(costEditor);
+        costSpinner.setPreferredSize(new Dimension(100, 36));
         detailPanel.add(new JXLabel("Costo:"));
-        detailPanel.add(costField, "h 36!, growx");
-        detailPanel.add(new JXLabel("€"));
+        detailPanel.add(costSpinner, "h 36!, growx, span 2");
 
         praticoCheck = new JCheckBox();
         praticoCheck.setBackground(Color.WHITE);
@@ -211,28 +223,35 @@ public class CreateCourseDialog extends JDialog
 
         limitLabel = new JXLabel("Limite partecipanti:");
         limitLabel.setVisible(false);
-        limitField = new JFormattedTextField(integerFormatter());
-        limitField.setVisible(false);
+
+        SpinnerNumberModel limitModel = new SpinnerNumberModel(1, 1, 1000, 1);
+        limitSpinner = new JSpinner(limitModel);
+        limitSpinner.setVisible(false);
+        ((JSpinner.DefaultEditor)limitSpinner.getEditor()).getTextField().setColumns(5);
+
         detailPanel.add(limitLabel, "newline");
-        detailPanel.add(limitField, "h 36!, growx, span 2");
+        detailPanel.add(limitSpinner, "h 36!, growx, span 2");
 
         formPanel.add(detailPanel, "growx");
-        leftPanel.add(formPanel, "grow, push");
+        leftPanel.add(formPanel, "grow, pushy");
         
         // Pulsanti
-        buttons = new JXPanel(new MigLayout("center", "[]20[]"));
+        buttons = new JXPanel();
+        buttons.setLayout(new MigLayout("fillx, insets 0", "[grow][grow]", "[]"));
         buttons.setBackground(BACKGROUND_COLOR);
+        buttons.setMinimumSize(new Dimension(260, 45));
 
         confirmBtn = new JXButton("Crea Corso");
         confirmBtn.setBackground(BUTTON_COLOR);
         confirmBtn.setForeground(Color.WHITE);
+        confirmBtn.setPreferredSize(new Dimension(120, 35));
 
         goBackBtn = new JXButton("Annulla");
+        goBackBtn.setPreferredSize(new Dimension(120, 35));
 
-        buttons.add(confirmBtn, "w 120!, h 35!");
-        buttons.add(goBackBtn, "w 120!, h 35!");
-        
-        leftPanel.add(Box.createVerticalGlue(), "growy");
+        buttons.add(confirmBtn, "growx, h 35!");
+        buttons.add(goBackBtn, "growx, h 35!");
+
         leftPanel.add(buttons, "align center");
 
         mainPanel.add(leftPanel, "cell 0 0, grow, push");
@@ -280,7 +299,6 @@ public class CreateCourseDialog extends JDialog
 
     private void initListeners()
     {
-        // Listener come classi interne anonime
 
         aggiungiSessioniMouseListener = new MouseAdapter()
         {
@@ -334,13 +352,16 @@ public class CreateCourseDialog extends JDialog
             public void itemStateChanged(ItemEvent e)
             {
                 if(e.getStateChange() == ItemEvent.SELECTED)
-                    mostraLimitePartecipanti(true);
+                    togglePartecipantiLimit(true);
                 else if(e.getStateChange() == ItemEvent.DESELECTED)
-                    gestisciDeselezionePratico();
+                    onPraticoDeselected();
 
             }
         };
         praticoCheck.addItemListener(praticoCheckListener);
+        
+        
+
     } 
 
     private void removeDialogListeners(JXButton addBtn, JXButton cancelBtn)
@@ -391,8 +412,7 @@ public class CreateCourseDialog extends JDialog
         	praticoCheckListener = null; 
         }
             
-        addSessionsListener = null;
-        cancelAddSessionsListener = null;
+       removeDialogListeners(addBtn, cancelBtn);
 
         // Rimuovi i listener dei pannelli sessione
         for (CreateSessionPanel card : sessionCards)
@@ -404,9 +424,150 @@ public class CreateCourseDialog extends JDialog
     {
         disposeListeners();
         super.dispose();
+    } 
+
+    private void refreshSessionLayout()
+    {
+        updateSessionTotal();
+        updateSessionLayout();
+        sessionsContainer.revalidate();
+        sessionsContainer.repaint();
+    }
+
+    private void updateSessionTotal()
+    {
+        numeroSessioniSpinner.setValue(sessionCards.size());
     }
     
-    private void gestisciDeselezionePratico()
+    private void updateSessionLayout()
+    {
+        int count = sessionCards.size();
+        String columns;
+
+        if(count == 1)
+            columns = "[grow, center]";
+        else if(count == 2)
+            columns = "[grow, right][grow, left]";
+        else
+            columns = "[grow, fill][grow, fill][grow, fill]";
+
+        sessionsContainer.setLayout(new MigLayout("wrap " + Math.min(count, 3) + ", gap 10 10, insets 5", columns));
+    }
+    
+    private void addNewSessionCard(boolean pratica)
+    {
+        CreateSessionPanel card = new CreateSessionPanel(sessionCards.size() + 1, pratica, this);
+        sessionCards.add(card);
+        sessionsContainer.add(card, "growx, growy, w 33%");
+
+        refreshSessionLayout();
+    }
+
+    public void removeSessionCard(CreateSessionPanel panel)
+    {  
+        sessionCards.remove(panel);
+        sessionsContainer.remove(panel);
+        panel.disposeListeners();
+        
+        for(int i = 0; i < sessionCards.size(); i++)
+            sessionCards.get(i).aggiornaNumero(i + 1);
+        
+        refreshSessionLayout();
+    }
+    
+    private void showAddSessionsDialog()
+    {
+        addSessionDialog = new JDialog(this, "Seleziona numero sessioni", true);
+        addSessionDialog.setLayout(new MigLayout("wrap 2", "[right][grow,fill]"));
+
+        // Rimuovi vecchi listener se ci sono
+        removeDialogListeners(addBtn, cancelBtn);
+
+        addSessionDialog.addWindowListener(new WindowAdapter() 
+        {
+            @Override
+            public void windowClosed(WindowEvent e) 
+            {
+                removeDialogListeners(addBtn, cancelBtn);
+            }
+
+            @Override
+            public void windowClosing(WindowEvent e) 
+            {
+                removeDialogListeners(addBtn, cancelBtn);
+            }
+        });
+
+        // Spinner per sessioni online
+        onlineSpinner = new JSpinner(new SpinnerNumberModel(1, 0, 20, 1));
+        addSessionDialog.add(new JXLabel("Sessioni Online:"));
+        addSessionDialog.add(onlineSpinner);
+
+        // Spinner per pratiche: inizializza sempre, ma lo aggiungi solo se pratico è selezionato
+        praticheSpinner = new JSpinner(new SpinnerNumberModel(1, 0, 20, 1));
+        if (praticoCheck.isSelected())
+        {
+            addSessionDialog.add(new JXLabel("Sessioni Pratiche:"));
+            addSessionDialog.add(praticheSpinner);
+        }
+
+        // Pulsanti
+        addBtn = new JXButton("Aggiungi");
+        cancelBtn = new JXButton("Annulla");
+        addSessionDialog.add(addBtn, "span 1, split 2, right");
+        addSessionDialog.add(cancelBtn);
+
+        // LISTENER: Aggiungi sessioni
+        addSessionsListener = new ActionListener()
+        {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                int onlineCount = (Integer) onlineSpinner.getValue();
+                int praticheCount = (praticoCheck.isSelected() && praticheSpinner != null) ? (Integer) praticheSpinner.getValue() : 0;
+
+                for (int i = 0; i < onlineCount; i++)
+                    addNewSessionCard(false);
+
+                for (int i = 0; i < praticheCount; i++)
+                    addNewSessionCard(true);
+
+                removeDialogListeners(addBtn, cancelBtn);
+                addSessionDialog.dispose();
+            }
+        };
+        addBtn.addActionListener(addSessionsListener);
+
+        // LISTENER: Annulla
+        cancelAddSessionsListener = new ActionListener()
+        {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                removeDialogListeners(addBtn, cancelBtn);
+                addSessionDialog.dispose();
+            }
+        };
+        cancelBtn.addActionListener(cancelAddSessionsListener);
+
+        addSessionDialog.pack();
+        addSessionDialog.setLocationRelativeTo(this);
+        addSessionDialog.setVisible(true);
+    }
+
+    private void rimuoviSessioniPratiche()
+    {
+        List<CreateSessionPanel> toRemove = new ArrayList<>();
+        
+        for(CreateSessionPanel card : sessionCards)
+            if("Pratica".equals(card.getTipo()))
+                toRemove.add(card);
+        
+        for(CreateSessionPanel card : toRemove)
+            removeSessionCard(card);
+    }   
+    
+    private void onPraticoDeselected()
     {
         boolean hasPratiche = false;
 
@@ -431,147 +592,81 @@ public class CreateCourseDialog extends JDialog
             {
                 rimuoviSessioniPratiche();
                 praticoCheck.setSelected(false);
-                mostraLimitePartecipanti(false);
+                togglePartecipantiLimit(false);
             }
-           
         }
         else
-            mostraLimitePartecipanti(false);
+            togglePartecipantiLimit(false);
     }
-
-    private void rimuoviSessioniPratiche()
-    {
-        List<CreateSessionPanel> toRemove = new ArrayList<>();
-        
-        for(CreateSessionPanel card : sessionCards)
-            if("Pratica".equals(card.getTipo()))
-                toRemove.add(card);
-        
-        for(CreateSessionPanel card : toRemove)
-            removeSessionCard(card);
-    }   
     
-    private void mostraLimitePartecipanti(boolean visibile)
+    private void togglePartecipantiLimit(boolean visibile)
     {
         limitLabel.setVisible(visibile);
-        limitField.setVisible(visibile);
+        limitSpinner.setVisible(visibile);
+        detailPanel.revalidate();
+        detailPanel.repaint();
     }
-
-    private void showAddSessionsDialog()
+    
+    private void removeSpinnerButtons(JSpinner spinner)
     {
-        addSessionDialog = new JDialog(this, "Seleziona numero sessioni", true);
-        addSessionDialog.setLayout(new MigLayout("wrap 2", "[right][grow,fill]"));
-
-        onlineSpinner = new JSpinner(new SpinnerNumberModel(1, 0, 20, 1));
-        addSessionDialog.add(new JXLabel("Sessioni Online:"));
-        addSessionDialog.add(onlineSpinner);
-
-        if(praticoCheck.isSelected())
+        JComponent editor = spinner.getEditor();
+        if(editor instanceof JSpinner.DefaultEditor)
         {
-            praticheSpinner = new JSpinner(new SpinnerNumberModel(1, 0, 20, 1));
-            addSessionDialog.add(new JXLabel("Sessioni Pratiche:"));
-            addSessionDialog.add(praticheSpinner);
+            Component[] components = spinner.getComponents();
+            
+            for (Component comp : components)
+                if(comp instanceof JButton)
+                    spinner.remove(comp); // rimuove i bottoni freccia ↑↓
+            
+            spinner.revalidate();
+            spinner.repaint();
         }
-
-        addBtn = new JXButton("Aggiungi");
-        cancelBtn = new JXButton("Annulla");
-
-        addSessionDialog.add(addBtn, "span 1, split 2, right");
-        addSessionDialog.add(cancelBtn);
-
-        addSessionsListener = new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                int onlineCount = (Integer) onlineSpinner.getValue();
-                int praticheCount = praticheSpinner != null ? (Integer) praticheSpinner.getValue() : 0;
-
-                for (int i = 0; i < onlineCount; i++)
-                    addNewSessionCard(false);
-
-                for (int i = 0; i < praticheCount; i++)
-                    addNewSessionCard(true);
-
-                removeDialogListeners(addBtn, cancelBtn);
-                addSessionDialog.dispose();
-            }
-        };
-        addBtn.addActionListener(addSessionsListener);
-
-        cancelAddSessionsListener = new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                removeDialogListeners(addBtn, cancelBtn);
-                addSessionDialog.dispose();
-            }
-        };
-        cancelBtn.addActionListener(cancelAddSessionsListener);
-
-        addSessionDialog.pack();
-        addSessionDialog.setLocationRelativeTo(this);
-        addSessionDialog.setVisible(true);
     }
-
-    private void addNewSessionCard(boolean pratica)
+    
+    public void applyOrangeTheme(DatePickerSettings settings)
     {
-        CreateSessionPanel card = new CreateSessionPanel(sessionCards.size() + 1, pratica, this);
-        sessionCards.add(card);
-        sessionsContainer.add(card, "growx, growy, w 33%");
+        Color orange = new Color(225, 126, 47);
+        Color orangeDark = new Color(140, 85, 20);
+        Color background = new Color(255, 255, 255); // bianco puro
+        Color lightBackground = new Color(255, 250, 245); // arancio molto chiaro
+        Color grayText = new Color(60, 60, 60);
+        Color disabledText = new Color(160, 160, 160);
 
-        updateSessionLayout();
-        sessionsContainer.revalidate();
-        sessionsContainer.repaint();
+        // Sfondo generale calendario chiaro e pulito (bianco/arancio molto chiaro)
+        settings.setColor(DateArea.BackgroundOverallCalendarPanel, lightBackground);
+
+        // Date normali: sfondo bianco e testo grigio scuro
+        settings.setColor(DateArea.CalendarBackgroundNormalDates, background);
+        settings.setColor(DateArea.CalendarTextNormalDates, grayText);
+
+        // Data selezionata: arancio pieno con bordo definito (più "flat")
+        settings.setColor(DateArea.CalendarBackgroundSelectedDate, orange);
+        settings.setColor(DateArea.CalendarBorderSelectedDate, orangeDark);
+        settings.setColor(DateArea.DatePickerTextValidDate, grayText); // testo campo input visibile
+
+        // Evidenziazione oggi: bordi sottili arancio scuro, sfondo bianco (no riempimento)
+        settings.setColor(DateArea.BackgroundTodayLabel, background);
+        settings.setColor(DateArea.TextTodayLabel, orangeDark);
+
+        // Date non selezionabili (vetoed): grigio molto chiaro e testo grigio smorzato
+        settings.setColor(DateArea.CalendarBackgroundVetoedDates, new Color(245, 245, 245));
+        settings.setColor(DateArea.DatePickerTextVetoedDate, disabledText);
+
+        // Sfondo e testo input disabilitato (leggibile ma smorzato)
+        settings.setColor(DateArea.TextFieldBackgroundDisabled, new Color(245, 245, 245));
+        settings.setColor(DateArea.DatePickerTextDisabled, disabledText);
+
+        // Pulsanti di navigazione mese/anno: arancio pieno con testo bianco, senza bordi spostanti
+        settings.setColor(DateArea.BackgroundMonthAndYearNavigationButtons, orange);
+        settings.setColor(DateArea.TextMonthAndYearNavigationButtons, Color.WHITE);
+
+        // Giorni settimana e numeri settimana in grigio arancio scuro
+        settings.setColor(DateArea.CalendarTextWeekdays, orangeDark);
+        settings.setColor(DateArea.CalendarTextWeekNumbers, orangeDark);
+
+        // Rimuove la barra azzurra di sfondo del mese (per sicurezza)
+        settings.setColor(DateArea.BackgroundMonthAndYearMenuLabels, background);
     }
 
-    public void removeSessionCard(CreateSessionPanel panel)
-    {
-        panel.disposeListeners();
-        sessionCards.remove(panel);
-        sessionsContainer.remove(panel);
 
-        for(int i = 0; i < sessionCards.size(); i++)
-            sessionCards.get(i).aggiornaNumero(i + 1);
-        
-        updateSessionLayout();
-        sessionsContainer.revalidate();
-        sessionsContainer.repaint();
-    }
-
-    private void updateSessionLayout()
-    {
-        int count = sessionCards.size();
-        String columns;
-
-        if(count == 1)
-            columns = "[grow, center]";
-        else if(count == 2)
-            columns = "[grow, right][grow, left]";
-        else
-            columns = "[grow, fill][grow, fill][grow, fill]";
-
-        sessionsContainer.setLayout(new MigLayout("wrap " + Math.min(count, 3) + ", gap 10 10", columns));
-    }
-
-    private NumberFormatter euroFormatter()
-    {
-        NumberFormatter formatter = new NumberFormatter(NumberFormat.getNumberInstance(Locale.ITALY));
-        formatter.setValueClass(Double.class);
-        formatter.setMinimum(0.0);
-        formatter.setAllowsInvalid(false);
-        return formatter;
-    }
-
-    private NumberFormatter integerFormatter()
-    {
-        NumberFormat format = NumberFormat.getIntegerInstance(Locale.ITALY);
-        format.setGroupingUsed(false);
-        NumberFormatter formatter = new NumberFormatter(format);
-        formatter.setValueClass(Integer.class);
-        formatter.setMinimum(1);
-        formatter.setAllowsInvalid(false);
-        return formatter;
-    }
 }

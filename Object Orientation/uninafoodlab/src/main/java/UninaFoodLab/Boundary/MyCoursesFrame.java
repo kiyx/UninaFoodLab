@@ -16,28 +16,6 @@ import com.formdev.flatlaf.FlatLightLaf;
 import UninaFoodLab.Controller.Controller;
 import net.miginfocom.swing.MigLayout;
 
-/**
- * {@code CoursesFrame} rappresenta la finestra principale della sezione "I miei corsi"
- * <p>
- * La finestra è costruita utilizzando Swing, con layout gestiti tramite MigLayout.
- * Presenta un'interfaccia utente con supporto per:
- * <ul>
- *   <li>Header con logo, barra di ricerca, filtro, hamburger menu e profilo utente</li>
- *   <li>Sidebar navigabile per le sezioni principali (Homepage, Corsi, Ricette, Report)</li>
- *   <li>Dropdown del profilo con opzioni di visualizzazione e logout</li>
- *   <li>Gestione eventi centralizzata per navigazione, ridimensionamento e usabilità</li>
- * </ul>
- * <p>
- * I componenti `ProfileDropdownPanel` e `SidebarPanel` sono aggiunti dinamicamente 
- * al `JLayeredPane` per essere visualizzati sopra il contenuto principale.
- * <p>
- * La classe gestisce correttamente eventi AWT globali, listener di interazione e
- * rimozione sicura degli stessi per evitare memory leak.
- *
- * @see SidebarPanel
- * @see ProfileDropdownPanel
- * @see Controller
- */
 
 public class MyCoursesFrame extends JXFrame 
 {
@@ -51,6 +29,7 @@ public class MyCoursesFrame extends JXFrame
     // Listeners
     
 
+    
     public static void main(String[] args) 
     {
         EventQueue.invokeLater(() -> {
@@ -58,7 +37,8 @@ public class MyCoursesFrame extends JXFrame
                 UIManager.setLookAndFeel(new FlatLightLaf());
                 new MyCoursesFrame().setVisible(true);
     
-            } catch (UnsupportedLookAndFeelException e) {
+            } 
+            catch (UnsupportedLookAndFeelException e) {
                 e.printStackTrace();
             }
         });
@@ -84,8 +64,6 @@ public class MyCoursesFrame extends JXFrame
         setVisible(true);
     }
    
- 
-
     private void initComponents()
     {
     	// Icona finestra
