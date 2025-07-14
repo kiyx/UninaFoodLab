@@ -667,9 +667,8 @@ public class Controller
 		catch (DAOException e)
 		{
 			LOGGER.log(Level.SEVERE, "Errore loadArgomenti da DB", e);
+			return new ArrayList<>();
 		}
-		
-		return null;
 	}
 	
 	public List<Ricetta> loadRicette()
@@ -677,15 +676,14 @@ public class Controller
 		try
 		{
 			return getRicettaDAO().getRicetteByIdChef(loggedUser.getId());
-		} 
+		}
 		catch (DAOException e)
 		{
 			LOGGER.log(Level.SEVERE, "Errore loadRicette da DB", e);
+			return new ArrayList<>();
 		}
-		
-		return null;
 	}
-	
+
 	
 	/**
      *  -------------------------

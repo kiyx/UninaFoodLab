@@ -20,24 +20,28 @@ import net.miginfocom.swing.MigLayout;
 import java.awt.*;
 import java.awt.event.*;
 import java.time.*;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
- * {@code CreateSessionPanel} rappresenta un pannello grafico Swing per la creazione di una singola
- * sessione (pratica o online) all'interno del dialog {@link CreateCourseDialog}.
- *
- * <p>Il pannello consente all'utente di configurare i dettagli relativi a una sessione specifica:
+ * La classe {@code CreateSessionPanel} rappresenta un pannello Swing responsabile della
+ * configurazione, validazione e gestione interattiva di una singola sessione, sia pratica
+ * che online, all'interno del dialogo {@link CreateCourseDialog}.
+ * 
+ * <p>Ogni pannello sessione include:</p>
  * <ul>
- *   <li>Tipo di sessione (pratica o online)</li>
- *   <li>Data e orario</li>
- *   <li>Durata (in ore e minuti)</li>
- *   <li>Indirizzo e ricetta (solo per sessioni pratiche)</li>
- *   <li>Link della riunione (solo per sessioni online)</li>
+ *   <li>Selezione della data e orario</li>
+ *   <li>Configurazione della durata tramite ore/minuti</li>
+ *   <li>Input dell'indirizzo (per sessioni pratiche)</li>
+ *   <li>Selezione multipla di ricette (per sessioni pratiche)</li>
+ *   <li>Link riunione (per sessioni online)</li>
+ *   <li>Validazione e focus automatico sui campi non validi</li>
+ *   <li>Rimozione dinamica del pannello dal dialogo genitore</li>
+ *   <li>Init e dispose sicura dei listener</li>
  * </ul>
- *
- * <p>Il pannello fornisce validazione in tempo reale sui campi obbligatori, gestione dinamica dei listener
- * e supporto per la rimozione della sessione tramite callback al pannello genitore.
- *
+ * 
  */
 
 public class CreateSessionPanel extends JXPanel
@@ -50,29 +54,36 @@ public class CreateSessionPanel extends JXPanel
 	private CreateCourseDialog parent;
 
 	private JXPanel durataPanel;
-	private JXLabel numeroLabel;
+	private JXLabel numeroLabel, clearButton;
 	private DatePicker datePicker;
 	private TimePicker timePicker;
 	private JSpinner oreSpinner, minutiSpinner;
 	private JXButton removeBtn;
 	private JXTextField addressField, linkField;
-	
+	private boolean focusSet = false;
+
 	private ActionListener removeBtnActionListener;
-	private DocumentListener addressListener, linkListener;
+	private DocumentListener addressListener, linkListener, ricercaRicetteFieldListener;
 	private ChangeListener durataChangeListener;
 	private TimeChangeListener timeListener;
 	private DateChangeListener dateListener;
-	private ItemListener ricettaListener;
-
-	private JComboBox<Ricetta> ricettaCombo;
+	private FocusListener addressFocusListener, linkFocusListener, dateFocusListener, timeFocusListener,
+						  oreFocusListener, minutiFocusListener;
+	private MouseAdapter clearButtonListener;
 	
+	private JPanel ricettePanel;
+	private JScrollPane scrollRicette;
+	private JXTextField ricercaRicetteField;
+	private List<Ricetta> ricette; // memorizziamo la lista delle ricette originale
+	private List<JCheckBox> ricettaChecks = new ArrayList<>();
+	private Set<Integer> ricetteSelezionate = new HashSet<>();
 
 	 /**
-     * Costruisce un nuovo pannello per la creazione di una sessione.
-     *
-     * @param numero Numero progressivo della sessione (per l'etichetta)
-     * @param pratica True se la sessione è pratica, false se online
-     * @param parent Il dialog genitore a cui notificare la rimozione
+     * Costruttore principale per creare un pannello di sessione.
+     * 
+     * @param numero Numero identificativo progressivo della sessione
+     * @param pratica {@code true} se la sessione è pratica, {@code false} se online
+     * @param parent Riferimento al dialogo contenitore {@link CreateCourseDialog}
      */
 	public CreateSessionPanel(int numero, boolean pratica, CreateCourseDialog parent)
 	{
@@ -84,72 +95,82 @@ public class CreateSessionPanel extends JXPanel
 		initListeners();
 	}
 
-	
 	/**
-     * Restituisce il tipo della sessione come stringa.
-     *
-     */
+	 * Restituisce il tipo della sessione come stringa.
+	 *
+	 * @return "Pratica" se la sessione è pratica, "Online" altrimenti
+	 */
 	public String getTipo()
 	{
 		return pratica ? "Pratica" : "Online";
 	}
 
-	 /**
-     * Restituisce la data selezionata per la sessione.
-     *
-     */
+	/**
+	 * Restituisce la data selezionata per la sessione.
+	 *
+	 * @return Oggetto {@link LocalDate} rappresentante la data scelta, oppure {@code null} se non selezionata
+	 */
 	public LocalDate getData()
 	{
 		return datePicker.getDate();
 	}
 
-	 /**
-     * Restituisce l'orario selezionato per la sessione.
-     *
-     */
+	/**
+	 * Restituisce l'orario selezionato per la sessione.
+	 *
+	 * @return Oggetto {@link LocalTime} rappresentante l'orario scelto, oppure {@code null} se non selezionato
+	 */
 	public LocalTime getOrario()
 	{
 		return timePicker.getTime();
 	}
 
-	 /**
-     * Restituisce la durata della sessione in minuti.
-     *
-     */
+	/**
+	 * Restituisce la durata totale della sessione in minuti.
+	 *
+	 * @return Valore intero pari a (ore * 60 + minuti)
+	 */
 	public int getDurata()
 	{
-		int ore = (int) oreSpinner.getValue();
-		int minuti = (int) minutiSpinner.getValue();
-		return ore * 60 + minuti;
+	    try 
+	    {
+	        int ore = (int) oreSpinner.getValue();
+	        int minuti = (int) minutiSpinner.getValue();
+	        return Math.max(0, ore * 60 + minuti);
+	    } 
+	    catch (Exception e) 
+	    {
+	        return 0;
+	    }
 	}
-	
-	/**
-	 * Restituisce l'ID della ricetta selezionata (solo per sessioni pratiche).
-	 *
-	 * @return L'ID della ricetta oppure -1 se nulla è selezionato o se la sessione è online
-	 */
-	public int getIdRicetta()
-	{
-		Ricetta selected = (Ricetta) ricettaCombo.getSelectedItem();
-		if(selected != null)
-		    return selected.getId();
 
-		return -1;
-	}
-	
 	/**
-     * Restituisce il link riunione (solo per sessioni online).
-     *
-     */
+	 * Restituisce la lista degli ID delle ricette selezionate (solo per sessioni pratiche).
+	 *
+	 * @return Lista di ID numerici delle ricette selezionate
+	 */
+	public List<Integer> getIdRicetteSelezionate()
+	{
+	    if(!pratica)
+	        throw new IllegalStateException("La sessione non è pratica: nessuna ricetta selezionabile.");
+	    return new ArrayList<>(ricetteSelezionate);
+	}
+
+	/**
+	 * Restituisce il link della riunione (solo per sessioni online).
+	 *
+	 * @return Stringa contenente il link della riunione, oppure {@code null} per sessioni pratiche
+	 */
 	public String getLinkRiunione()
 	{
 		return !pratica ? linkField.getText().trim() : null;
 	}
 
-	 /**
-     * Restituisce l'indirizzo della sessione (solo se pratica).
-     *
-     */
+	/**
+	 * Restituisce l'indirizzo della sessione (solo per sessioni pratiche).
+	 *
+	 * @return Stringa contenente l'indirizzo, oppure {@code null} per sessioni online
+	 */
 	public String getIndirizzo()
 	{
 		return pratica && addressField != null ? addressField.getText().trim() : null;
@@ -160,6 +181,7 @@ public class CreateSessionPanel extends JXPanel
      */
 	private void initComponents()
 	{
+		// Inizializza il layout e lo stile del pannello
 		setLayout(new MigLayout("wrap 2, insets 15, gap 10 15", "[right][grow,fill]"));
 		setBackground(Color.WHITE);
 		setBorder(BorderFactory.createCompoundBorder(
@@ -171,6 +193,7 @@ public class CreateSessionPanel extends JXPanel
 			));
 			setOpaque(true);
 
+		// Label con numero sessione
 		numeroLabel = createLabel("Sessione #" + numero);
 		numeroLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
 		add(numeroLabel, "span 2, center");
@@ -191,7 +214,7 @@ public class CreateSessionPanel extends JXPanel
 		timePicker.setFont(fieldFont);
 		add(timePicker, "h 30!");
 
-		// Spinner per ore
+		// Spinner per ore e minuti della durata con formattazione centrata
 		oreSpinner = new JSpinner(new SpinnerNumberModel(1, 0, 23, 1));
 		oreSpinner.setFont(fieldFont);
 		((JSpinner.DefaultEditor) oreSpinner.getEditor()).getTextField().setHorizontalAlignment(SwingConstants.CENTER);
@@ -203,7 +226,7 @@ public class CreateSessionPanel extends JXPanel
 		minutiSpinner.setFont(fieldFont);
 		minutiSpinner.setToolTipText("Minuti di durata");
 
-		// Pannello combinato
+		// Costruzione del pannello durata con etichette "h" e "m"
 		durataPanel = new JXPanel(new MigLayout("insets 0", "[]5[]5[]", "[]"));
 		durataPanel.setBackground(Color.WHITE);
 		durataPanel.add(oreSpinner, "w 50!");
@@ -216,18 +239,73 @@ public class CreateSessionPanel extends JXPanel
 
 		if(pratica)
 		{
-			add(createLabel("Indirizzo:"));
-			addressField = new JXTextField();
-			addressField.setFont(fieldFont);
-			addressField.putClientProperty("JTextField.placeholderText", "Inserisci indirizzo...");
-			add(addressField, "h 30!");
+		    add(createLabel("Indirizzo:"));
+		    addressField = new JXTextField();
+		    addressField.setFont(fieldFont);
+		    addressField.putClientProperty("JTextField.placeholderText", "Inserisci indirizzo...");
+		    add(addressField, "h 30!");
 
-			add(createLabel("Ricetta:"));
-			List<Ricetta> ricette = Controller.getController().loadRicette();
-			ricettaCombo = new JComboBox<>(ricette.toArray(new Ricetta[0]));
-			ricettaCombo.setFont(fieldFont);
-			ricettaCombo.setEditable(false);
-			add(ricettaCombo, "h 30!");
+		    // Campo ricerca sopra la lista ricette
+		    ricercaRicetteField = new JXTextField();
+		    ricercaRicetteField.setFont(fieldFont);
+		    ricercaRicetteField.putClientProperty("JTextField.placeholderText", "Cerca ricetta...");
+		    ricercaRicetteField.setLayout(new BorderLayout());
+
+		    clearButton = new JXLabel(FontIcon.of(MaterialDesign.MDI_CLOSE_CIRCLE_OUTLINE, 16, new Color(150, 150, 150)));
+		    clearButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		    clearButton.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 4));
+		    clearButton.setVisible(false); // appare solo quando c'è testo
+
+		    ricercaRicetteField.add(clearButton, BorderLayout.EAST);
+		    add(ricercaRicetteField, "span, growx, gaptop 10, gapbottom 5");
+
+		    ricettePanel = new JXPanel(new MigLayout("wrap 1, insets 0, gap 4", "[grow,fill]"));
+		    ricettePanel.setAutoscrolls(true);
+		    ricettePanel.setOpaque(false);
+		    ricettePanel.setBackground(Color.WHITE);
+
+		    // Inizializzazione e popolamento lista ricette (solo se pratica)
+		    ricette = Controller.getController().loadRicette();
+
+		    for(Ricetta r : ricette)
+		    {
+		        JCheckBox cb = new JCheckBox(r.getNome());
+		        
+		        // Impostazioni base checkbox (font, focus, cursor)
+		        cb.setFont(fieldFont);
+		        cb.setFocusPainted(false);
+		        cb.setOpaque(false);
+		        cb.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		        
+		        // Sincronizzazione con set ricette selezionate
+		        cb.setSelected(ricetteSelezionate.contains(r.getId()));
+
+		        // Listener per aggiornare set quando selezionato/deselezionato
+		        cb.addItemListener(new ItemListener() 
+							       {
+							           @Override
+							           public void itemStateChanged(ItemEvent e) 
+							           {
+							               if(cb.isSelected())
+							                   ricetteSelezionate.add(r.getId());
+							               else
+							                   ricetteSelezionate.remove(r.getId());
+							           }
+							        });
+
+		        ricettaChecks.add(cb);
+		        ricettePanel.add(cb, "growx");
+		    }
+
+		    scrollRicette = new JScrollPane(ricettePanel);
+		    scrollRicette.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		    scrollRicette.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		    scrollRicette.setBorder(BorderFactory.createEmptyBorder());
+		    scrollRicette.getViewport().setBackground(Color.WHITE);
+		    scrollRicette.setBackground(Color.WHITE);
+
+		    add(new JXLabel("Ricette da svolgere:"), "span, growx");
+		    add(scrollRicette, "span, growx, growy, hmin 100, hmax 160");
 		}
 		else
 		{
@@ -254,115 +332,262 @@ public class CreateSessionPanel extends JXPanel
 	}
 
 	 /**
-     * Inizializza i listener per la validazione e gli eventi utente.
+     * Inizializza e registra tutti i listener necessari per la validazione in tempo reale,
+     * l'interazione utente (clic, input, focus) e la gestione dinamica del pannello. 
+     * Ogni listener è associato al rispettivo campo e viene rimosso con {@link #disposeListeners()}.
      */
 	private void initListeners()
 	{
+		/**
+		 * Listener associato al pulsante di rimozione della sessione.
+		 * <p>Invoca {@link CreateCourseDialog#removeSessionCard(CreateSessionPanel)} per eliminare dinamicamente il pannello dal dialogo genitore.
+		 */
 	    removeBtnActionListener = new ActionListener()
-	    {
-	        @Override
-	        public void actionPerformed(ActionEvent e)
-	        {
-	            parent.removeSessionCard(CreateSessionPanel.this);
-	        }
-	    };
+								  {
+								      @Override
+								      public void actionPerformed(ActionEvent e)
+								      {
+								          parent.removeSessionCard(CreateSessionPanel.this);
+								      }
+								  };
 	    removeBtn.addActionListener(removeBtnActionListener);
-	    
+
 	    if(pratica && addressField != null)
 	    {
+	    	/**
+	    	 * Listener che valida il campo indirizzo in tempo reale.
+	    	 * <p>Attivato su ogni modifica al contenuto del campo {@code addressField}.
+	    	 */
 	        addressListener = new DocumentListener()
-	        {
-	            @Override
-	            public void insertUpdate(DocumentEvent e) { checkAddress(); }
-	            @Override
-	            public void removeUpdate(DocumentEvent e) { checkAddress(); }
-	            @Override
-	            public void changedUpdate(DocumentEvent e) { checkAddress(); }
-
-	            private void checkAddress()
-	            {
-	                showError(addressField, addressField.getText().trim().isEmpty(), "Indirizzo obbligatorio");
-	            }
-	        };
+					          {
+					              @Override
+					              public void insertUpdate(DocumentEvent e) { checkAddress(); }
+					              @Override
+					              public void removeUpdate(DocumentEvent e) { checkAddress(); }
+					              @Override
+					              public void changedUpdate(DocumentEvent e) { checkAddress(); }
+				
+					              private void checkAddress()
+					              {
+					            	  showError(addressField, addressField.getText().trim().isEmpty(), "Indirizzo obbligatorio");
+					              }
+					          };
 	        addressField.getDocument().addDocumentListener(addressListener);
+
+	        /**
+	         * Listener che attiva la validazione al termine del focus sul campo indirizzo.
+	         */
+	        addressFocusListener = new FocusAdapter()
+							       {
+							           @Override
+							           public void focusLost(FocusEvent e)
+							           {
+							        	   showError(addressField, addressField.getText().trim().isEmpty(), "Indirizzo obbligatorio");
+							           }
+							       };
+	        addressField.addFocusListener(addressFocusListener);
 	    }
 
 	    if(!pratica && linkField != null)
 	    {
+	    	/**
+	    	 * Listener che valida il campo link della riunione in tempo reale.
+	    	 * <p>Attivato su ogni modifica al contenuto del campo {@code linkField}.
+	    	 */
 	        linkListener = new DocumentListener()
-	        {
-	            @Override
-	            public void insertUpdate(DocumentEvent e) { checkLink(); }
-	            @Override
-	            public void removeUpdate(DocumentEvent e) { checkLink(); }
-	            @Override
-	            public void changedUpdate(DocumentEvent e) { checkLink(); }
-
-	            private void checkLink()
-	            {
-	                showError(linkField, linkField.getText().trim().isEmpty(), "Link riunione obbligatorio");
-	            }
-	        };
+					       {
+					           @Override
+					           public void insertUpdate(DocumentEvent e) { checkLink(); }
+					           @Override
+					           public void removeUpdate(DocumentEvent e) { checkLink(); }
+					           @Override
+					           public void changedUpdate(DocumentEvent e) { checkLink(); }
+				
+					           private void checkLink()
+					           {
+					               showError(linkField, linkField.getText().trim().isEmpty(), "Link riunione obbligatorio");
+					           }
+					        };
 	        linkField.getDocument().addDocumentListener(linkListener);
+
+	        /**
+	         * Listener che attiva la validazione al termine del focus sul campo link riunione.
+	         */
+	        linkFocusListener = new FocusAdapter()
+						        {
+						            @Override
+						            public void focusLost(FocusEvent e)
+						            {
+						                showError(linkField, linkField.getText().trim().isEmpty(), "Link riunione obbligatorio");
+						            }
+						        };
+	        linkField.addFocusListener(linkFocusListener);
 	    }
 
+	    /**
+	     * Listener che valida la durata della sessione ogni volta che gli spinner cambiano.
+	     * <p>Controlla che ore e minuti sommati non siano zero.<p>
+	     */
 	    durataChangeListener = new ChangeListener()
-	    {
-	        @Override
-	        public void stateChanged(ChangeEvent e)
-	        {
-	            int durata = getDurata();
-	            boolean errore = durata <= 0;
-	            showError(oreSpinner, errore, errore ? "Durata non valida" : null);
-	            showError(minutiSpinner, errore, errore ? "Durata non valida" : null);
-	        }
-	    };
+							   {
+							       @Override
+							       public void stateChanged(ChangeEvent e)
+							       {
+							           showError(oreSpinner, getDurata() <= 0, "Durata non valida");
+							           showError(minutiSpinner, getDurata() <= 0, "Durata non valida");
+							       }
+							    };
 	    oreSpinner.addChangeListener(durataChangeListener);
 	    minutiSpinner.addChangeListener(durataChangeListener);
 
+	    /**
+	     * Listener che attiva la validazione al termine del focus sul campo ore (durata).
+	     */
+	    oreFocusListener = new FocusAdapter()
+						   {
+						       @Override
+						       public void focusLost(FocusEvent e)
+						       {
+						    	   showError(oreSpinner, getDurata() <= 0, "Durata non valida");
+						       }
+						   };
+	   /**
+	    * Listener che attiva la validazione al termine del focus sul campo minuti (durata).
+	    */				   
+	    minutiFocusListener = new FocusAdapter()
+							  {
+							      @Override
+							      public void focusLost(FocusEvent e)
+							      {
+							          showError(minutiSpinner, getDurata() <= 0, "Durata non valida");
+							      }
+							  };
+	    oreSpinner.addFocusListener(oreFocusListener);
+	    minutiSpinner.addFocusListener(minutiFocusListener);
+
+	    /**
+	     * Listener per la validazione della data selezionata.
+	     * <p>Attivato ogni volta che l'utente seleziona o modifica la data tramite {@code datePicker}.
+	     */
 	    dateListener = new DateChangeListener()
-	    {
-	        @Override
-	        public void dateChanged(DateChangeEvent event)
-	        {
-	            showError(datePicker, datePicker.getDate() == null, "Data obbligatoria");
-	        }
-	    };
+					   {
+					       @Override
+					       public void dateChanged(DateChangeEvent event)
+					       {
+					          showError(datePicker, datePicker.getDate() == null, "Data obbligatoria");
+					       }
+					   };
 	    datePicker.addDateChangeListener(dateListener);
 
+
+		/**
+		 * Listener che attiva la validazione al termine del focus sul campo data.
+		 */
+	    dateFocusListener = new FocusAdapter()
+						    {
+						        @Override
+						        public void focusLost(FocusEvent e)
+						        {
+						        	showError(datePicker, datePicker.getDate() == null, "Data obbligatoria");
+						        }
+						    };
+	    // Nota: getComponent(0) è il campo testo
+	    datePicker.getComponent(0).addFocusListener(dateFocusListener);
+
+	    /**
+	     * Listener per la validazione dell’orario selezionato.
+	     * <p>Attivato ogni volta che l’utente modifica l’orario nel {@code timePicker}.
+	     */
 	    timeListener = new TimeChangeListener()
-	    {
-	        @Override
-	        public void timeChanged(TimeChangeEvent event)
-	        {
-	            showError(timePicker, timePicker.getTime() == null, "Orario obbligatorio");
-	        }
-	    };
+					   {
+					       @Override
+					       public void timeChanged(TimeChangeEvent event)
+					       {
+					           showError(timePicker, timePicker.getTime() == null, "Orario obbligatorio");
+					       }
+					   };
 	    timePicker.addTimeChangeListener(timeListener);
 
-	    if(pratica && ricettaCombo != null)
+	    /**
+	     * Listener che attiva la validazione al termine del focus sul campo orario.
+	     */
+	    timeFocusListener = new FocusAdapter()
+						    {
+						        @Override
+						        public void focusLost(FocusEvent e)
+						        {
+						        	showError(timePicker, timePicker.getTime() == null, "Orario obbligatorio");
+						        }
+						    };
+	    timePicker.getComponent(0).addFocusListener(timeFocusListener);
+
+	    /**
+	     * Listener su label x che svuota il campo di ricerca delle ricette
+	     */
+	    if(pratica && clearButton != null)
 	    {
-	        ricettaListener = new ItemListener()
-	        {
-	            @Override
-	            public void itemStateChanged(ItemEvent e)
-	            {
-	                if(e.getStateChange() == ItemEvent.SELECTED)
-	                {
-	                    Ricetta selected = (Ricetta) ricettaCombo.getSelectedItem();
-	                    boolean errore = (selected == null || selected.getId() <= 0);
-	                    showError(ricettaCombo, errore, "Ricetta obbligatoria");
-	                }
-	            }
-	        };
-	        ricettaCombo.addItemListener(ricettaListener);
+	    	clearButtonListener = new MouseAdapter()
+								  {
+								      @Override
+								      public void mouseClicked(MouseEvent e)
+								      {
+								          ricercaRicetteField.setText("");
+								          clearButton.setVisible(false);
+								      }
+								  };
+	        clearButton.addMouseListener(clearButtonListener);
+	    }
+	    
+	    /**    
+	     * <p><b>Filtro Ricette:</b> include un {@link DocumentListener} dinamico sul campo {@code ricercaRicetteField},
+	     * che filtra in tempo reale la lista di ricette visualizzate nel pannello. Il listener:</p>
+	     * <ul>
+	     *   <li>Recupera il testo di filtro digitato</li>
+	     *   <li>Mostra o nasconde il pulsante di reset</li>
+	     *   <li>Rimuove tutte le checkbox dal pannello</li>
+	     *   <li>Riaggiunge solo le checkbox che matchano il filtro</li>
+	     *   <li>Effettua repaint e revalidate del pannello ricette</li>
+	     * </ul>
+	     */
+	    if(pratica && ricercaRicetteField != null)
+	    {
+	    	ricercaRicetteFieldListener = new DocumentListener()
+										  {
+										   	   private void aggiornaFiltro()
+										   	   {
+										    	  String filtro = ricercaRicetteField.getText().trim().toLowerCase();
+										    	  clearButton.setVisible(!filtro.isEmpty());
+								
+										    	  ricettePanel.removeAll();
+								
+										    	  // Prima inserisco quelli matching
+										    	  for(int i = 0; i < ricette.size(); i++)
+										    	  {
+										    	      Ricetta r = ricette.get(i);
+										    	      JCheckBox cb = ricettaChecks.get(i);
+										    	      boolean match = r.getNome().toLowerCase().contains(filtro);
+										    	      if(match)
+										    	      {
+										    	          ricettePanel.add(cb, "growx");
+										    	          cb.setVisible(true);
+										    	      }
+										    	  }
+								
+										    	  ricettePanel.revalidate();
+										    	  ricettePanel.repaint();
+										    	}
+										        @Override public void insertUpdate(DocumentEvent e) { aggiornaFiltro(); }
+										        @Override public void removeUpdate(DocumentEvent e) { aggiornaFiltro(); }
+										        @Override public void changedUpdate(DocumentEvent e) { aggiornaFiltro(); }
+										    };
+		    ricercaRicetteField.getDocument().addDocumentListener(ricercaRicetteFieldListener);
 	    }
 	}
 
-	/**
-	 * Disconnette tutti i listener associati ai componenti di input.
-	 * <p>Chiamare questo metodo prima di rimuovere il pannello per evitare memory leak.</p>
-	 */
+	 /**
+     * Rimuove in modo sicuro tutti i listener registrati per prevenire memory leak
+     * quando il pannello viene rimosso dal dialog.
+     */
 	public void disposeListeners()
 	{
 	    if(removeBtn != null && removeBtnActionListener != null)
@@ -371,16 +596,28 @@ public class CreateSessionPanel extends JXPanel
 	        removeBtnActionListener = null;
 	    }
 
-	    if(addressListener != null && addressField != null)
+	    if(addressField != null && addressListener != null)
 	    {
 	        addressField.getDocument().removeDocumentListener(addressListener);
 	        addressListener = null;
 	    }
+	    
+	    if(addressField != null && addressFocusListener != null)
+	    {
+	        addressField.removeFocusListener(addressFocusListener);
+	        addressFocusListener = null;
+	    }
 
-	    if(linkListener != null && linkField != null)
+	    if(linkField != null && linkListener != null)
 	    {
 	        linkField.getDocument().removeDocumentListener(linkListener);
 	        linkListener = null;
+	    }
+	    
+	    if(linkField != null && linkFocusListener != null)
+	    {
+	        linkField.removeFocusListener(linkFocusListener);
+	        linkFocusListener = null;
 	    }
 
 	    if(durataChangeListener != null)
@@ -389,116 +626,63 @@ public class CreateSessionPanel extends JXPanel
 	            oreSpinner.removeChangeListener(durataChangeListener);
 	        if (minutiSpinner != null)
 	            minutiSpinner.removeChangeListener(durataChangeListener);
-	        
 	        durataChangeListener = null;
 	    }
+	    
+	    if(oreSpinner != null && oreFocusListener != null)
+	    {
+	        oreSpinner.removeFocusListener(oreFocusListener);
+	        oreFocusListener = null;
+	    }
+	    
+	    if(minutiSpinner != null && minutiFocusListener != null)
+	    {
+	        minutiSpinner.removeFocusListener(minutiFocusListener);
+	        minutiFocusListener = null;
+	    }
 
-	    if(dateListener != null && datePicker != null)
+	    if(datePicker != null && dateListener != null)
 	    {
 	        datePicker.removeDateChangeListener(dateListener);
 	        dateListener = null;
 	    }
+	    
+	    if(datePicker != null && dateFocusListener != null)
+	    {
+	        datePicker.getComponent(0).removeFocusListener(dateFocusListener);
+	        dateFocusListener = null;
+	    }
 
-	    if(timeListener != null && timePicker != null)
+	    if(timePicker != null && timeListener != null)
 	    {
 	        timePicker.removeTimeChangeListener(timeListener);
 	        timeListener = null;
 	    }
-
-	    if(ricettaListener != null && ricettaCombo != null)
+	    
+	    if(timePicker != null && timeFocusListener != null)
 	    {
-	        ricettaCombo.removeItemListener(ricettaListener);
-	        ricettaListener = null;
+	        timePicker.getComponent(0).removeFocusListener(timeFocusListener);
+	        timeFocusListener = null;
+	    }
+
+	    if(clearButton != null && clearButtonListener != null)
+	    {
+	    	clearButton.removeMouseListener(clearButtonListener);
+	    	clearButtonListener = null;
+	    }
+	    
+	    if(ricercaRicetteField != null && ricercaRicetteFieldListener != null)
+	    {
+		    ricercaRicetteField.getDocument().removeDocumentListener(ricercaRicetteFieldListener);
+		    ricercaRicetteFieldListener = null;
 	    }
 	}
-
 	/**
-	 * Aggiorna il numero visualizzato della sessione.
+	 * Crea un'etichetta {@link JXLabel} con font coerente.
 	 *
-	 * @param nuovoNumero il nuovo numero da assegnare alla sessione
+	 * @param text Testo da visualizzare nell'etichetta
+	 * @return Etichetta formattata
 	 */
-	public void aggiornaNumero(int nuovoNumero)
-	{
-		numero = nuovoNumero;
-		numeroLabel.setText("Sessione #" + nuovoNumero);
-	}
-
-	/**
-	 * Valida tutti i campi obbligatori della sessione, mostrando errori visivi se presenti.
-	 *
-	 * @return {@code true} se tutti i campi obbligatori sono compilati correttamente, {@code false} altrimenti
-	 */
-	public boolean isValidSession()
-	{
-		boolean valido = true;
-
-		if(datePicker.getDate() == null)
-		{
-			showError(datePicker, true, "Data obbligatoria");
-			valido = false;
-		}
-		else
-			showError(datePicker, false, null);
-
-		if(timePicker.getTime() == null)
-		{
-			showError(timePicker, true, "Orario obbligatorio");
-			valido = false;
-		}
-		else
-			showError(timePicker, false, null);
-
-		if(getDurata()<= 0)
-		{
-			showError(oreSpinner, true, "Durata non valida");
-			showError(minutiSpinner, true, "Durata non valida");
-			valido = false;
-		}
-		else
-		{
-			showError(oreSpinner, false, null);
-			showError(minutiSpinner, false, null);
-		}
-
-		if(pratica)
-		{
-			Ricetta selected = (Ricetta) ricettaCombo.getSelectedItem();
-			if(selected == null || selected.toString().trim().isEmpty())
-			{
-				showError(ricettaCombo, true, "Ricetta obbligatoria");
-				valido = false;
-			}
-			else
-				showError(ricettaCombo, false, null);
-
-			if(addressField.getText().trim().isEmpty())
-			{
-				showError(addressField, true, "Indirizzo obbligatorio");
-				valido = false;
-			}
-			else
-				showError(addressField, false, null);
-		}
-		else
-		{
-			if(linkField.getText().trim().isEmpty())
-			{
-				showError(linkField, true, "Link riunione obbligatorio");
-				valido = false;
-			}
-			else
-				showError(linkField, false, null);
-		}
-
-		return valido;
-	}
-
-	 /**
-     * Crea un'etichetta JXLabel con lo stile coerente.
-     *
-     * @param text Il testo dell'etichetta
-     * @return Un JXLabel formattato
-     */
 	private JXLabel createLabel(String text)
 	{
 	    JXLabel label = new JXLabel(text);
@@ -506,19 +690,20 @@ public class CreateSessionPanel extends JXPanel
 	    return label;
 	}
 	
-	 /**
-     * Applica o rimuove la visualizzazione di un errore su un componente.
-     *
-     * @param comp Componente su cui applicare l'errore
-     * @param errore true se l'errore deve essere mostrato, false altrimenti
-     * @param tooltip Messaggio da mostrare come tooltip (null per rimuoverlo)
+	/**
+     * Mostra o rimuove un errore visivo su un componente Swing con tooltip e outline.
+     * 
+     * @param comp Componente target (es. JTextField, JSpinner)
+     * @param errore {@code true} per mostrare l'errore, {@code false} per rimuoverlo
+     * @param tooltip Messaggio di errore da visualizzare come tooltip
      */
 	private void showError(JComponent comp, boolean errore, String tooltip)
 	{
 		if(errore)
 		{
 			comp.putClientProperty("JComponent.outline", "error");
-			if (tooltip != null) comp.setToolTipText(tooltip);
+			if(tooltip != null) 
+				comp.setToolTipText(tooltip);
 		}
 		else
 		{
@@ -526,4 +711,168 @@ public class CreateSessionPanel extends JXPanel
 			comp.setToolTipText(null);
 		}
 	}
+	
+	/**
+	 * Aggiorna l'etichetta con il nuovo numero progressivo della sessione.
+	 *
+	 * @param nuovoNumero Nuovo numero da visualizzare
+	 */
+	public void aggiornaNumero(int nuovoNumero)
+	{
+		numero = nuovoNumero;
+		numeroLabel.setText("Sessione #" + nuovoNumero);
+	}
+
+	 /**
+     * Valida tutti i campi della sessione e imposta il focus sul primo campo errato.
+     * 
+     * @return {@code true} se tutti i campi obbligatori sono validi, {@code false} altrimenti
+     */
+	public boolean isValidSession()
+	{
+	    focusSet = false;
+	    boolean valido = true;
+
+	    valido &= validateData();
+	    valido &= validateTime();
+	    valido &= validateDurata();
+
+	    if(pratica)
+	    {
+	        valido &= validateRicetta();
+	        valido &= validateAddress();
+	    }
+	    else
+	    	valido &= validateLink();
+
+	    return valido;
+	}
+
+	/**
+	 * Verifica che la data sia selezionata.
+	 *
+	 * @return {@code true} se la data è valida, {@code false} altrimenti
+	 */
+	private boolean validateData()
+	{
+	    boolean errore = (datePicker.getDate() == null);
+	    showError(datePicker, errore, "Data obbligatoria");
+	    
+	    if(errore && !focusSet)
+	    {
+	        datePicker.requestFocusInWindow();
+	        focusSet = true;
+	    }
+	    return !errore;
+	}
+
+	/**
+	 * Verifica che l'orario sia selezionato.
+	 *
+	 * @return {@code true} se l'orario è valido, {@code false} altrimenti
+	 */
+	private boolean validateTime()
+	{
+	    boolean errore = (timePicker.getTime() == null);
+	    showError(timePicker, errore, "Orario obbligatorio");
+	    
+	    if(errore && !focusSet)
+	    {
+	        timePicker.requestFocusInWindow();
+	        focusSet = true;
+	    }
+	    return !errore;
+	}
+
+	/**
+	 * Verifica che la durata sia maggiore di zero.
+	 *
+	 * @return {@code true} se la durata è valida, {@code false} altrimenti
+	 */
+	private boolean validateDurata()
+	{
+	    boolean errore = getDurata() <= 0;
+	    showError(oreSpinner, errore, "Durata non valida");
+	    showError(minutiSpinner, errore, "Durata non valida");
+	    
+	    if(errore && !focusSet)
+	    {
+	        oreSpinner.requestFocusInWindow();
+	        focusSet = true;
+	    }
+	    return !errore;
+	}
+
+
+	/**
+	 * Verifica che l'indirizzo sia compilato correttamente (solo per sessioni pratiche).
+	 *
+	 * @return {@code true} se l'indirizzo è valido, {@code false} altrimenti
+	 */
+	private boolean validateAddress()
+	{
+	    boolean errore = addressField.getText().trim().isEmpty();
+	    showError(addressField, errore, "Indirizzo obbligatorio");
+	    
+	    if(errore && !focusSet)
+	    {
+	        addressField.requestFocusInWindow();
+	        focusSet = true;
+	    }
+	    return !errore;
+	}
+
+	 /**
+     * Verifica che una ricetta sia selezionata e scrolla sulla prima ricetta visibile non selezionata.
+     * 
+     * @return {@code true} se almeno una ricetta è selezionata, {@code false} altrimenti
+     */
+	private boolean validateRicetta()
+	{
+	    boolean errore = ricetteSelezionate.isEmpty();
+	    showError(scrollRicette, errore, "Seleziona almeno una ricetta");
+
+	    if(errore && !focusSet)
+	    {
+	        // Cerca la prima checkbox visibile e non selezionata
+	        for(JCheckBox cb : ricettaChecks)
+	        {
+	            if(cb.isVisible() && !cb.isSelected())
+	            {
+	                cb.requestFocusInWindow();
+	                scrollRicette.getViewport().scrollRectToVisible(cb.getBounds());
+	                focusSet = true;
+	                break;
+	            }
+	        }
+	        // Fallback: campo ricerca
+	        if(!focusSet && ricercaRicetteField != null)
+	        {
+	            ricercaRicetteField.requestFocusInWindow();
+	            scrollRicette.getViewport().scrollRectToVisible(ricercaRicetteField.getBounds());
+	            focusSet = true;
+	        }
+	    }
+
+	    return !errore;
+	}
+
+	/**
+	 * Verifica che il link della riunione sia compilato (solo per sessioni online).
+	 *
+	 * @return {@code true} se il link è valido, {@code false} altrimenti
+	 */
+	private boolean validateLink()
+	{
+	    boolean errore = linkField.getText().trim().isEmpty();
+	    showError(linkField, errore, "Link riunione obbligatorio");
+	    
+	    if(errore && !focusSet)
+	    {
+	        linkField.requestFocusInWindow();
+	        focusSet = true;
+	    }
+	    return !errore;
+	}
+	 
 }

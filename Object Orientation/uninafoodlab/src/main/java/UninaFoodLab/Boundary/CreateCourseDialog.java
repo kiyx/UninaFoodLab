@@ -54,8 +54,8 @@ public class CreateCourseDialog extends JDialog
     private MouseListener aggiungiSessioniMouseListener;
     private ItemListener praticoCheckListener, argomentiCheckBoxListener;
 
-    private List<CreateSessionPanel> sessionCards;
-    private List<JCheckBox> argumentsCheck;
+    private List<CreateSessionPanel> sessionCards = new ArrayList<>();
+    private List<JCheckBox> argumentsCheck = new ArrayList<>();
     
     
     public CreateCourseDialog(JXFrame parent)
@@ -66,8 +66,6 @@ public class CreateCourseDialog extends JDialog
         setLocationRelativeTo(parent);
         setResizable(true);
         setIconImage(parent.getIconImage());
-        
-        sessionCards = new ArrayList<>();
 
         initComponents();
         initListeners();
@@ -97,9 +95,9 @@ public class CreateCourseDialog extends JDialog
     private void initLeftPanel(JXPanel mainPanel)
     {
     	leftPanel = new JXPanel(new MigLayout(
-    		    "fill, wrap 1",   // layout: riempi tutto, una colonna per riga
-    		    "[grow, fill]",   // una colonna che cresce e riempie in orizzontale
-    		    "[]10[grow, fill]10[]" // prima riga fissa, poi riga centrale che cresce con padding sopra e sotto, infine riga fissa per i bottoni
+    		    "fill, wrap 1",
+    		    "[grow, fill]",
+    		    "[]10[grow, fill]10[]"
     		));
     	leftPanel.setBackground(BACKGROUND_COLOR);
     	leftPanel.setMinimumSize(new Dimension(400, 400));
@@ -161,7 +159,6 @@ public class CreateCourseDialog extends JDialog
             }
         };
         
-        argumentsCheck = new ArrayList<>();
         argomentiPanel = new JPanel(new GridLayout(0, 1));
         argomentiPanel.setOpaque(false);
 
@@ -338,20 +335,13 @@ public class CreateCourseDialog extends JDialog
             {
                 if(e.getStateChange() == ItemEvent.SELECTED)
                     mostraLimitePartecipanti(true);
-                else if (e.getStateChange() == ItemEvent.DESELECTED)
+                else if(e.getStateChange() == ItemEvent.DESELECTED)
                     gestisciDeselezionePratico();
 
             }
         };
         praticoCheck.addItemListener(praticoCheckListener);
     } 
-
-    @Override
-    public void dispose()
-    {
-        disposeListeners();
-        super.dispose();
-    }
 
     private void removeDialogListeners(JXButton addBtn, JXButton cancelBtn)
     {
@@ -372,7 +362,8 @@ public class CreateCourseDialog extends JDialog
     {
         if(aggiungiSessioneLabel != null && aggiungiSessioniMouseListener != null)
         {
-        	aggiungiSessioneLabel.removeMouseListener(aggiungiSessioniMouseListener);
+        	aggiungiSessioneLabel.removeMouseListener(aggiungiSessioniMouseListener);    	
+        	aggiungiSessioniMouseListener = null;
         }  
 
         if(confirmBtn != null && confirmBtnListener != null)
@@ -408,6 +399,13 @@ public class CreateCourseDialog extends JDialog
         	card.disposeListeners();
     }
     
+    @Override
+    public void dispose()
+    {
+        disposeListeners();
+        super.dispose();
+    }
+    
     private void gestisciDeselezionePratico()
     {
         boolean hasPratiche = false;
@@ -435,8 +433,7 @@ public class CreateCourseDialog extends JDialog
                 praticoCheck.setSelected(false);
                 mostraLimitePartecipanti(false);
             }
-            else
-                praticoCheck.setSelected(true); 
+           
         }
         else
             mostraLimitePartecipanti(false);
