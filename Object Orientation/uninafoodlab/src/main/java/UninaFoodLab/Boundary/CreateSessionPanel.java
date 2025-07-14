@@ -21,9 +21,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.time.*;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * La classe {@code CreateSessionPanel} rappresenta un pannello Swing responsabile della
@@ -74,9 +72,9 @@ public class CreateSessionPanel extends JXPanel
 	private JPanel ricettePanel;
 	private JScrollPane scrollRicette;
 	private JXTextField ricercaRicetteField;
-	private List<Ricetta> ricette; // memorizziamo la lista delle ricette originale
+	private List<Ricetta> ricette;
 	private List<JCheckBox> ricettaChecks = new ArrayList<>();
-	private Set<Integer> ricetteSelezionate = new HashSet<>();
+	private List<Integer> ricetteSelezionate = new ArrayList<>();
 
 	 /**
      * Costruttore principale per creare un pannello di sessione.
@@ -277,19 +275,17 @@ public class CreateSessionPanel extends JXPanel
 		        cb.setOpaque(false);
 		        cb.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		        
-		        // Sincronizzazione con set ricette selezionate
-		        cb.setSelected(ricetteSelezionate.contains(r.getId()));
-
 		        // Listener per aggiornare set quando selezionato/deselezionato
 		        cb.addItemListener(new ItemListener() 
 							       {
 							           @Override
 							           public void itemStateChanged(ItemEvent e) 
 							           {
-							               if(cb.isSelected())
-							                   ricetteSelezionate.add(r.getId());
-							               else
-							                   ricetteSelezionate.remove(r.getId());
+							        	   int id = r.getId();
+							        	   if(cb.isSelected() && !ricetteSelezionate.contains(id))
+							        	        ricetteSelezionate.add(id);
+							        	    else
+							        	        ricetteSelezionate.remove(Integer.valueOf(id));
 							           }
 							        });
 
