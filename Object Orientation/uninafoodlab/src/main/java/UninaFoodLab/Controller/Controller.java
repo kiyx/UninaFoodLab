@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 
 import javax.swing.*;
 
+import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXFrame;
 import org.mindrot.jbcrypt.*;
 import com.formdev.flatlaf.*;
@@ -15,6 +16,8 @@ import UninaFoodLab.DTO.*;
 import UninaFoodLab.DAO.Postgres.*;
 import UninaFoodLab.Exceptions.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.*;
 import java.nio.file.*;
 import java.time.*;
@@ -723,7 +726,7 @@ public class Controller
 	 * Carica e apre il report mensile dello Chef autenticato.
 	 * @param parent frame genitore da cui si accede
 	 */
-	public void openMonthlyReport(JFrame parent)
+	public void openMonthlyReport(JFrame parent, JXButton reportBtn)
 	{
 		EventQueue.invokeLater(() -> 
         {
@@ -733,12 +736,26 @@ public class Controller
         		ReportFrame rFrame = new ReportFrame();
         	    rFrame.setReportData(report.getTotCorsi(), report.getTotOnline(), report.getTotPratiche(),
     					 			 report.getMinRicette(), report.getMaxRicette(), report.getAvgRicette());
+        	    rFrame.setLocationRelativeTo(parent);
+        	    
+        	    // Qui aggiungi il listener con rimozione automatica:
+                WindowAdapter wl = new WindowAdapter() 
+					               {
+					                   @Override
+					                   public void windowClosed(WindowEvent e) 
+					                   {
+					                       reportBtn.setEnabled(true);
+					                       ((Window)e.getSource()).removeWindowListener(this);
+					                   }
+					               };
+                rFrame.addWindowListener(wl);
         	    rFrame.setVisible(true);
         	}
         	catch(DAOException e)
         	{
         		JOptionPane.showMessageDialog(parent, "Errore durante il caricamento del report.", "Errore", JOptionPane.ERROR_MESSAGE);
         		LOGGER.log(Level.SEVERE, "Errore durante il report nel DB: " + e.getMessage(), e);
+        		reportBtn.setEnabled(true);
         	}
         });
 	}
