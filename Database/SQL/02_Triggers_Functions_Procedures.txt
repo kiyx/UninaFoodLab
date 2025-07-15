@@ -272,8 +272,8 @@ RETURNS TRIGGER AS
 $$
 DECLARE
 	chef Chef.IdChef%TYPE;
-	inizio_nuova TIME := NEW.Ora;
-	fine_nuova TIME := (NEW.Ora + (NEW.Durata || ' minutes')::interval)::time;
+	inizio_nuova TIME := NEW.Orario;
+	fine_nuova TIME := (NEW.Orario + (NEW.Durata || ' minutes')::interval)::time;
 BEGIN
 	SELECT IdChef INTO chef FROM Corso WHERE IdCorso = NEW.IdCorso;
 
@@ -281,18 +281,18 @@ BEGIN
 		 	  (
 				SELECT 1 FROM 
 				(
-					SELECT SP.Data, SP.Ora, SP.Durata, C.IdChef, SP.IdSessionePratica AS IdSessione
+					SELECT SP.Data, SP.Orario, SP.Durata, C.IdChef, SP.IdSessionePratica AS IdSessione
 					FROM SessionePratica SP JOIN Corso C ON SP.IdCorso = C.IdCorso
 					WHERE C.IdChef = chef AND SP.Data = NEW.Data
 					UNION ALL
-					SELECT SO.Data, SO.Ora, SO.Durata, C.IdChef, SO.IdSessioneOnline AS IdSessione
+					SELECT SO.Data, SO.Orario, SO.Durata, C.IdChef, SO.IdSessioneOnline AS IdSessione
 					FROM SessionePratica SO JOIN Corso C ON SO.IdCorso = C.IdCorso
 					WHERE C.IdChef = chef AND SO.Data = NEW.Data
 				 ) AS S
 				WHERE S.IdSessione <> COALESCE(NEW.IdSessionePratica, NEW.IdSessioneOnline, -1)
 						AND NOT 
 								    (
-									    (S.Ora + (S.Durata || ' minutes')::interval)::time <= inizio_nuova)	 OR (S.Ora >=  fine_nuova)							
+									    (S.Orario + (S.Durata || ' minutes')::interval)::time <= inizio_nuova)	 OR (S.Orario >=  fine_nuova)							
 								    )
 			 ) THEN
 				RAISE EXCEPTION 'Sovrapposizione oraria con altra sessione dello stesso chef');
@@ -303,13 +303,13 @@ $$ LANGUAGE plpgsql;
 			
 
 CREATE OR REPLACE TRIGGER trg_sovrapposizione_orario_sessione_pratica
-BEFORE INSERT OR UPDATE OF Data, Ora, Durata ON SessionePratica
+BEFORE INSERT OR UPDATE OF Data, Orario, Durata ON SessionePratica
 FOR EACH ROW
 EXECUTE FUNCTION fun_controlla_sovrapposizione_orario_sessione();
 
 
 CREATE OR REPLACE TRIGGER trg_sovrapposizione_orario_sessione_online
-BEFORE INSERT OR UPDATE OF Data, Ora, Durata ON SessioneOnline
+BEFORE INSERT OR UPDATE OF Data, Orario, Durata ON SessioneOnline
 FOR EACH ROW
 EXECUTE FUNCTION fun_controlla_sovrapposizione_orario_sessione();
 
@@ -558,7 +558,7 @@ RETURNS TRIGGER AS
 $$
 BEGIN
 	RAISE EXCEPTION 'Non puoi modificare il tuo codice fiscale!!!';
-	RETURN NULL;
+	RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 

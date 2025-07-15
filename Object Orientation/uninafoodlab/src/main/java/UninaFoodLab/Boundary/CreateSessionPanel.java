@@ -206,41 +206,6 @@ public class CreateSessionPanel extends JXPanel
 	{
 		return pratica && addressField != null ? addressField.getText().trim() : null;
 	}
-	
-	/**
-	 * Imposta la politica di selezione della data consentita.
-	 * <p>Se {@code disable} è vero, disabilita il selettore e imposta una data fissa.</p>
-	 * 
-	 * @param minDate Data minima consentita (inclusa)
-	 * @param maxDate Data massima consentita (inclusa), o {@code null} per nessun limite superiore
-	 * @param disable Se {@code true}, disabilita la selezione e imposta la data a {@code minDate}
-	 */
-	public void setDataPrevista(LocalDate minDate, LocalDate maxDate, boolean disable)
-    {
-        if(disable)
-        {
-            datePicker.setEnabled(false);
-            datePicker.setDate(minDate);
-        }
-        else
-        {
-            datePicker.setEnabled(true);
-            datePicker.getSettings().setVetoPolicy(new DateVetoPolicy()
-            {
-                @Override
-                public boolean isDateAllowed(LocalDate date)
-                {
-                    if(date == null)
-                        return false;
-                    return (!date.isBefore(minDate)) && (!date.isAfter(maxDate));
-                }
-            });
-
-            LocalDate current = datePicker.getDate();
-            if(current == null || current.isBefore(minDate) || current.isAfter(maxDate))
-                datePicker.setDate(minDate);
-        }
-    }
 
 	/**
      * Inizializza i componenti grafici del pannello.
@@ -766,6 +731,46 @@ public class CreateSessionPanel extends JXPanel
 		    ricercaRicetteFieldListener = null;
 	    }
 	}
+	
+	/**
+	 * Imposta la politica di selezione della data consentita nel selettore di date.
+	 * <p>
+	 * Se il parametro {@code disable} è {@code true}, il selettore viene disabilitato e la data viene impostata a {@code minDate}.
+	 * Altrimenti, il selettore viene abilitato e viene impostata una politica che consente solo le date comprese tra
+	 * {@code minDate} e {@code maxDate} (entrambe incluse).
+	 * </p>
+	 * 
+	 * @param minDate la data minima consentita (inclusa)
+	 * @param maxDate la data massima consentita (inclusa), oppure {@code null} se non è previsto un limite superiore
+	 * @param disable se {@code true}, disabilita il selettore e imposta la data fissa a {@code minDate}
+	 */
+	public void setDataPrevista(LocalDate minDate, LocalDate maxDate, boolean disable)
+    {
+        if(disable)
+        {
+            datePicker.setEnabled(false);
+            datePicker.setDate(minDate);
+        }
+        else
+        {
+            datePicker.setEnabled(true);
+            datePicker.getSettings().setVetoPolicy(new DateVetoPolicy()
+            {
+                @Override
+                public boolean isDateAllowed(LocalDate date)
+                {
+                    if(date == null)
+                        return false;
+                    return (!date.isBefore(minDate)) && (!date.isAfter(maxDate));
+                }
+            });
+
+            LocalDate current = datePicker.getDate();
+            if(current == null || current.isBefore(minDate) || current.isAfter(maxDate))
+                datePicker.setDate(minDate);
+        }
+    }
+	
 	/**
 	 * Crea un'etichetta {@link JXLabel} con font coerente.
 	 *

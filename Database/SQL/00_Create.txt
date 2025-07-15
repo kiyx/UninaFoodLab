@@ -93,6 +93,8 @@ CREATE TABLE SessionePratica
 	NumeroPartecipanti INTEGER NOT NULL DEFAULT 0,
 	Luogo VARCHAR(100),
 	IdCorso  INTEGER NOT NULL,
+	CONSTRAINT check_data_non_passata_sessioneprat CHECK (Data > CURRENT_DATE),
+	CONSTRAINT check_durata_positiva_sessioneprat CHECK (Durata > 0),
 	CONSTRAINT check_empty_sessioneprat_luogo CHECK (LENGTH(Luogo) > 0),	
 	CONSTRAINT fk_corso_pratica FOREIGN KEY(IdCorso) REFERENCES Corso(IdCorso) ON DELETE CASCADE 			--Se eliminiamo il corso vengono eliminate anche tutte le sessioni pratiche associate
 );
@@ -106,6 +108,8 @@ CREATE TABLE SessioneOnline
 	Data DATE NOT NULL, 
 	LinkRiunione TEXT NOT NULL,
 	IdCorso  INTEGER NOT NULL,
+	CONSTRAINT check_data_non_passata_sessioneonl CHECK (Data > CURRENT_DATE),
+	CONSTRAINT check_durata_positiva_sessioneonl CHECK (Durata > 0),
 	CONSTRAINT check_empty_sessioneonl_link CHECK (LENGTH(LinkRiunione) > 0),
 	CONSTRAINT fk_corso_online FOREIGN KEY(IdCorso) REFERENCES Corso(IdCorso) ON DELETE CASCADE			--Se eliminiamo il corso vengono eliminate anche tutte le sessioni online associate
 );

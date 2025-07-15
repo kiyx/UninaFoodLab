@@ -212,20 +212,37 @@ public class SidebarPanel extends JXPanel
 	public void disposeListeners() 
 	{
 		if(homeBtn != null && homeBtnListener != null)
-	        homeBtn.removeActionListener(homeBtnListener);
+		{
+			homeBtn.removeActionListener(homeBtnListener);
+			homeBtnListener = null;
+		}
+	        
 	    if(coursesBtn != null && coursesBtnListener != null)
-	        coursesBtn.removeActionListener(coursesBtnListener);    
+	    {
+	    	coursesBtn.removeActionListener(coursesBtnListener); 
+	    	coursesBtnListener = null;
+	    }
+	           
 	    if(recipesBtn != null && recipesBtnListener != null)
-	        recipesBtn.removeActionListener(recipesBtnListener);
+	    {
+	    	recipesBtn.removeActionListener(recipesBtnListener);
+	    	recipesBtnListener = null;
+	    }
+	        
 	    if(reportBtn != null && reportBtnListener != null)
-	        reportBtn.removeActionListener(reportBtnListener);
-	    
+	    {
+	    	reportBtn.removeActionListener(reportBtnListener);
+	    	reportBtnListener = null;
+	    }
+	        
 	    if(hoverListener != null) 
 	    {
 	        homeBtn.removeMouseListener(hoverListener);
 	        coursesBtn.removeMouseListener(hoverListener);
 	        if(recipesBtn != null) recipesBtn.removeMouseListener(hoverListener);
 	        if(reportBtn != null) reportBtn.removeMouseListener(hoverListener);
+	        
+	        hoverListener = null;
 	    }
 	}
 	

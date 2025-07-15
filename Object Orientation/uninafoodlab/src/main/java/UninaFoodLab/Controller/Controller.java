@@ -738,7 +738,7 @@ public class Controller
     					 			 report.getMinRicette(), report.getMaxRicette(), report.getAvgRicette());
         	    rFrame.setLocationRelativeTo(parent);
         	    
-        	    // Qui aggiungi il listener con rimozione automatica:
+        	    // Se viene chiuso il frame Report bisogna riattivare il bottone nella sidebar
                 WindowAdapter wl = new WindowAdapter() 
 					               {
 					                   @Override

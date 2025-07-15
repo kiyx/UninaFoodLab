@@ -94,7 +94,7 @@ public class CreateCourseDialog extends JDialog
     private void initLeftPanel(JXPanel mainPanel)
     {
     	leftPanel = new JXPanel(new MigLayout(
-    		    "wrap 1, fill, insets 0", // rimosso `dock`, evita confusione
+    		    "wrap 1, fill, insets 0",
     		    "[grow]",
     		    "[]10[grow, fill]10[]"
     		));
