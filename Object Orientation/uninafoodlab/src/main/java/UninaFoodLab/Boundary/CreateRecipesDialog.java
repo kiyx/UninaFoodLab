@@ -32,6 +32,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.text.NumberFormatter;
 
@@ -79,6 +80,13 @@ public class CreateRecipesDialog extends JDialog
     private JSpinner tempoSpinner, calorieSpinner;
     private JXLabel tempoLabel, calorieLabel, minLabel, kcalLabel;
     
+	private CompoundBorder defaultBorder = BorderFactory.createCompoundBorder(
+			new LineBorder(Color.LIGHT_GRAY, 1),
+		  	new EmptyBorder(0, 6, 0, 0));
+	private CompoundBorder errorBorder = BorderFactory.createCompoundBorder(
+        	new LineBorder(Color.RED, 1),
+        	new EmptyBorder(0, 6, 0, 0));
+	
     private ActionListener addSessionsListener, cancelAddSessionsListener, confirmBtnListener, goBackBtnListener, aggiungiIngredienteBtnListener;
     private MouseListener aggiungiIngredienteMouseListener;
     
@@ -443,19 +451,43 @@ public class CreateRecipesDialog extends JDialog
         ingredientiContainer.setLayout(new MigLayout("wrap " + Math.min(count, 2) + ", gap 10 10", columns));
     }
  
-    ciao
     private boolean checkNome()
     {
-    	boolean ret = true;
-    	
-    	return ret;
+		boolean check = true;
+	    String text = nameField.getText().trim();
+	      
+	    if(text.isEmpty())
+	    {
+	    	nameField.setBorder(errorBorder);
+	    	showError("Bisogna inserire il nome della ricetta.");
+	    	check = false;
+	    }
+	    else
+	    {
+	    	nameField.setBorder(defaultBorder);
+
+	    }
+	    
+	    return check;
     }
-    ciao
+
     private boolean checkProvenienza()
     {
-    	boolean ret = true;
-    	
-    	return ret;
+		boolean check = true;
+	    String text = provenienzaField.getText().trim();
+	      
+	    if(text.isEmpty())
+	    {
+	    	provenienzaField.setBorder(errorBorder);
+	    	showError("Bisogna inserire la provenienza della ricetta.");
+	    	check = false;
+	    }
+	    else
+	    {
+	    	provenienzaField.setBorder(defaultBorder);
+	    }
+	    
+	    return check;
     }
     
     public void addIngrediente(Ingrediente ing)
@@ -472,4 +504,8 @@ public class CreateRecipesDialog extends JDialog
     	return ingredienti;
     }
     
+	public void showError(String msg)
+	{
+		JOptionPane.showMessageDialog(this, msg, "Errore", JOptionPane.ERROR_MESSAGE);
+	}
 }

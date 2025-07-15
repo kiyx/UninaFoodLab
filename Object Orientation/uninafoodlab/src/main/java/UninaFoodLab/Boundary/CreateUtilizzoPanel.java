@@ -266,17 +266,8 @@ public class CreateUtilizzoPanel extends JXPanel {
 	    focusSet = false;
 	    boolean valido = true;
 
-	    /*valido &= validateData();
-	    valido &= validateTime();
-	    valido &= validateDurata();
-
-	    if(pratica)
-	    {
-	        valido &= validateRicetta();
-	        valido &= validateAddress();
-	    }
-	    else
-	    	valido &= validateLink();*/
+	    valido &= validateIngrediente();
+	    valido &=validateQuantita();
 
 	    return valido;
 	}
@@ -291,6 +282,30 @@ public class CreateUtilizzoPanel extends JXPanel {
         ingredientiChecks.add(cb);
         group.add(cb);
         ingredientiPanel.add(cb, "growx");
+	}
+	
+	private boolean validateIngrediente()
+	{
+		boolean check = true;
+		
+		if(getSelectedRadioText(group)==null)
+		{
+			check = false;
+		}
+		
+		return check;
+	}
+	
+	private boolean validateQuantita()
+	{
+		boolean check = true;
+		
+		if((int)quantitaField.getValue()==0)
+		{
+			check = false;
+		}
+		
+		return check;
 	}
 	
     private NumberFormatter quantitaFormatter()
