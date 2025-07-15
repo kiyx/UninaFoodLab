@@ -38,7 +38,7 @@ public class Argomento
         this.id = id;
     }
 
-    public String getNome ()
+    public String getNome()
     {
         return nome;
     }

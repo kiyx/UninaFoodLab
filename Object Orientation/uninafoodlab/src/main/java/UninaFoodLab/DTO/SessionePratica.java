@@ -18,10 +18,11 @@ public class SessionePratica extends Sessione
     public SessionePratica(int durata, Time orario, LocalDate data, Corso corso, String indirizzo, ArrayList<Ricetta> ricette)
     {
         super(durata, orario, data);
-        this.indirizzo = indirizzo;
         
         if(ricette == null) throw new RequiredRicettaException();
         this.ricette = ricette;
+        
+        this.indirizzo = indirizzo; 
     }
 
     @Override
@@ -71,14 +72,9 @@ public class SessionePratica extends Sessione
         return ricette;
     }
 
-    public void addRicetta (Ricetta toAddRicetta)
+    public void addRicetta(Ricetta toAddRicetta)
     {
         ricette.add(toAddRicetta);
-    }
-
-    public int getNumeroRicette()
-    {
-        return ricette.size();
     }
 
     public ArrayList<Adesione> getAdesioni()

@@ -292,7 +292,7 @@ BEGIN
 				WHERE S.IdSessione <> COALESCE(NEW.IdSessionePratica, NEW.IdSessioneOnline, -1)
 						AND NOT 
 								    (
-									    (S.Ora + (S.Durata || ' minutes')::interval)::time <= inizio_nuova)	 OR (S.Ora >= fine_nuova)							
+									    (S.Ora + (S.Durata || ' minutes')::interval)::time <= inizio_nuova)	 OR (S.Ora >=  fine_nuova)							
 								    )
 			 ) THEN
 				RAISE EXCEPTION 'Sovrapposizione oraria con altra sessione dello stesso chef');
@@ -397,59 +397,61 @@ CREATE OR REPLACE FUNCTION fun_verifica_frequenza_sessioni()
 RETURNS TRIGGER AS
 $$
 DECLARE
-	frequenza Corso.FrequenzaSessioni%TYPE;
-	giorni_intervallo INTEGER;
-	data_prec SessionePratica.Data%TYPE; diff_prec INTEGER;
-	data_succ SessionePratica.Data%TYPE; diff_succ  INTEGER;
+    frequenza Corso.FrequenzaSessioni%TYPE;
+    giorniFrequenza INTEGER;
+    dataPrec DATE;
+    dataSucc DATE;
+    dataMin DATE;
+    dataMax DATE;
 BEGIN
-	-- Prendo la frequenza del corso
-	SELECT FrequenzaSessioni INTO frequenza FROM CORSO WHERE IDCorso = NEW.IdCorso;
-	
-	CASE frequenza
-		WHEN 'Giornaliera' THEN giorni_intervallo := 1;
-		WHEN 'Settimanale' THEN giorni_intervallo := 7;
-		WHEN 'Bisettimanale' THEN giorni_intervallo := 14;
-		WHEN 'Mensile' THEN giorni_intervallo := 30;
-		WHEN 'Libera' THEN RETURN NEW;
-		ELSE
-			RAISE EXCEPTION 'Frequenza non riconosciuta';
-	END CASE;
+    -- Prendi la frequenza del corso
+    SELECT FrequenzaSessioni INTO frequenza FROM Corso WHERE IdCorso = NEW.IdCorso;
 
-	-- Sessione Precedente
-	SELECT MAX(Data) INTO data_prec
-	FROM
-		     ( 
-			 SELECT Data FROM SessionePratica WHERE IdCorso = NEW.IdCorso AND Data < NEW.Data 
-			 UNION ALL
-			 SELECT Data FROM SessioneOnline WHERE IdCorso = NEW.IDCorso AND Data < NEW.Data
-		     )  AS Sessioni_Precedenti;
+    CASE frequenza
+        WHEN 'Giornaliera' THEN giorniFrequenza := 1;
+        WHEN 'Settimanale' THEN giorniFrequenza := 7;
+        WHEN 'Bisettimanale' THEN giorniFrequenza := 14;
+        WHEN 'Mensile' THEN giorniFrequenza := 30;
+        WHEN 'Libera' THEN RETURN NEW;  -- nessun vincolo su frequenza
+        ELSE
+            RAISE EXCEPTION 'Frequenza non riconosciuta: %', frequenza;
+    END CASE;
 
-	-- Sessione Successiva
-	SELECT MIN(Data) INTO data_succ
-	FROM
-		     ( 
-			 SELECT Data FROM SessionePratica WHERE IdCorso = NEW.IdCorso AND Data > NEW.Data 
-			 UNION ALL
-			 SELECT Data FROM SessioneOnline WHERE IdCorso = NEW.IDCorso AND Data > NEW.Data
-		     )  AS Sessioni_Successive;
+    -- Trova sessione precedente (max data < NEW.Data)
+    SELECT MAX(Data) INTO dataPrec FROM (
+        SELECT Data FROM SessionePratica WHERE IdCorso = NEW.IdCorso AND Data < NEW.Data
+        UNION ALL
+        SELECT Data FROM SessioneOnline WHERE IdCorso = NEW.IdCorso AND Data < NEW.Data
+    ) AS Precedenti;
 
-	-- Verifico distanza dalla precedente
-	IF data_prec IS NOT NULL THEN
-		diff_prec := NEW.Data - data_prec;
-		IF diff_prec < giorni_intervallo THEN
-			RAISE EXCEPTION 'Violazione frequenza: La nuova sessione è troppo vicina a quella precedente';
-		END IF;
-	END IF;
+    -- Trova sessione successiva (min data > NEW.Data)
+    SELECT MIN(Data) INTO dataSucc FROM (
+        SELECT Data FROM SessionePratica WHERE IdCorso = NEW.IdCorso AND Data > NEW.Data
+        UNION ALL
+        SELECT Data FROM SessioneOnline WHERE IdCorso = NEW.IdCorso AND Data > NEW.Data
+    ) AS Successive;
 
-	-- Verifico distanza dalla successiva
-	IF data_succ IS NOT NULL THEN
-		diff_succ := data_succ - NEW.Data;
-		IF diff_succ < giorni_intervallo THEN
-			RAISE EXCEPTION 'Violazione frequenza: La nuova sessione è troppo vicina a quella successiva';
-		END IF;
-	END IF;
+    IF dataPrec IS NOT NULL THEN
+        -- Definisci range consentito per NEW.Data
+        dataMin := dataPrec + giorniFrequenza;
+        dataMax := dataPrec + giorniFrequenza - 1;  -- intervallo di una frequenza
 
-	RETURN NEW;
+        IF NEW.Data < dataMin OR NEW.Data > dataMax THEN
+            RAISE EXCEPTION
+                'La data della sessione deve essere tra % e % (range consentito dalla frequenza del corso)',
+                dataMin, dataMax;
+        END IF;
+    END IF;
+
+    IF dataSucc IS NOT NULL THEN
+        IF dataSucc < NEW.Data + giorniFrequenza THEN
+            RAISE EXCEPTION
+                'La sessione successiva è troppo vicina alla data inserita. Deve essere almeno a % giorni di distanza',
+                giorniFrequenza;
+        END IF;
+    END IF;
+
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -723,6 +725,33 @@ CREATE OR REPLACE TRIGGER trg_blocca_aggiorna_argomenticorso
 BEFORE UPDATE  OF IdCorso, IdArgomento ON Argomenti_Corso
 FOR EACH ROW
 EXECUTE FUNCTION fun_blocca_aggiorna_argomenticorso();
+
+-----------------------------------------------------------------------------------------------------------------------
+-- bloccare la cancellazione dell'ultimo argomento di un corso
+
+
+CREATE OR REPLACE FUNCTION fun_blocca_cancellazione_argomento_corso()
+RETURNS TRIGGER AS
+$$
+DECLARE
+    num_argomenti INT;
+BEGIN
+    	SELECT COUNT(*) INTO num_argomenti
+    	FROM Argomenti_Corso
+   	 WHERE IdCorso = OLD.IdCorso;
+
+   	 IF num_argomenti <= 1 THEN
+       	 	RAISE EXCEPTION 'Non puoi rimuovere l''ultimo argomento di un corso.';
+    	END IF;
+
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_blocca_cancellazione_argomento_corso
+BEFORE DELETE ON Argomenti_Corso
+FOR EACH ROW
+EXECUTE FUNCTION fun_blocca_cancellazione_argomento_corso();
 
 -----------------------------------------------------------------------------------------------------------------------
 

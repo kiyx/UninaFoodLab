@@ -39,7 +39,6 @@ import java.util.List;
  *   <li>Rimozione dinamica del pannello dal dialogo genitore</li>
  *   <li>Init e dispose sicura dei listener</li>
  * </ul>
- * 
  */
 
 public class CreateSessionPanel extends JXPanel
@@ -66,12 +65,12 @@ public class CreateSessionPanel extends JXPanel
 	private DocumentListener addressListener, linkListener, ricercaRicetteFieldListener;
 	private ChangeListener durataChangeListener;
 	private TimeChangeListener timeListener;
-	private DateChangeListener dateListener;
+	private DateChangeListener dateListener, dateChangeListener;
 	private FocusListener addressFocusListener, linkFocusListener, dateFocusListener, timeFocusListener,
 						  oreFocusListener, minutiFocusListener;
 	private MouseAdapter clearButtonListener;
-	
-	// Gestio
+
+	// Componenti per show + gestione dinamica filtrata delle ricette
 	private JPanel ricettePanel;
 	private JScrollPane scrollRicette;
 	private JXTextField ricercaRicetteField;
@@ -91,11 +90,11 @@ public class CreateSessionPanel extends JXPanel
 		this.numero = numero;
 		this.pratica = pratica;
 		this.parent = parent;
-
+		
 		initComponents();
 		initListeners();
 	}
-
+	
 	/**
 	 * Restituisce il tipo della sessione come stringa.
 	 *
@@ -111,11 +110,42 @@ public class CreateSessionPanel extends JXPanel
 	 *
 	 * @return Oggetto {@link LocalDate} rappresentante la data scelta, oppure {@code null} se non selezionata
 	 */
-	public LocalDate getData()
+	public LocalDate getDataSessione()
 	{
 		return datePicker.getDate();
 	}
+	
+	/**
+	 * Imposta la data selezionata nel componente {@link DatePicker}.
+	 * 
+	 * @param data Data da impostare
+	 */
+	public void setData(LocalDate data)
+	{
+	    datePicker.setDate(data);
+	}
 
+	/**
+	 * Restituisce il componente {@link DatePicker} della data.
+	 * 
+	 * @return Il componente {@link DatePicker} utilizzato per la selezione della data
+	 */
+	public DatePicker getDatePicker()
+	{
+		return datePicker;
+	}
+	
+	/**
+	 * Restituisce il listener registrato per gli eventi di cambio data associato a questo pannello.
+	 *
+	 * @return l'istanza di {@link DateChangeListener} attualmente registrata,
+	 *         oppure {@code null} se nessun listener è stato impostato.
+	 */
+	public DateChangeListener getDateChangeListener()
+	{
+		return dateChangeListener;
+	}
+	
 	/**
 	 * Restituisce l'orario selezionato per la sessione.
 	 *
@@ -177,6 +207,41 @@ public class CreateSessionPanel extends JXPanel
 		return pratica && addressField != null ? addressField.getText().trim() : null;
 	}
 	
+	/**
+	 * Imposta la politica di selezione della data consentita.
+	 * <p>Se {@code disable} è vero, disabilita il selettore e imposta una data fissa.</p>
+	 * 
+	 * @param minDate Data minima consentita (inclusa)
+	 * @param maxDate Data massima consentita (inclusa), o {@code null} per nessun limite superiore
+	 * @param disable Se {@code true}, disabilita la selezione e imposta la data a {@code minDate}
+	 */
+	public void setDataPrevista(LocalDate minDate, LocalDate maxDate, boolean disable)
+    {
+        if(disable)
+        {
+            datePicker.setEnabled(false);
+            datePicker.setDate(minDate);
+        }
+        else
+        {
+            datePicker.setEnabled(true);
+            datePicker.getSettings().setVetoPolicy(new DateVetoPolicy()
+            {
+                @Override
+                public boolean isDateAllowed(LocalDate date)
+                {
+                    if(date == null)
+                        return false;
+                    return (!date.isBefore(minDate)) && (!date.isAfter(maxDate));
+                }
+            });
+
+            LocalDate current = datePicker.getDate();
+            if(current == null || current.isBefore(minDate) || current.isAfter(maxDate))
+                datePicker.setDate(minDate);
+        }
+    }
+
 	/**
      * Inizializza i componenti grafici del pannello.
      */
@@ -525,15 +590,14 @@ public class CreateSessionPanel extends JXPanel
 	     */
 	    if(pratica && clearButton != null)
 	    {
-	    	clearButton.addMouseListener(new MouseAdapter()
+	    	clearButtonListener = new MouseAdapter()
 								    	 {
 								    	     @Override
 								    	     public void mouseClicked(MouseEvent e)
 								    	     {
 								    	         ricercaRicetteField.setText("");
 								    	     }
-								    	 });
-
+								    	 };
 	        clearButton.addMouseListener(clearButtonListener);
 	    }
 	    
@@ -564,8 +628,8 @@ public class CreateSessionPanel extends JXPanel
 										    	  {
 										    	      Ricetta r = ricette.get(i);
 										    	      JCheckBox cb = ricettaChecks.get(i);
-										    	      boolean match = r.getNome().toLowerCase().contains(filtro);
-										    	      if(match)
+
+										    	      if(r.getNome().toLowerCase().contains(filtro))
 										    	      {
 										    	          ricettePanel.add(cb, "growx");
 										    	          cb.setVisible(true);
@@ -583,6 +647,26 @@ public class CreateSessionPanel extends JXPanel
 	    }
 	}
 
+	/**
+	 * Imposta un listener per i cambiamenti di data sul DatePicker associato a questa sessione.
+	 * 
+	 * Se un listener era già presente, viene rimosso prima di aggiungere il nuovo.
+	 * Questo evita l'accumulo di listener multipli che causerebbero chiamate ripetute.
+	 * 
+	 * @param listener il nuovo {@link DateChangeListener} da associare;
+	 *                 può essere {@code null} per rimuovere il listener esistente senza sostituirlo.
+	 */
+	public void setDateChangeListener(DateChangeListener listener)
+	{
+	    if(this.dateChangeListener != null)
+	        getDatePicker().removeDateChangeListener(this.dateChangeListener);
+
+	    this.dateChangeListener = listener;
+
+	    if(listener != null)
+	        getDatePicker().addDateChangeListener(listener);
+	}
+	
 	 /**
      * Rimuove in modo sicuro tutti i listener registrati per prevenire memory leak
      * quando il pannello viene rimosso dal dialog.
@@ -651,7 +735,13 @@ public class CreateSessionPanel extends JXPanel
 	        datePicker.getComponent(0).removeFocusListener(dateFocusListener);
 	        dateFocusListener = null;
 	    }
-
+	    
+	    if(datePicker != null && dateChangeListener != null)
+        {
+            datePicker.removeDateChangeListener(dateChangeListener);
+            dateChangeListener = null;
+        }
+	    
 	    if(timePicker != null && timeListener != null)
 	    {
 	        timePicker.removeTimeChangeListener(timeListener);
@@ -747,6 +837,14 @@ public class CreateSessionPanel extends JXPanel
 	    return valido;
 	}
 
+	/**
+	 * Metodo di utilità per validare un singolo campo e impostare il focus se errato.
+	 *
+	 * @param comp Componente da validare
+	 * @param errore {@code true} se c'è errore, {@code false} altrimenti
+	 * @param tooltip Messaggio di errore da mostrare
+	 * @return {@code true} se il campo è valido, {@code false} se c'è errore
+	 */
 	private boolean validateField(JComponent comp, boolean errore, String tooltip)
 	{
 	    showError(comp, errore, tooltip);
@@ -843,5 +941,4 @@ public class CreateSessionPanel extends JXPanel
 	{
 	    return validateField(linkField, linkField.getText().trim().isEmpty(), "Link riunione obbligatorio");
 	}
-	 
 }

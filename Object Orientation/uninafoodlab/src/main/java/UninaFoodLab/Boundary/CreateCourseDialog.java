@@ -46,14 +46,15 @@ public class CreateCourseDialog extends JDialog
     private JXTextArea descrizioneArea;
     private JXTextField nameField;
     private DatePicker dataInizioField;
-    
+
     private ActionListener addSessionsListener, cancelAddSessionsListener, confirmBtnListener, goBackBtnListener;
     private MouseListener aggiungiSessioniMouseListener;
-    private ItemListener praticoCheckListener, argomentiCheckBoxListener;
-
+    private ItemListener praticoCheckListener, argomentiCheckBoxListener, frequencyListListener;
+    private DateChangeListener dataInizioListener;
+    private WindowAdapter windowListener;
+    
     private List<CreateSessionPanel> sessionCards = new ArrayList<>();
     private List<JCheckBox> argumentsCheck = new ArrayList<>();
-    
     
     public CreateCourseDialog(JXFrame parent)
     {
@@ -134,7 +135,10 @@ public class CreateCourseDialog extends JDialog
         frequencyList = new JComboBox<>(FrequenzaSessioni.values());
         infoPanel.add(new JXLabel("Frequenza:"));
         infoPanel.add(frequencyList, "h 36!, growx");
-
+        
+        argomentiPanel = new JPanel(new GridLayout(0, 1));
+        argomentiPanel.setOpaque(false);
+        
         argomentiCheckBoxListener = new ItemListener()
         {
             @Override
@@ -157,9 +161,6 @@ public class CreateCourseDialog extends JDialog
             }
         };
         
-        argomentiPanel = new JPanel(new GridLayout(0, 1));
-        argomentiPanel.setOpaque(false);
-
         for(Argomento a : Controller.getController().loadArgomenti())
         {
             JCheckBox cb = new JCheckBox(a.getNome());
@@ -298,73 +299,92 @@ public class CreateCourseDialog extends JDialog
     }
 
     private void initListeners()
-    {
-
+    {					          
+    	goBackBtnListener = new ActionListener()
+					        {
+					            @Override
+					            public void actionPerformed(ActionEvent e)
+					            {
+					                dispose();
+					            }
+					        };
+        goBackBtn.addActionListener(goBackBtnListener);
+        
         aggiungiSessioniMouseListener = new MouseAdapter()
-        {
-            @Override
-            public void mouseClicked(MouseEvent e)
-            {
-                showAddSessionsDialog();
-            }
-        };
+								        {
+								            @Override
+								            public void mouseClicked(MouseEvent e)
+								            {
+								                showAddSessionsDialog();
+								            }
+								        };
         aggiungiSessioneLabel.addMouseListener(aggiungiSessioniMouseListener);
 
+        praticoCheckListener = new ItemListener()
+						       {
+						           @Override
+						           public void itemStateChanged(ItemEvent e)
+						           {
+						               if(e.getStateChange() == ItemEvent.SELECTED)
+						                   togglePartecipantiLimit(true);
+						               else if(e.getStateChange() == ItemEvent.DESELECTED)
+						                   onPraticoDeselected();
+						
+						           }
+						       };
+        praticoCheck.addItemListener(praticoCheckListener);
+        
+        frequencyListListener = new ItemListener()
+						        {
+						            @Override
+						            public void itemStateChanged(ItemEvent e)
+						            {
+						                if(e.getStateChange() == ItemEvent.SELECTED)
+						                    rescheduleSessions();
+						            }
+						        };
+        frequencyList.addItemListener(frequencyListListener);
+        
+        
+        dataInizioListener = new DateChangeListener()
+        {
+            @Override
+            public void dateChanged(DateChangeEvent e)
+            {
+                rescheduleSessions();
+            }
+        };
+        dataInizioField.addDateChangeListener(dataInizioListener);
+        
         confirmBtnListener = new ActionListener()
         {
+        	
             @Override
             public void actionPerformed(ActionEvent e)
             {
-                if(sessionCards.isEmpty())
-                {
+                if(sessionCards.isEmpty())               
                     JOptionPane.showMessageDialog(CreateCourseDialog.this, "Devi aggiungere almeno una sessione.", "Errore", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                for(CreateSessionPanel card : sessionCards)
+                else
                 {
-                    if(!card.isValidSession())
+                	for(CreateSessionPanel card : sessionCards)
                     {
-                        JOptionPane.showMessageDialog(CreateCourseDialog.this, "Errore nei dati di una sessione. Controlla data, ora e ricetta/link.", "Errore", JOptionPane.ERROR_MESSAGE);
-                        return;
+                        if(!card.isValidSession())
+                        {
+                            JOptionPane.showMessageDialog(CreateCourseDialog.this, "Errore nei dati di una sessione. Controlla i campi", "Errore", JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
                     }
-                }
 
-                // TODO: invia dati al Controller
-                dispose();
+                    // TODO: invia dati al Controller
+                    dispose();
+                }
+                
             }
         };
         confirmBtn.addActionListener(confirmBtnListener);
-
-        goBackBtnListener = new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                dispose();
-            }
-        };
-        goBackBtn.addActionListener(goBackBtnListener);
-        
-        praticoCheckListener = new ItemListener()
-        {
-            @Override
-            public void itemStateChanged(ItemEvent e)
-            {
-                if(e.getStateChange() == ItemEvent.SELECTED)
-                    togglePartecipantiLimit(true);
-                else if(e.getStateChange() == ItemEvent.DESELECTED)
-                    onPraticoDeselected();
-
-            }
-        };
-        praticoCheck.addItemListener(praticoCheckListener);
-        
-        
-
     } 
 
-    private void removeDialogListeners(JXButton addBtn, JXButton cancelBtn)
+    private void removeDialogListeners()
     {
         if(addBtn != null && addSessionsListener != null)
         {
@@ -377,27 +397,51 @@ public class CreateCourseDialog extends JDialog
             cancelBtn.removeActionListener(cancelAddSessionsListener);
             cancelAddSessionsListener = null;
         }
+        
+        if(addSessionDialog != null && windowListener != null) 
+        {
+            addSessionDialog.removeWindowListener(windowListener);
+            windowListener = null;
+        }
     }
 
     public void disposeListeners()
     {
+        if(goBackBtn != null && goBackBtnListener != null)
+        {
+        	goBackBtn.removeActionListener(goBackBtnListener);
+        	goBackBtnListener = null;
+        } 
+
         if(aggiungiSessioneLabel != null && aggiungiSessioniMouseListener != null)
         {
-        	aggiungiSessioneLabel.removeMouseListener(aggiungiSessioniMouseListener);    	
-        	aggiungiSessioniMouseListener = null;
+        	aggiungiSessioneLabel.removeMouseListener(aggiungiSessioniMouseListener);
+        	 aggiungiSessioniMouseListener = null;
+        }
+
+        if(praticoCheck != null && praticoCheckListener != null)
+        {
+        	praticoCheck.removeItemListener(praticoCheckListener);
+        	praticoCheckListener = null;
+        }
+
+        if(frequencyList != null && frequencyListListener != null)
+        {
+        	frequencyList.removeItemListener(frequencyListListener);
+        	frequencyListListener = null;
         }  
+
+        if(dataInizioField != null && dataInizioListener != null)
+        {
+        	dataInizioField.removeDateChangeListener(dataInizioListener);
+        	dataInizioListener = null; 
+        }   
 
         if(confirmBtn != null && confirmBtnListener != null)
         {
         	confirmBtn.removeActionListener(confirmBtnListener);
         	confirmBtnListener = null;
-        }          
-
-        if(goBackBtn != null && goBackBtnListener != null)
-        {
-        	goBackBtn.removeActionListener(goBackBtnListener);
-        	goBackBtnListener = null;
-        }      
+        }            
 
         if(argumentsCheck != null && argomentiCheckBoxListener != null)
         {
@@ -405,18 +449,16 @@ public class CreateCourseDialog extends JDialog
                 cb.removeItemListener(argomentiCheckBoxListener);
             argomentiCheckBoxListener = null;
         }
-        
-        if(praticoCheck != null && praticoCheckListener != null)
-        {
-        	praticoCheck.removeItemListener(praticoCheckListener);
-        	praticoCheckListener = null; 
-        }
-            
-       removeDialogListeners(addBtn, cancelBtn);
 
         // Rimuovi i listener dei pannelli sessione
-        for (CreateSessionPanel card : sessionCards)
+        for(CreateSessionPanel card : sessionCards)
+        {
+        	card.setDateChangeListener(null);
         	card.disposeListeners();
+        }       
+
+        // Listener del dialog addSessionDialog (se esiste)
+        removeDialogListeners();
     }
     
     @Override
@@ -425,35 +467,107 @@ public class CreateCourseDialog extends JDialog
         disposeListeners();
         super.dispose();
     } 
-
-    private void refreshSessionLayout()
+    
+    private void rescheduleSessions()
     {
-        updateSessionTotal();
-        updateSessionLayout();
-        sessionsContainer.revalidate();
-        sessionsContainer.repaint();
-    }
+        LocalDate dataInizio = dataInizioField.getDate();
+        FrequenzaSessioni frequenza = (FrequenzaSessioni) frequencyList.getSelectedItem();
 
-    private void updateSessionTotal()
-    {
-        numeroSessioniSpinner.setValue(sessionCards.size());
+        if(dataInizio != null && frequenza != null)
+        {
+        	if(frequenza == FrequenzaSessioni.Libera)
+                rescheduleLibera(dataInizio);
+            else
+                rescheduleFissa(dataInizio, frequenza);
+        }
     }
     
-    private void updateSessionLayout()
+    private void rescheduleFissa(LocalDate dataInizio, FrequenzaSessioni frequenza)
     {
-        int count = sessionCards.size();
-        String columns;
+        int giorniFrequenza = switch(frequenza)
+						      {
+						          case Giornaliera -> 1;
+						          case Settimanale -> 7;
+						          case Bisettimanale -> 14;
+						          case Mensile -> 30;
+						          default -> -1;
+						      };
 
-        if(count == 1)
-            columns = "[grow, center]";
-        else if(count == 2)
-            columns = "[grow, right][grow, left]";
-        else
-            columns = "[grow, fill][grow, fill][grow, fill]";
+        if(giorniFrequenza > 0)
+        {
+        	for(int i = 0; i < sessionCards.size(); i++)
+            {
+                CreateSessionPanel panel = sessionCards.get(i);
+                LocalDate start = dataInizio.plusDays(giorniFrequenza * i);
+                LocalDate end = start.plusDays(giorniFrequenza - 1);
 
-        sessionsContainer.setLayout(new MigLayout("wrap " + Math.min(count, 3) + ", gap 10 10, insets 5", columns));
+                panel.setDataPrevista(start, i == 0 ? start : end, i == 0);
+                panel.setData(start);
+            }
+        }
     }
     
+    private void rescheduleLibera(LocalDate dataInizio)
+    {
+        for(CreateSessionPanel panel : sessionCards)
+        {
+            panel.getDatePicker().getSettings().setVetoPolicy(getVetoPolicy(dataInizio, panel));
+            updateSelectedDate(panel, dataInizio);
+            updateSessionListener(panel);
+        }
+    }
+    
+    private DateVetoPolicy getVetoPolicy(final LocalDate dataInizio, final CreateSessionPanel currentPanel)
+    {
+        return new DateVetoPolicy()
+			       {
+			           @Override
+			           public boolean isDateAllowed(LocalDate date)
+			           {
+			               if(date == null || date.isBefore(dataInizio.plusDays(1)))
+			                   return false;
+			
+			               for(CreateSessionPanel other : sessionCards)
+			               {
+			                   if(other == currentPanel)
+			                       continue;
+			
+			                   LocalDate selected = other.getDatePicker().getDate();
+			                   if(selected != null && selected.equals(date))
+			                       return false;
+			                }
+			
+			               return true;
+			            }
+			        };
+    }
+    
+    private void updateSelectedDate(CreateSessionPanel panel, LocalDate dataInizio)
+    {
+        LocalDate selected = panel.getDatePicker().getDate();
+        
+        if(selected == null || selected.isBefore(dataInizio.plusDays(1)))
+            panel.getDatePicker().setDate(dataInizio.plusDays(1));
+    }
+    
+    private void updateSessionListener(CreateSessionPanel panel)
+    {
+    	 if(panel.getDateChangeListener() != null)
+    		 panel.getDatePicker().removeDateChangeListener(panel.getDateChangeListener());
+
+    	 DateChangeListener listener = new DateChangeListener()
+							    	   {
+							    	       @Override
+							    	       public void dateChanged(DateChangeEvent e)
+							    	       {
+							    	           rescheduleSessions();
+							    	       }
+							    	   };
+        panel.setDateChangeListener(listener);
+
+        SwingUtilities.invokeLater(() -> panel.getDatePicker().addDateChangeListener(listener));
+    }
+  
     private void addNewSessionCard(boolean pratica)
     {
         CreateSessionPanel card = new CreateSessionPanel(sessionCards.size() + 1, pratica, this);
@@ -461,6 +575,7 @@ public class CreateCourseDialog extends JDialog
         sessionsContainer.add(card, "growx, growy, w 33%");
 
         refreshSessionLayout();
+        rescheduleSessions();
     }
 
     public void removeSessionCard(CreateSessionPanel panel)
@@ -473,6 +588,7 @@ public class CreateCourseDialog extends JDialog
             sessionCards.get(i).aggiornaNumero(i + 1);
         
         refreshSessionLayout();
+        rescheduleSessions();
     }
     
     private void showAddSessionsDialog()
@@ -481,23 +597,24 @@ public class CreateCourseDialog extends JDialog
         addSessionDialog.setLayout(new MigLayout("wrap 2", "[right][grow,fill]"));
 
         // Rimuovi vecchi listener se ci sono
-        removeDialogListeners(addBtn, cancelBtn);
+        removeDialogListeners();
 
-        addSessionDialog.addWindowListener(new WindowAdapter() 
+        windowListener = new WindowAdapter() 
         {
             @Override
             public void windowClosed(WindowEvent e) 
             {
-                removeDialogListeners(addBtn, cancelBtn);
+                removeDialogListeners();
             }
 
             @Override
             public void windowClosing(WindowEvent e) 
             {
-                removeDialogListeners(addBtn, cancelBtn);
+                removeDialogListeners();
             }
-        });
-
+        };
+        addSessionDialog.addWindowListener(windowListener);
+        
         // Spinner per sessioni online
         onlineSpinner = new JSpinner(new SpinnerNumberModel(1, 0, 20, 1));
         addSessionDialog.add(new JXLabel("Sessioni Online:"));
@@ -505,7 +622,7 @@ public class CreateCourseDialog extends JDialog
 
         // Spinner per pratiche: inizializza sempre, ma lo aggiungi solo se pratico è selezionato
         praticheSpinner = new JSpinner(new SpinnerNumberModel(1, 0, 20, 1));
-        if (praticoCheck.isSelected())
+        if(praticoCheck.isSelected())
         {
             addSessionDialog.add(new JXLabel("Sessioni Pratiche:"));
             addSessionDialog.add(praticheSpinner);
@@ -532,7 +649,7 @@ public class CreateCourseDialog extends JDialog
                 for (int i = 0; i < praticheCount; i++)
                     addNewSessionCard(true);
 
-                removeDialogListeners(addBtn, cancelBtn);
+                removeDialogListeners();
                 addSessionDialog.dispose();
             }
         };
@@ -544,7 +661,7 @@ public class CreateCourseDialog extends JDialog
             @Override
             public void actionPerformed(ActionEvent e)
             {
-                removeDialogListeners(addBtn, cancelBtn);
+                removeDialogListeners();
                 addSessionDialog.dispose();
             }
         };
@@ -599,6 +716,34 @@ public class CreateCourseDialog extends JDialog
             togglePartecipantiLimit(false);
     }
     
+    private void refreshSessionLayout()
+    {
+        updateSessionTotal();
+        updateSessionLayout();
+        sessionsContainer.revalidate();
+        sessionsContainer.repaint();
+    }
+    
+    private void updateSessionTotal()
+    {
+        numeroSessioniSpinner.setValue(sessionCards.size());
+    }
+    
+    private void updateSessionLayout()
+    {
+        int count = sessionCards.size();
+        String columns;
+
+        if(count == 1)
+            columns = "[grow, center]";
+        else if(count == 2)
+            columns = "[grow, right][grow, left]";
+        else
+            columns = "[grow, fill][grow, fill][grow, fill]";
+
+        sessionsContainer.setLayout(new MigLayout("wrap " + Math.min(count, 3) + ", gap 10 10, insets 5", columns));
+    }
+    
     private void togglePartecipantiLimit(boolean visibile)
     {
         limitLabel.setVisible(visibile);
@@ -606,7 +751,7 @@ public class CreateCourseDialog extends JDialog
         detailPanel.revalidate();
         detailPanel.repaint();
     }
-    
+
     private void removeSpinnerButtons(JSpinner spinner)
     {
         JComponent editor = spinner.getEditor();
@@ -639,7 +784,7 @@ public class CreateCourseDialog extends JDialog
         settings.setColor(DateArea.CalendarBackgroundNormalDates, background);
         settings.setColor(DateArea.CalendarTextNormalDates, grayText);
 
-        // Data selezionata: arancio pieno con bordo definito (più "flat")
+        // Data selezionata: arancio pieno con bordo definito 
         settings.setColor(DateArea.CalendarBackgroundSelectedDate, orange);
         settings.setColor(DateArea.CalendarBorderSelectedDate, orangeDark);
         settings.setColor(DateArea.DatePickerTextValidDate, grayText); // testo campo input visibile
@@ -652,7 +797,7 @@ public class CreateCourseDialog extends JDialog
         settings.setColor(DateArea.CalendarBackgroundVetoedDates, new Color(245, 245, 245));
         settings.setColor(DateArea.DatePickerTextVetoedDate, disabledText);
 
-        // Sfondo e testo input disabilitato (leggibile ma smorzato)
+        // Sfondo e testo input disabilitato 
         settings.setColor(DateArea.TextFieldBackgroundDisabled, new Color(245, 245, 245));
         settings.setColor(DateArea.DatePickerTextDisabled, disabledText);
 
@@ -667,6 +812,4 @@ public class CreateCourseDialog extends JDialog
         // Rimuove la barra azzurra di sfondo del mese (per sicurezza)
         settings.setColor(DateArea.BackgroundMonthAndYearMenuLabels, background);
     }
-
-
 }

@@ -10,7 +10,8 @@ import java.util.List;
 
 public class SessionePraticaDAO_Postgres implements SessionePraticaDAO
 {
-    public SessionePratica getSessionePraticaById(int id) throws SQLException{
+    public SessionePratica getSessionePraticaById(int id)
+    {
         String sql ="SELECT * FROM SessionePratica WHERE IdCorso = ?";
         try (Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
         {
@@ -33,7 +34,8 @@ public class SessionePraticaDAO_Postgres implements SessionePraticaDAO
         return null;
     }
 
-    public List<SessionePratica> getSessioniPraticheByCorso(int idCorso) throws SQLException{
+    public List<SessionePratica> getSessioniPraticheByIdCorso(int idCorso)
+    {
         String sql ="SELECT * FROM SessionePratica WHERE IdCorso = ?";
         List<SessionePratica> ret =new ArrayList<SessionePratica>();
         try (Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
@@ -57,7 +59,8 @@ public class SessionePraticaDAO_Postgres implements SessionePraticaDAO
         return ret;
     }
 
-    public void save(SessionePratica toSaveSessione) throws SQLException {
+    public void save(SessionePratica toSaveSessione)
+    {
         String sql = "INSERT INTO SessioneOnline (durata, orario, data, numeroPartecipanti, indirizzo)  VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
         {
@@ -71,17 +74,10 @@ public class SessionePraticaDAO_Postgres implements SessionePraticaDAO
         }
     }
 
-    public void delete(int IdSessionePratica) throws SQLException {
-        String sql = "DELETE FROM SessionePratica WHERE IdSessionePratica = ?";
-        try (Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
-        {
-            s.setInt(1, IdSessionePratica);
-            s.executeUpdate();
-        }
+    
 
-    }
-
-    public void update(SessioneOnline oldSessione, SessioneOnline newSessione) throws SQLException{
+    public void update(SessioneOnline oldSessione, SessioneOnline newSessione)
+    {
         if(!oldSessione.getLinkRiunione().equals(newSessione.getLinkRiunione()))
         {
             String sql = "UPDATE SessioneOnline SET LinkRiunione = ? WHERE IdSessioneOnline = ?";
@@ -92,5 +88,16 @@ public class SessionePraticaDAO_Postgres implements SessionePraticaDAO
                 s.executeUpdate();
             }
         }
+    }
+    
+    public void delete(int IdSessionePratica)
+    {
+        String sql = "DELETE FROM SessionePratica WHERE IdSessionePratica = ?";
+        try (Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
+        {
+            s.setInt(1, IdSessionePratica);
+            s.executeUpdate();
+        }
+
     }
 }

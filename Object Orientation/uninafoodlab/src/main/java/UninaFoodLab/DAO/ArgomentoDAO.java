@@ -6,5 +6,8 @@ import java.util.List;
 
 public interface ArgomentoDAO
 {
-    public List<Argomento> getAllArgomenti();
-}
+	void saveArgomentiCorso(int idCorso, List<Argomento> argomenti);
+    List<Argomento> getAllArgomenti();
+    List<Argomento> getArgomentiByIdCorso(int idCorso);
+    void deleteArgomentoFromCorso(int idCorso, int idArgomento);
+} 

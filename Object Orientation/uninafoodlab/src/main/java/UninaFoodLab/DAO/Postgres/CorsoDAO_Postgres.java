@@ -2,32 +2,44 @@ package UninaFoodLab.DAO.Postgres;
 
 import UninaFoodLab.DAO.CorsoDAO;
 import UninaFoodLab.DTO.Argomento;
+import UninaFoodLab.DTO.Chef;
 import UninaFoodLab.DTO.Corso;
+import UninaFoodLab.DTO.FrequenzaSessioni;
 import UninaFoodLab.Exceptions.CorsoNotFoundException;
 import UninaFoodLab.Exceptions.DAOException;
 
+import java.math.BigDecimal;
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CorsoDAO_Postgres implements CorsoDAO
 {
-	private Corso mapResultSetToCorso(ResultSet rs) throws SQLException
+	private Corso mapResultSetToCorso(ResultSet rs) throws SQLException 
 	{
-		Corso c = new Corso(
-				        	 
-	    			   	   );
-		
-	    c.setId(rs.getInt("IdCorso"));	    
-	    return c;
+	    int idCorso = rs.getInt("IdCorso");
+	    
+	    return new Corso(
+	    				 rs.getString("Nome"), 
+	    				 rs.getDate("Data").toLocalDate(), 
+	    				 rs.getInt("NumeroSessioni"), 
+	    				 FrequenzaSessioni.valueOf(rs.getString("FrequenzaSessioni")), 
+	    				 rs.getInt("Limite"), 
+	    				 rs.getString("Descrizione"), 
+	    				 rs.getBigDecimal("Costo"), 
+	    				 rs.getBoolean("isPratico"), 
+	    				 new ChefDAO_Postgres().getChefById(rs.getInt("IdChef")), 
+	    				 new ArgomentoDAO_Postgres().getArgomentiByIdCorso(idCorso), 
+	    				 new SessioneDAO_Postgres().getSessioniByCorso(idCorso));
 	}
 	
 	@Override
 	public void save(Corso toSaveCorso)
 	{
         String sql =
-        		     "INSERT INTO Corso (nome, data, frequenzaSessioni, limite, descrizione, costo, isPratico) "
-        		   + "VALUES (?, ?, ?, ?, ?, ?)";
+        		     "INSERT INTO Corso (nome, data, frequenzaSessioni, limite, descrizione, costo, isPratico, idChef) "
+        		   + "VALUES (?, ?, ?, ?, ?, ?, ?)";
         
         try (Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
         {
@@ -38,6 +50,7 @@ public class CorsoDAO_Postgres implements CorsoDAO
             s.setString(5, toSaveCorso.getDescrizione());
             s.setBigDecimal(6, toSaveCorso.getCosto());
             s.setBoolean(7, toSaveCorso.getIsPratico());
+            s.setInt(8, toSaveCorso.getChef().getId());
             s.executeUpdate();
             
             try(ResultSet genKeys = s.getGeneratedKeys())

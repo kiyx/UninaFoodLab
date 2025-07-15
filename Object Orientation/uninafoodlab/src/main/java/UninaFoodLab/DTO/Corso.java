@@ -2,11 +2,11 @@ package UninaFoodLab.DTO;
 
 import java.math.BigDecimal;
 import java.sql.Date;
-import java.sql.Time;
 import java.util.ArrayList;
 
 import UninaFoodLab.Exceptions.RequiredArgomentoException;
 import UninaFoodLab.Exceptions.RequiredChefException;
+import UninaFoodLab.Exceptions.RequiredSessioneException;
 
 import java.time.LocalDate;
 
@@ -21,14 +21,25 @@ public class Corso
     private String descrizione;
     private BigDecimal costo;
     private boolean isPratico;
+    
     private Chef chef; 
     private ArrayList<Sessione> sessioni;
     private ArrayList<Argomento> argomenti;
     
     
     public Corso(String nome, LocalDate dataInizio, int numeroSessioni, FrequenzaSessioni frequenzaSessioni, int limite, String descrizione, BigDecimal costo, boolean isPratico, Chef chef,
-    		     ArrayList<Argomento> argomenti, ArrayList<Sessione> sessioniIniziali)
+    		     ArrayList<Argomento> argomenti, ArrayList<Sessione> sessioni)
     {
+    	if(chef == null) throw new RequiredChefException();
+        this.chef = chef;
+        
+    	if(argomenti == null || argomenti.isEmpty()) throw new RequiredArgomentoException();	
+        this.argomenti = argomenti; 
+        
+        if(sessioni == null || sessioni.isEmpty()) throw new RequiredSessioneException();	
+        this.sessioni = sessioni;
+        
+       
         this.nome = nome;
         this.dataInizio = dataInizio;
         this.numeroSessioni = numeroSessioni;
@@ -37,15 +48,6 @@ public class Corso
         this.descrizione = descrizione;
         this.costo = costo;
         this.isPratico = isPratico;
-        
-        if(chef == null) throw new RequiredChefException();
-        this.setChef(chef);
-        
-        this.sessioni;
-        this.numeroSessioni = sessioni.size();
-        
-        if(argomenti == null || argomenti.isEmpty()) throw new RequiredArgomentoException();	
-        this.argomenti = argomenti;  
     }
     
     public int getId()  
@@ -108,11 +110,6 @@ public class Corso
 		return chef;
 	}
 
-	public void setChef(Chef chef)
-	{
-		this.chef = chef;
-	}
-	
     public ArrayList<Sessione> getSessioni()
     {
         return sessioni;
@@ -123,12 +120,7 @@ public class Corso
         return argomenti;
     }
 
-    public void aggiungiSessione(Sessione toAddSessione)
-    {
-        sessioni.add(toAddSessione);
-    }
-
-    public void aggiungiArgomento(Argomento toAddArgomento)
+    public void addArgomento(Argomento toAddArgomento)
     {
         argomenti.add(toAddArgomento);
     }

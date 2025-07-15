@@ -10,6 +10,26 @@ import java.util.List;
 
 public class SessioneOnlineDAO_Postgres implements SessioneOnlineDAO
 {
+	
+	
+	
+	@Override
+    public void save(SessioneOnline toSaveSessione) throws SQLException 
+    {
+        String sql = "INSERT INTO SessioneOnline (durata, orario, data, link)  VALUES (?, ?, ?, ?)";
+        try (Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
+        {
+            s.setInt(1, toSaveSessione.getDurata());
+            s.setTime(2, toSaveSessione.getOrario());
+            s.setDate(3, toSaveSessione.getData());
+            s.setString(4, toSaveSessione.getLinkRiunione());
+
+            s.executeUpdate();
+        }
+    }
+
+	
+	@Override
     public SessioneOnline getSessioneOnlineById(int id) throws SQLException{
         String sql ="SELECT * FROM SessioneOnline WHERE IdCorso = ?";
         try (Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
@@ -30,6 +50,7 @@ public class SessioneOnlineDAO_Postgres implements SessioneOnlineDAO
         return null;
     }
 
+	@Override
     public List<SessioneOnline> getSessioniOnlineByCorso(int idCorso) throws SQLException
     {
         String sql ="SELECT * FROM SessioneOnline WHERE IdCorso = ?";
@@ -51,32 +72,8 @@ public class SessioneOnlineDAO_Postgres implements SessioneOnlineDAO
         }
         return ret;
     }
-
-    public void save(SessioneOnline toSaveSessione) throws SQLException 
-    {
-        String sql = "INSERT INTO SessioneOnline (durata, orario, data, link)  VALUES (?, ?, ?, ?)";
-        try (Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
-        {
-            s.setInt(1, toSaveSessione.getDurata());
-            s.setTime(2, toSaveSessione.getOrario());
-            s.setDate(3, toSaveSessione.getData());
-            s.setString(4, toSaveSessione.getLinkRiunione());
-
-            s.executeUpdate();
-        }
-    }
-
-    public void delete(int IdSessioneOnline) throws SQLException 
-    {
-        String sql = "DELETE FROM Corso WHERE IdSessioneOnline = ?";
-        try (Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
-        {
-            s.setInt(1, IdSessioneOnline);
-            s.executeUpdate();
-        }
-
-    }
-
+	
+	@Override
     public void update(SessioneOnline oldSessione, SessioneOnline newSessione) throws SQLException
     {
         if(!oldSessione.getLinkRiunione().equals(newSessione.getLinkRiunione()))
@@ -90,4 +87,17 @@ public class SessioneOnlineDAO_Postgres implements SessioneOnlineDAO
             }
         }
     }
+
+	@Override
+    public void delete(int IdSessioneOnline) throws SQLException 
+    {
+        String sql = "DELETE FROM Corso WHERE IdSessioneOnline = ?";
+        try (Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
+        {
+            s.setInt(1, IdSessioneOnline);
+            s.executeUpdate();
+        }
+
+    }
+	
 }
