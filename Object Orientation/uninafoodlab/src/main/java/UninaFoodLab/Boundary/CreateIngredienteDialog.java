@@ -1,12 +1,65 @@
 package UninaFoodLab.Boundary;
 
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
+import javax.swing.BorderFactory;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
+import javax.swing.JToggleButton;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+
+import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXDialog;
 import org.jdesktop.swingx.JXFrame;
+import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
 
-public class CreateIngredienteDialog extends JXDialog {
+import UninaFoodLab.Controller.Controller;
+import UninaFoodLab.DTO.LivelloDifficolta;
+import UninaFoodLab.DTO.NaturaIngrediente;
+import net.miginfocom.swing.MigLayout;
 
-	public CreateIngredienteDialog(JXPanel parent)
+public class CreateIngredienteDialog extends JDialog {
+
+	private JXLabel nomeLabel, origineLabel;
+	private JTextField nomeField;
+	
+	private CompoundBorder defaultBorder = BorderFactory.createCompoundBorder(
+			new LineBorder(Color.LIGHT_GRAY, 1),
+		  	new EmptyBorder(0, 6, 0, 0));
+	private CompoundBorder errorBorder = BorderFactory.createCompoundBorder(
+        	new LineBorder(Color.RED, 1),
+        	new EmptyBorder(0, 6, 0, 0));
+	
+	private JXButton conferma;
+	private JComboBox<NaturaIngrediente> origineList;
+	
+	private JXPanel panel;
+	private CreateRecipesDialog parent;
+	
+	private DocumentListener nomeListener;
+	private FocusAdapter nomeFocusListener;
+	private ActionListener ConfermaBtnActionListener;
+	private WindowAdapter windowListener;
+	
+	public CreateIngredienteDialog(CreateRecipesDialog parent)
 	{
 		super(parent, "Cambia Password", true);
 		this.parent=parent;
@@ -16,4 +69,166 @@ public class CreateIngredienteDialog extends JXDialog {
         setLocationRelativeTo(parent);
         setResizable(false);
 	}
+	
+	private void initComponents() {
+	    setTitle("Crea Ingrediente");
+
+	    panel = new JXPanel(new MigLayout("wrap 2", "[grow][grow,fill]", "[]5[]5[]5[]30[]"));
+	    panel.setBackground(Color.WHITE);
+	    panel.setBorder(new EmptyBorder(20, 25, 20, 25)); // Spaziatura esterna
+	    setContentPane(panel);
+
+	    Font labelFont = new Font("Segoe UI", Font.BOLD, 14);
+	    Font inputFont = new Font("Segoe UI", Font.PLAIN, 14);
+
+	    nomeLabel = new JXLabel("Nome ingrediente:");
+	    nomeLabel.setFont(labelFont);
+	    nomeLabel.setForeground(new Color(50, 50, 50));
+	    panel.add(nomeLabel, "span 2, left");
+
+	    nomeField = new JTextField();
+	    nomeField.setFont(inputFont);
+	    nomeField.setPreferredSize(new Dimension(250, 36));
+	    nomeField.setBorder(BorderFactory.createCompoundBorder(
+	    		defaultBorder,
+	        new EmptyBorder(6, 8, 6, 8)
+	    ));
+	    panel.add(nomeField, "span 2, growx");
+
+	    origineLabel = new JXLabel("Natura dell'ingrediente:");
+	    origineLabel.setFont(labelFont);
+	    origineLabel.setForeground(new Color(50, 50, 50));
+	    panel.add(origineLabel, "span 2, left");
+
+	    origineList = new JComboBox<>(NaturaIngrediente.values());
+	    origineList.setFont(inputFont);
+	    origineList.setPreferredSize(new Dimension(250, 36));
+	    origineList.setBackground(Color.WHITE);
+	    origineList.setBorder(BorderFactory.createCompoundBorder(
+	        new LineBorder(new Color(200, 200, 200), 1, true),
+	        new EmptyBorder(2, 8, 2, 8)
+	    ));
+	    panel.add(origineList, "span 2, growx");
+
+	    conferma = new JXButton("Conferma");
+	    conferma.setFont(new Font("Segoe UI", Font.BOLD, 16));
+	    conferma.setPreferredSize(new Dimension(140, 36));
+	    conferma.setBackground(new Color(225, 126, 47, 220));
+	    conferma.setForeground(Color.WHITE);
+	    conferma.setOpaque(true);
+	    conferma.setFocusPainted(false);
+	    conferma.setCursor(new Cursor(Cursor.HAND_CURSOR));
+	    conferma.setBorder(BorderFactory.createCompoundBorder(
+	    		defaultBorder,
+	        new EmptyBorder(6, 12, 6, 12)
+	    ));
+	    panel.add(conferma, "span 2, center");
+	}
+	
+	private void initListeners()
+	{
+        nomeListener = new DocumentListener()
+        {
+            @Override
+            public void insertUpdate(DocumentEvent e) { checkNome(); }
+            @Override
+            public void removeUpdate(DocumentEvent e) { checkNome(); }
+            @Override
+            public void changedUpdate(DocumentEvent e) { checkNome(); }
+        };
+        nomeField.getDocument().addDocumentListener(nomeListener);
+	
+	
+			ConfermaBtnActionListener = new ActionListener()
+			{
+				@Override
+				public void actionPerformed(ActionEvent e)
+				{
+					boolean nomeValid = checkNome();
+					boolean origineValid = checkOrigine();
+
+					if (!nomeValid) {
+						nomeField.requestFocus();
+					} else if (!origineValid) {
+						origineList.requestFocus();
+					} else {
+			        	conferma.setEnabled(false); // Disabilita il pulsante durante l'operazione
+			        	Controller.getController().createNewIngredient(CreateIngredienteDialog.this, parent, nomeField.getText(), (NaturaIngrediente)origineList.getSelectedItem());
+			        	// La riabilitazione del pulsante e la chiusura della dialog (o gestione errori) dovrebbe avvenire dopo la risposta del controller
+			        }
+			    }
+			};
+			conferma.addActionListener(ConfermaBtnActionListener);
+			
+			/*windowListener = new WindowAdapter() 
+	        {
+	            @Override
+	            public void windowClosed(WindowEvent e) 
+	            {
+	            	disposeListeners();
+	            }
+
+	            @Override
+	            public void windowClosing(WindowEvent e) 
+	            {
+	            	disposeListeners();
+	            }
+	        };
+	        CreateIngredienteDialog.addWindowListener(windowListener);*/
+	}
+	
+   private void disposeListeners() 
+    {
+	    if(nomeField != null && nomeListener != null)
+			nomeField.getDocument().removeDocumentListener(nomeListener);
+
+        if (conferma != null && ConfermaBtnActionListener != null)
+        	conferma.removeActionListener(ConfermaBtnActionListener);
+		
+    }
+	@Override
+    public void dispose()
+    {
+    	disposeListeners();
+        super.dispose();
+    }
+
+    private boolean checkNome()
+    {
+    	boolean ret = true;
+    	if( nomeField.getText().trim().isEmpty())
+    	{
+    		nomeField.setBorder(errorBorder);
+    		showError( "Nome obbligatorio");
+    		ret = false;
+    	}
+    	else
+    		nomeField.setBorder(defaultBorder);
+    	return ret;
+  	  		
+    }
+    
+    private boolean checkOrigine()
+    {
+    	boolean ret = true;
+    	if( origineList.getSelectedItem()==null)
+    	{
+    		showError( "Natura dell'ingrediente obbligatoria");
+    		ret = false;
+    	}
+    	return ret;
+  	  		
+    }    
+    
+	public void showError(String msg)
+	{
+		JOptionPane.showMessageDialog(this, msg, "Errore", JOptionPane.ERROR_MESSAGE);
+		conferma.setEnabled(true);
+	}
+
+	public void showSuccess(String msg) {
+        JOptionPane.showMessageDialog(this, msg, "Successo", JOptionPane.INFORMATION_MESSAGE);
+        conferma.setEnabled(true);
+        dispose(); 
+    }
 }

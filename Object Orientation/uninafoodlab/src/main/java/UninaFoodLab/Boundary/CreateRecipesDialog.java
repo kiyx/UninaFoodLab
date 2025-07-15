@@ -49,9 +49,15 @@ import com.github.lgooddatepicker.optionalusertools.DateVetoPolicy;
 import com.github.lgooddatepicker.zinternaltools.DateVetoPolicyMinimumMaximumDate;
 
 import UninaFoodLab.Controller.Controller;
+import UninaFoodLab.DAO.Postgres.RicettaDAO_Postgres;
 import UninaFoodLab.DTO.Argomento;
+import UninaFoodLab.DTO.Chef;
 import UninaFoodLab.DTO.FrequenzaSessioni;
+import UninaFoodLab.DTO.Ingrediente;
 import UninaFoodLab.DTO.LivelloDifficolta;
+import UninaFoodLab.DTO.Ricetta;
+import UninaFoodLab.DTO.Utilizzo;
+import UninaFoodLab.Exceptions.DAOException;
 import net.miginfocom.swing.MigLayout;
 
 public class CreateRecipesDialog extends JDialog
@@ -73,7 +79,7 @@ public class CreateRecipesDialog extends JDialog
     private JSpinner tempoSpinner, calorieSpinner;
     private JXLabel tempoLabel, calorieLabel, minLabel, kcalLabel;
     
-    private ActionListener addSessionsListener, cancelAddSessionsListener, confirmBtnListener, goBackBtnListener;
+    private ActionListener addSessionsListener, cancelAddSessionsListener, confirmBtnListener, goBackBtnListener, aggiungiIngredienteBtnListener;
     private MouseListener aggiungiIngredienteMouseListener;
     
     private static final Color BACKGROUND_COLOR = new Color(245, 248, 250);
@@ -86,9 +92,13 @@ public class CreateRecipesDialog extends JDialog
     );
     
     private List<CreateUtilizzoPanel> ingredientiCards;
+    private List<Ingrediente> ingredienti;
     private List<JCheckBox> ingredientiCheck;
     
-	public CreateRecipesDialog(JXFrame parent)
+    private ArrayList<Utilizzo> utilizzi = new ArrayList<>();
+    
+    private MyRecipesFrame parent;
+	public CreateRecipesDialog(MyRecipesFrame parent)
 	{
         super(parent, "Crea nuova ricetta", true);
         setMinimumSize(new Dimension(1670, 700));
@@ -96,7 +106,7 @@ public class CreateRecipesDialog extends JDialog
         setLocationRelativeTo(parent);
         setResizable(true);
         setIconImage(parent.getIconImage());
-        
+        this.parent=parent;
         ingredientiCards = new ArrayList<>();
 
         initComponents();
@@ -119,12 +129,14 @@ public class CreateRecipesDialog extends JDialog
         mainPanel.setBackground(BACKGROUND_COLOR);
         container.add(mainPanel, BorderLayout.CENTER);
 
+        ingredienti = Controller.getController().loadIngredienti();
         initLeftPanel(mainPanel);
         initRightPanel(mainPanel);
 	}
 	
 	 private void initLeftPanel(JXPanel mainPanel)
 	    {
+		 	
 	        leftPanel = new JXPanel(new MigLayout("wrap 1, gapy 20", "[grow,fill]"));
 	        leftPanel.setBackground(BACKGROUND_COLOR);
 	        leftPanel.setPreferredSize(new Dimension(700, 700));
@@ -282,6 +294,16 @@ public class CreateRecipesDialog extends JDialog
         };
         aggiungiIngredienteLabel.addMouseListener(aggiungiIngredienteMouseListener);
 
+        aggiungiIngredienteBtnListener = new ActionListener()
+        		{
+        	 @Override
+        	 public void actionPerformed(ActionEvent e)
+        	 {
+        		 new CreateIngredienteDialog(CreateRecipesDialog.this).setVisible(true);
+        	 }
+        		};
+        aggiungiIngredienteBtn.addActionListener(aggiungiIngredienteBtnListener);
+        
         confirmBtnListener = new ActionListener()
         {
             @Override
@@ -297,12 +319,36 @@ public class CreateRecipesDialog extends JDialog
                 {
                     if(!card.isValidUtilizzo())
                     {
-                        JOptionPane.showMessageDialog(CreateRecipesDialog.this, "Errore nei dati di un ingredeinte utilizzato", "Errore", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(CreateRecipesDialog.this, "Errore nei dati di un ingrediente utilizzato", "Errore", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
                 }
 
-                // TODO: invia dati al Controller
+                if(!checkNome())
+                {
+                	
+                }
+                else if (!checkProvenienza())
+                {
+                	
+                }
+                else
+                {
+                	for(CreateUtilizzoPanel card : ingredientiCards)
+                    {	 
+                		for(int i=0; i<ingredienti.size(); i++)
+                		{
+                			if(ingredienti.get(i).getId()==card.getId())
+                				utilizzi.add(new Utilizzo(card.getQuantita(), card.getUnita(), ingredienti.get(i)));               				
+                		}                        
+                    }
+
+            		Ricetta toSaveRicetta = new Ricetta(nameField.getText(), provenienzaField.getText(), (int)tempoSpinner.getValue(), (int)calorieSpinner.getValue(),
+            								(LivelloDifficolta)difficoltaList.getSelectedItem(), allergeniArea.getText(), ((Chef)Controller.getController().getLoggedUser()), utilizzi);
+            											
+            		Controller.getController().saveRicettaUtilizzi(parent, toSaveRicetta, utilizzi);
+
+                }
                 dispose();
             }
         };
@@ -328,11 +374,7 @@ public class CreateRecipesDialog extends JDialog
 
 	public void disposeListeners()
 	{
-	    if(aggiungiIngredienteLabel != null && aggiungiIngredienteMouseListener != null)
-	    {
-	    	aggiungiIngredienteLabel.removeMouseListener(aggiungiIngredienteMouseListener);
-	    }  
-	
+
 	    if(confirmBtn != null && confirmBtnListener != null)
 	    {
 	    	confirmBtn.removeActionListener(confirmBtnListener);
@@ -344,18 +386,22 @@ public class CreateRecipesDialog extends JDialog
 	    	goBackBtn.removeActionListener(goBackBtnListener);
 	    	goBackBtnListener = null;
 	    }      
-	        
-	    addSessionsListener = null;
-	    cancelAddSessionsListener = null;
 	
 	    // Rimuovi i listener dei pannelli sessione
 	    for (CreateUtilizzoPanel card : ingredientiCards)
 	    	card.disposeListeners();
-	
 
-        addSessionDialog.pack();
-        addSessionDialog.setLocationRelativeTo(this);
-        addSessionDialog.setVisible(true);
+	    if(aggiungiIngredienteLabel != null && aggiungiIngredienteMouseListener != null)
+	    {
+	    	aggiungiIngredienteLabel.removeMouseListener(aggiungiIngredienteMouseListener);
+	    }           
+
+        if(confirmBtn != null && confirmBtnListener != null)
+        {
+        	confirmBtn.removeActionListener(confirmBtnListener);
+        	confirmBtnListener = null;
+        }            
+ 
     }
 
     private void addNewUtilizzoCard()
@@ -387,6 +433,7 @@ public class CreateRecipesDialog extends JDialog
         if(count == 1)
         {
              columns = "[grow, center]";     
+
              notIngrediente.setVisible(true);
              aggiungiIngredienteBtn.setVisible(true);
         }        
@@ -394,6 +441,35 @@ public class CreateRecipesDialog extends JDialog
             columns = "[grow, right][grow, left]";
 
         ingredientiContainer.setLayout(new MigLayout("wrap " + Math.min(count, 2) + ", gap 10 10", columns));
+    }
+ 
+    ciao
+    private boolean checkNome()
+    {
+    	boolean ret = true;
+    	
+    	return ret;
+    }
+    ciao
+    private boolean checkProvenienza()
+    {
+    	boolean ret = true;
+    	
+    	return ret;
+    }
+    
+    public void addIngrediente(Ingrediente ing)
+    {
+		ingredienti.add(ing);
+		for(CreateUtilizzoPanel card : ingredientiCards)
+		{
+			card.refresh(ing);
+		}
+    }
+    
+    public List<Ingrediente> getIngredienti()
+    {
+    	return ingredienti;
     }
     
 }

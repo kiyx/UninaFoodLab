@@ -711,7 +711,40 @@ public class Controller
 		}
 	}
 	
+	public void createNewIngredient(CreateIngredienteDialog currentDialog, CreateRecipesDialog parent, String nome, NaturaIngrediente ni)
+	{
+		Ingrediente i = new Ingrediente(nome, ni);
+		try
+		{
+			getIngredienteDAO().save(i);
+			parent.addIngrediente(i);
+		}
+		catch(DAOException e)
+		{
+			LOGGER.log(Level.SEVERE, "Errore salvataggio ingrediente nel DB", e);	
+			currentDialog.showError("Errore salvataggio ingrediente nel DB, controllare se l'ingrediente è già presente");
+		}
+		
+	}
 	
+	public void saveRicettaUtilizzi(MyRecipesFrame parent, Ricetta toSaveRicetta, ArrayList<Utilizzo> utilizzi)
+	{
+		try
+		{
+			getRicettaDAO().save(toSaveRicetta, getLoggedUser().getId());
+			for(int i=0; i<utilizzi.size(); i++)
+			{
+				utilizzi.get(i).setIdRicetta(i);
+				getUtilizzoDAO().save(utilizzi.get(i));
+			}
+		}
+		catch(DAOException e)
+		{
+			LOGGER.log(Level.SEVERE, "Errore salvataggio ricetta nel DB", e);	
+			parent.showError("Errore salvataggio ricetta nel DB");
+		}
+		
+	}
 	
 	
 	/**

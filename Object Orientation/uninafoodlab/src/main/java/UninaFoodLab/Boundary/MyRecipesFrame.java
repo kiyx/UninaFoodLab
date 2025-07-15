@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
@@ -108,6 +109,16 @@ public class MyRecipesFrame extends JXFrame
         header.resetView();
         // scrollPane.getVerticalScrollBar().setValue(0); // se hai scroll
         // refreshTableModel(); // se carichi dati
+    }
+    
+	public void showError(String msg)
+	{
+		JOptionPane.showMessageDialog(this, msg, "Errore", JOptionPane.ERROR_MESSAGE);
+	}	
+	
+	public void showSuccess(String msg) 
+	{
+        JOptionPane.showMessageDialog(this, msg, "Successo", JOptionPane.INFORMATION_MESSAGE);
     }
 
 }
