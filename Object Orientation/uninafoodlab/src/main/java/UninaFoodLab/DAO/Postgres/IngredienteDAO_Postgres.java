@@ -1,6 +1,7 @@
 package UninaFoodLab.DAO.Postgres;
 
 import UninaFoodLab.DAO.IngredienteDAO;
+import UninaFoodLab.DTO.Argomento;
 import UninaFoodLab.DTO.Ingrediente;
 import UninaFoodLab.DTO.NaturaIngrediente;
 import UninaFoodLab.Exceptions.DAOException;
@@ -46,6 +47,25 @@ public class IngredienteDAO_Postgres implements IngredienteDAO
         {
         	throw new DAOException("Errore DB durante salvataggio Ingrediente", e);
         }
+    }
+	
+	@Override
+    public List<Ingrediente> getAllIngredienti()
+    {
+        List<Ingrediente> ingredienti = new ArrayList<>();
+        String sql = "SELECT * FROM Ingrediente ORDER BY Nome";
+
+        try(Connection conn = ConnectionManager.getConnection(); Statement s = conn.createStatement(); ResultSet rs = s.executeQuery(sql))
+        {
+            while(rs.next())
+            	ingredienti.add(mapResultSetToIngrediente(rs));
+        }
+        catch(SQLException e)
+        {
+        	throw new DAOException("Errore DB durante getAllIngredienti", e);
+        }
+        
+        return ingredienti;
     }
 	
 	@Override

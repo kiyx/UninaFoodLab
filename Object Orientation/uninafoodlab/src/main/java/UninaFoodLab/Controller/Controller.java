@@ -695,6 +695,18 @@ public class Controller
 	// CreateRecipesDialog
 	// DetailedRecipeFrame
 	
+	public List<Ingrediente> loadIngredienti()
+	{
+		try
+		{
+			return getIngredienteDAO().getAllIngredienti();
+		} 
+		catch (DAOException e)
+		{
+			LOGGER.log(Level.SEVERE, "Errore loadIngredienti da DB", e);
+			return new ArrayList<>();
+		}
+	}
 	
 	
 	
