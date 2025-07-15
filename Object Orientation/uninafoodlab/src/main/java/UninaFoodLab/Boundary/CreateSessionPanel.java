@@ -308,7 +308,7 @@ public class CreateSessionPanel extends JXPanel
 		        cb.setOpaque(false);
 		        cb.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		        
-		        // Listener per aggiornare set quando selezionato/deselezionato
+		        // Listener per aggiornare list quando selezionato/deselezionato
 		        cb.addItemListener(new ItemListener() 
 							       {
 							           @Override

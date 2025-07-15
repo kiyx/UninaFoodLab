@@ -162,6 +162,7 @@ public class ChefDAO_Postgres implements ChefDAO
             s.setString(1, name);
             s.setString(2, surname);
             ResultSet rs = s.executeQuery();
+            
             while(rs.next())
                 chefs.add(mapResultSetToChef(rs));
         }

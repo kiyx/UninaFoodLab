@@ -75,6 +75,7 @@ public class ProfileFrame extends JXFrame
     private void initComponents()
     {
     	rootPanel = new JXPanel(new MigLayout("fill, insets 0", "[grow]", "[][grow]"));
+    	rootPanel.setBackground(Color.white);
     	header = new HeaderPanel(this, getLayeredPane());
     	setContentPane(rootPanel);
     	rootPanel.add(header, "dock north");
@@ -85,7 +86,7 @@ public class ProfileFrame extends JXFrame
     	modifyBtn = new JXButton();
     	mainContentPanel = new JXPanel(new MigLayout("fill, insets 40",
     		    "[push][grow]10[grow]30[grow]10[grow][push]",
-    		    "[]20[]10[]10[]10[]10[]10[]10[]10[]10[]10[]30[]"));
+    		    "[]20[grow, top]10[]10[]10[]10[]10[]10[]10[]10[]30[grow, bottom]"));
     	
         mainContentPanel.setBackground(Color.WHITE);
         mainContentPanel.setBorder(BorderFactory.createCompoundBorder(
@@ -129,7 +130,7 @@ public class ProfileFrame extends JXFrame
     	nomeField.setFocusable(false);
     	nomeField.setBorder(defaultBorder);
     	nomeField.setBackground(new Color(0xFFFBF5));
-    	mainContentPanel.add(nomeField, "cell 2 3, growx");
+    	mainContentPanel.add(nomeField, "cell 2 3, growx, wmax 160");
     	
     	cognomeErrorLabel = new JXLabel(" ");
         cognomeErrorLabel.setFont(new Font("SansSerif", Font.BOLD, 13));
@@ -149,7 +150,7 @@ public class ProfileFrame extends JXFrame
     	cognomeField.setFocusable(false);
     	cognomeField.setBorder(defaultBorder);
     	cognomeField.setBackground(new Color(0xFFFBF5));
-    	mainContentPanel.add(cognomeField, "cell 4 3, growx, left"); 
+    	mainContentPanel.add(cognomeField, "cell 4 3, growx, left, wmax 160"); 
     	
     	dataErrorLabel = new JXLabel(" ");
     	dataErrorLabel.setFont(new Font("SansSerif", Font.BOLD, 13));
@@ -216,7 +217,7 @@ public class ProfileFrame extends JXFrame
 		luogoField.setFocusable(false);
 		luogoField.setBorder(defaultBorder);
 		luogoField.setBackground(new Color(0xFFFBF5));
-		mainContentPanel.add(luogoField, "cell 4 5, growx, left");
+		mainContentPanel.add(luogoField, "cell 4 5, growx, left, wmax 160");
 		
     	codFiscErrorLabel = new JXLabel(" ");
     	codFiscErrorLabel.setFont(new Font("SansSerif", Font.BOLD, 13));
@@ -273,7 +274,7 @@ public class ProfileFrame extends JXFrame
     	usernameField.setFocusable(false);
     	usernameField.setBorder(defaultBorder);
     	usernameField.setBackground(new Color(0xFFFBF5));
-    	mainContentPanel.add(usernameField, "cell 2 9, growx");
+    	mainContentPanel.add(usernameField, "cell 2 9, growx, wmax 160");
     	
     	curriculumLabel = new JXLabel ("Curriculum:");
     	curriculumLabel.setFont(new Font("SansSerif", Font.BOLD, 16));

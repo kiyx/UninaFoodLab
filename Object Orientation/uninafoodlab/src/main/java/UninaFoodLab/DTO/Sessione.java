@@ -4,12 +4,15 @@ import java.sql.Date;
 import java.sql.Time;
 import java.time.LocalDate;
 
+import UninaFoodLab.Exceptions.RequiredCorsoException;
+
 public abstract class Sessione
 {
     private int id;
     private int durata;
     private Time orario;
     private LocalDate data;
+    private Corso corso;
     
     protected Sessione(int durata, Time orario, LocalDate data)
     {
@@ -56,5 +59,17 @@ public abstract class Sessione
     public void setData(LocalDate data) 
     {
         this.data = data;
+    }
+    
+    public Corso getCorso() 
+    {
+        return corso;
+    }
+    
+    public void setCorso(Corso corso)
+    {
+        if(corso == null)
+            throw new RequiredCorsoException();
+        this.corso = corso;
     }
 }

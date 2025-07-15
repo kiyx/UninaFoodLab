@@ -399,56 +399,49 @@ $$
 DECLARE
     frequenza Corso.FrequenzaSessioni%TYPE;
     giorniFrequenza INTEGER;
-    dataPrec DATE;
-    dataSucc DATE;
+    dataInizio DATE;
+    posizione INTEGER;
     dataMin DATE;
     dataMax DATE;
 BEGIN
-    -- Prendi la frequenza del corso
-    SELECT FrequenzaSessioni INTO frequenza FROM Corso WHERE IdCorso = NEW.IdCorso;
+    -- 1. Recupera frequenza e dataInizio
+    SELECT FrequenzaSessioni, DataInizio
+    INTO frequenza, dataInizio
+    FROM Corso
+    WHERE IdCorso = NEW.IdCorso;
 
+    -- 2. Se la frequenza è libera, accetta sempre
+    IF frequenza = 'Libera' THEN
+        RETURN NEW;
+    END IF;
+
+    -- 3. Mappa frequenza → giorni
     CASE frequenza
         WHEN 'Giornaliera' THEN giorniFrequenza := 1;
         WHEN 'Settimanale' THEN giorniFrequenza := 7;
         WHEN 'Bisettimanale' THEN giorniFrequenza := 14;
         WHEN 'Mensile' THEN giorniFrequenza := 30;
-        WHEN 'Libera' THEN RETURN NEW;  -- nessun vincolo su frequenza
         ELSE
             RAISE EXCEPTION 'Frequenza non riconosciuta: %', frequenza;
     END CASE;
 
-    -- Trova sessione precedente (max data < NEW.Data)
-    SELECT MAX(Data) INTO dataPrec FROM (
-        SELECT Data FROM SessionePratica WHERE IdCorso = NEW.IdCorso AND Data < NEW.Data
+    -- 4. Calcola posizione (quante sessioni esistono già, escluse quella in editing)
+    SELECT COUNT(*) INTO posizione
+    FROM (
+        SELECT Data FROM SessionePratica WHERE IdCorso = NEW.IdCorso AND IdSessionePratica <> COALESCE(NEW.IdSessionePratica, -1)
         UNION ALL
-        SELECT Data FROM SessioneOnline WHERE IdCorso = NEW.IdCorso AND Data < NEW.Data
-    ) AS Precedenti;
+        SELECT Data FROM SessioneOnline WHERE IdCorso = NEW.IdCorso AND IdSessioneOnline <> COALESCE(NEW.IdSessioneOnline, -1)
+    ) AS sessioni_precedenti;
 
-    -- Trova sessione successiva (min data > NEW.Data)
-    SELECT MIN(Data) INTO dataSucc FROM (
-        SELECT Data FROM SessionePratica WHERE IdCorso = NEW.IdCorso AND Data > NEW.Data
-        UNION ALL
-        SELECT Data FROM SessioneOnline WHERE IdCorso = NEW.IdCorso AND Data > NEW.Data
-    ) AS Successive;
+    -- 5. Calcola la finestra valida
+    dataMin := dataInizio + (giorniFrequenza * posizione);
+    dataMax := dataMin + giorniFrequenza - 1;
 
-    IF dataPrec IS NOT NULL THEN
-        -- Definisci range consentito per NEW.Data
-        dataMin := dataPrec + giorniFrequenza;
-        dataMax := dataPrec + giorniFrequenza - 1;  -- intervallo di una frequenza
-
-        IF NEW.Data < dataMin OR NEW.Data > dataMax THEN
-            RAISE EXCEPTION
-                'La data della sessione deve essere tra % e % (range consentito dalla frequenza del corso)',
-                dataMin, dataMax;
-        END IF;
-    END IF;
-
-    IF dataSucc IS NOT NULL THEN
-        IF dataSucc < NEW.Data + giorniFrequenza THEN
-            RAISE EXCEPTION
-                'La sessione successiva è troppo vicina alla data inserita. Deve essere almeno a % giorni di distanza',
-                giorniFrequenza;
-        END IF;
+    -- 6. Verifica se la data è dentro l'intervallo
+    IF NEW.Data < dataMin OR NEW.Data > dataMax THEN
+        RAISE EXCEPTION
+            'La data della sessione n.% deve essere tra % e %, secondo la frequenza % del corso',
+            posizione + 1, dataMin, dataMax, frequenza;
     END IF;
 
     RETURN NEW;
@@ -623,13 +616,13 @@ CREATE OR REPLACE FUNCTION fun_blocca_aggiorna_corso()
 RETURNS TRIGGER AS
 $$
 BEGIN
-    RAISE EXCEPTION 'Non puoi modificare i campi IdCorso, Nome, NumeroSessioni, FrequenzaSessioni, Costo o IdChef.';
+    RAISE EXCEPTION 'Non puoi modificare i campi IdCorso, NumeroSessioni, FrequenzaSessioni, Costo o IdChef.';
     RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE TRIGGER trg_blocca_aggiorna_corso
-BEFORE UPDATE  OF IdCorso, Nome, NumeroSessioni, FrequenzaSessioni, Costo, IdChef ON Corso
+BEFORE UPDATE  OF IdCorso, NumeroSessioni, FrequenzaSessioni, Costo, IdChef ON Corso
 FOR EACH ROW
 EXECUTE FUNCTION fun_blocca_aggiorna_corso();
 

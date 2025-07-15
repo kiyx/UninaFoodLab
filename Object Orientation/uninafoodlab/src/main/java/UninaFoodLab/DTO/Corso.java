@@ -23,23 +23,30 @@ public class Corso
     private boolean isPratico;
     
     private Chef chef; 
-    private ArrayList<Sessione> sessioni;
+    private ArrayList<Sessione> sessioni = new ArrayList<>();
     private ArrayList<Argomento> argomenti;
     
     
     public Corso(String nome, LocalDate dataInizio, int numeroSessioni, FrequenzaSessioni frequenzaSessioni, int limite, String descrizione, BigDecimal costo, boolean isPratico, Chef chef,
     		     ArrayList<Argomento> argomenti, ArrayList<Sessione> sessioni)
     {
-    	if(chef == null) throw new RequiredChefException();
+    	if(chef == null) 
+    		throw new RequiredChefException();
         this.chef = chef;
         
-    	if(argomenti == null || argomenti.isEmpty()) throw new RequiredArgomentoException();	
+    	if(argomenti == null || argomenti.isEmpty()) 
+    		throw new RequiredArgomentoException();	
         this.argomenti = argomenti; 
         
-        if(sessioni == null || sessioni.isEmpty()) throw new RequiredSessioneException();	
-        this.sessioni = sessioni;
+        if(sessioni == null || sessioni.isEmpty())
+            throw new RequiredSessioneException();
         
-       
+        for(Sessione s : sessioni)
+        {
+            s.setCorso(this);
+            this.sessioni.add(s);
+        }
+
         this.nome = nome;
         this.dataInizio = dataInizio;
         this.numeroSessioni = numeroSessioni;
@@ -65,6 +72,11 @@ public class Corso
         return nome;
     }
 
+    public void setNome(String nome)
+    {
+        this.nome = nome;
+    }
+    
     public Date getDataInizio()
     {
         return Date.valueOf(dataInizio);

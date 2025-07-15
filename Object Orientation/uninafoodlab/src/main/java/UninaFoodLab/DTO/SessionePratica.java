@@ -15,7 +15,7 @@ public class SessionePratica extends Sessione
     ArrayList<Ricetta> ricette;
     ArrayList<Adesione> adesioni = new ArrayList<>();
 
-    public SessionePratica(int durata, Time orario, LocalDate data, Corso corso, String indirizzo, ArrayList<Ricetta> ricette)
+    public SessionePratica(int durata, Time orario, LocalDate data, String indirizzo, ArrayList<Ricetta> ricette)
     {
         super(durata, orario, data);
         

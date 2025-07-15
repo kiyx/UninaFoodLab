@@ -2,15 +2,13 @@ package UninaFoodLab.DAO.Postgres;
 
 import UninaFoodLab.DAO.CorsoDAO;
 import UninaFoodLab.DTO.Argomento;
-import UninaFoodLab.DTO.Chef;
 import UninaFoodLab.DTO.Corso;
+import UninaFoodLab.DTO.Sessione;
 import UninaFoodLab.DTO.FrequenzaSessioni;
 import UninaFoodLab.Exceptions.CorsoNotFoundException;
 import UninaFoodLab.Exceptions.DAOException;
 
-import java.math.BigDecimal;
 import java.sql.*;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,37 +18,48 @@ public class CorsoDAO_Postgres implements CorsoDAO
 	{
 	    int idCorso = rs.getInt("IdCorso");
 	    
-	    return new Corso(
-	    				 rs.getString("Nome"), 
-	    				 rs.getDate("Data").toLocalDate(), 
-	    				 rs.getInt("NumeroSessioni"), 
-	    				 FrequenzaSessioni.valueOf(rs.getString("FrequenzaSessioni")), 
-	    				 rs.getInt("Limite"), 
-	    				 rs.getString("Descrizione"), 
-	    				 rs.getBigDecimal("Costo"), 
-	    				 rs.getBoolean("isPratico"), 
-	    				 new ChefDAO_Postgres().getChefById(rs.getInt("IdChef")), 
-	    				 new ArgomentoDAO_Postgres().getArgomentiByIdCorso(idCorso), 
-	    				 new SessioneDAO_Postgres().getSessioniByCorso(idCorso));
+	    ArrayList<Sessione> sessioni = new ArrayList<>();
+	    
+	    sessioni.addAll(new SessioneOnlineDAO_Postgres().getSessioniOnlineByIdCorso(idCorso));
+	    sessioni.addAll(new SessionePraticaDAO_Postgres().getSessioniPraticheByIdCorso(idCorso));
+	    
+	    Corso c = new Corso
+		    				(
+		    				  rs.getString("Nome"), 
+		    				  rs.getDate("Data").toLocalDate(), 
+		    				  rs.getInt("NumeroSessioni"), 
+		    				  FrequenzaSessioni.valueOf(rs.getString("FrequenzaSessioni")), 
+		    				  rs.getInt("Limite"), 
+		    				  rs.getString("Descrizione"), 
+		    				  rs.getBigDecimal("Costo"), 
+		    				  rs.getBoolean("isPratico"), 
+		    				  new ChefDAO_Postgres().getChefById(rs.getInt("IdChef")), 
+		    				  new ArrayList<Argomento>(new ArgomentoDAO_Postgres().getArgomentiByIdCorso(idCorso)), 
+		    				  sessioni
+		    			   );
+	    c.setId(rs.getInt("IdCorso"));
+	    
+	    return c;
 	}
 	
 	@Override
 	public void save(Corso toSaveCorso)
 	{
         String sql =
-        		     "INSERT INTO Corso (nome, data, frequenzaSessioni, limite, descrizione, costo, isPratico, idChef) "
-        		   + "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        		     "INSERT INTO Corso(Nome, DataInizio, FrequenzaSessioni, Limite, Descrizione, Costo, isPratico, IdChef) "
+        		   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
-        try (Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
+        try(Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
         {
             s.setString(1, toSaveCorso.getNome());
             s.setDate(2, toSaveCorso.getDataInizio());
-            s.setString(3, toSaveCorso.getFrequenzaSessioni().toString());
-            s.setInt(4, toSaveCorso.getLimite());
-            s.setString(5, toSaveCorso.getDescrizione());
-            s.setBigDecimal(6, toSaveCorso.getCosto());
-            s.setBoolean(7, toSaveCorso.getIsPratico());
-            s.setInt(8, toSaveCorso.getChef().getId());
+            s.setInt(3, toSaveCorso.getNumeroSessioni());
+            s.setString(4, toSaveCorso.getFrequenzaSessioni().toString());
+            s.setInt(5, toSaveCorso.getLimite());
+            s.setString(6, toSaveCorso.getDescrizione());
+            s.setBigDecimal(7, toSaveCorso.getCosto());
+            s.setBoolean(8, toSaveCorso.getIsPratico());
+            s.setInt(9, toSaveCorso.getChef().getId());
             s.executeUpdate();
             
             try(ResultSet genKeys = s.getGeneratedKeys())
@@ -103,7 +112,7 @@ public class CorsoDAO_Postgres implements CorsoDAO
         
         List<Corso> courses = new ArrayList<Corso>();
         
-        try (Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
+        try(Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
         {
             s.setInt(1, idChef);
             ResultSet rs = s.executeQuery();
@@ -144,15 +153,79 @@ public class CorsoDAO_Postgres implements CorsoDAO
     }
 
 	@Override
-    public List<Corso> getCorsiByArgomenti(List<Argomento> argomenti)
+    public List<Corso> getCorsiByArgomenti(List<Integer> argomenti)
     {
+		String sql = 
+					 "SELECT * "
+				   + "FROM Corso C JOIN Argomenti_Corso AC ON C.IdCorso = AC.IdCorso "
+				   + "WHERE IdArgomento IN( ";
+		
+		for(int i = 0; i < argomenti.size(); i++)
+		{
+			sql += "?";
+			if(i < argomenti.size() - 1)
+				sql += ", ";
+		}
+		sql += ")";
+		    
+		List<Corso> courses = new ArrayList<>();
+        
+        try(Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
+        {
+        	for(int i = 0; i < argomenti.size(); i++)
+        		s.setInt(i + 1, argomenti.get(i).intValue());
+        	
+            ResultSet rs = s.executeQuery();
 
+            while(rs.next())
+            	courses.add(mapResultSetToCorso(rs));
+        }
+        catch(SQLException e)
+        {
+        	throw new DAOException("Errore DB durante getCorsiByArgomenti", e);
+        }
+        
+        return courses;
     }
-
+	
 	@Override
     public void update(Corso oldCorso, Corso newCorso)
     {
+		String sql = "UPDATE Corso SET ";
+        List<Object> param = new ArrayList<>();
+
+        if(! (oldCorso.getNome().equals(newCorso.getNome())) )
+        {
+            sql += "Nome = ?, ";
+            param.add(newCorso.getNome());
+        }
         
+        if(! (oldCorso.getDescrizione().equals(newCorso.getDescrizione())) )
+        {
+            sql += "Descrizione = ? ";
+            param.add(newCorso.getDescrizione());
+        }
+        
+        if(!param.isEmpty())
+        {
+        	if(sql.endsWith(", ")) 
+        		sql = sql.substring(0, sql.length() - 2);
+        	
+            sql += " WHERE IdCorso = ?";
+            param.add(oldCorso.getId());
+
+            try(Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
+            {
+                for(int i = 0; i < param.size(); i++)
+                    s.setObject(i + 1, param.get(i));
+
+                s.executeUpdate();
+            }
+            catch(SQLException e)
+            {
+            	throw new DAOException("Errore DB durante aggiornamento Corso", e);
+            }
+        }
     }
 	
 	@Override
@@ -162,7 +235,7 @@ public class CorsoDAO_Postgres implements CorsoDAO
         		   + "FROM Corso "
         		   + "WHERE IdCorso = ?";
         
-        try (Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
+        try(Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
         {
             s.setInt(1, IdCorso);
             s.executeUpdate();
