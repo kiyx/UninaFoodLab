@@ -84,7 +84,7 @@ public class ReportFrame extends JXFrame
     {
         // --- CORSI ---
     	
-        if (totCorsi <= 0) 
+        if(totCorsi <= 0) 
         {
             panelCorsi.setChart(null);
             panelCorsi.setBackground(new Color(250, 250, 250));
@@ -105,7 +105,7 @@ public class ReportFrame extends JXFrame
         }
 
         // --- RICETTE ---
-        if (totPratiche <= 0) 
+        if(totPratiche <= 0) 
         {
             panelRicette.setChart(null);
             panelRicette.setBackground(new Color(250, 250, 250));

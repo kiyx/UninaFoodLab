@@ -82,7 +82,7 @@ public class SidebarPanel extends JXPanel
         styleComponents();
         initListeners();
 	}
-
+	
 	/**
 	 * Inizializza i componenti grafici della sidebar, inclusi
 	 * i pulsanti condizionali se l'utente è un chef.
@@ -194,7 +194,7 @@ public class SidebarPanel extends JXPanel
 				 public void actionPerformed(ActionEvent e)
 				 {
 					 reportBtn.setEnabled(false);
-					 Controller.getController().openMonthlyReport(parentFrame);
+					 Controller.getController().openMonthlyReport(parentFrame, reportBtn);
 				 }
 			 };
 			 reportBtn.addActionListener(reportBtnListener);
