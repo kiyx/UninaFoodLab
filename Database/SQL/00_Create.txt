@@ -87,7 +87,7 @@ CREATE TABLE Corso
 CREATE TABLE SessionePratica
 (
 	IdSessionePratica SERIAL PRIMARY KEY, 
-	Durata INTEGER NOT NULL,																							-- La durata è in minuti
+	Durata INTEGER NOT NULL,																-- La durata è in minuti
 	Orario TIME NOT NULL,
 	Data DATE NOT NULL, 
 	NumeroPartecipanti INTEGER NOT NULL DEFAULT 0,

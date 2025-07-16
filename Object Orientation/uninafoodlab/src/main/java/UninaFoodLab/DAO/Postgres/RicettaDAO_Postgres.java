@@ -5,7 +5,7 @@ import UninaFoodLab.DTO.LivelloDifficolta;
 import UninaFoodLab.DTO.Ricetta;
 import UninaFoodLab.DTO.Utilizzo;
 import UninaFoodLab.Exceptions.DAOException;
-import UninaFoodLab.Exceptions.IngredienteNotFoundException;
+import UninaFoodLab.Exceptions.RicettaNotFoundException;
 
 import java.sql.*;
 import java.util.*;
@@ -75,7 +75,7 @@ public class RicettaDAO_Postgres implements RicettaDAO
             if(rs.next())
                 return mapResultSetToRicetta(rs);
             else
-            	throw new IngredienteNotFoundException("Ricetta con id " + idRicetta + " non trovato");
+            	throw new RicettaNotFoundException("Ricetta con id " + idRicetta + " non trovato");
         }
         catch(SQLException e)
         {
@@ -108,7 +108,7 @@ public class RicettaDAO_Postgres implements RicettaDAO
     }
 	
 	@Override
-    public List<Ricetta> getRicettaByIdSessione(int idSessione)
+    public List<Ricetta> getRicettaByIdSessionePratica(int idSessionePratica)
     {
         List<Ricetta> ricette = new ArrayList<>();
         String sql = 
@@ -118,7 +118,7 @@ public class RicettaDAO_Postgres implements RicettaDAO
 
         try(Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
         {
-            s.setInt(1, idSessione);
+            s.setInt(1, idSessionePratica);
             ResultSet rs = s.executeQuery();
             while(rs.next())
             	 ricette.add(mapResultSetToRicetta(rs));

@@ -6,7 +6,7 @@ import UninaFoodLab.DTO.Adesione;
 
 public interface AdesioneDAO
 {
-	List<Adesione> getAdesioniByIdSessionePratica(int idSessionePratica);
 	void save(Adesione toSaveAdesione);
+	List<Adesione> getAdesioniByIdSessionePratica(int idSessionePratica);
 	void delete(int idPartecipante, int idSessionePratica);
 }

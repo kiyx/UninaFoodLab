@@ -90,9 +90,7 @@ public class CorsoDAO_Postgres implements CorsoDAO
             ResultSet rs = s.executeQuery();
 
             if(rs.next())
-            {
                 return mapResultSetToCorso(rs);
-            }
             else
             	throw new CorsoNotFoundException("Corso con id " + idCorso + " non trovato");
         }

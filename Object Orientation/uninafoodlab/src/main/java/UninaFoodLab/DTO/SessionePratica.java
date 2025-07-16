@@ -61,7 +61,7 @@ public class SessionePratica extends Sessione
         return partecipanti;
     }
 
-    public void addPartecipante (Partecipante toAddPartecipante)
+    public void addPartecipante(Partecipante toAddPartecipante)
     {
         partecipanti.add(toAddPartecipante);
         numeroPartecipanti++;
