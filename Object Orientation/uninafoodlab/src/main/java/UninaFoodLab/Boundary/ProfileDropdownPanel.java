@@ -67,7 +67,6 @@ public class ProfileDropdownPanel extends JXPanel
     	initListeners();
 	}
 
-	
 	 /**
      * Inizializza i componenti del dropdown: etichetta utente, separatore,
      * pulsanti "Profilo" e "Logout".
@@ -75,7 +74,7 @@ public class ProfileDropdownPanel extends JXPanel
      */
 	private void initComponents()
 	{
-		userLabel = new JXLabel("hola", FontIcon.of(MaterialDesign.MDI_ACCOUNT_CIRCLE, 20, new Color(80, 80, 80)), JXLabel.LEFT); /*Controller.getController().getLoggedUser().getUsername()*/
+		userLabel = new JXLabel(Controller.getController().getLoggedUser().getUsername(), FontIcon.of(MaterialDesign.MDI_ACCOUNT_CIRCLE, 20, new Color(80, 80, 80)), JXLabel.LEFT);
     	separator = new JXPanel();
     	profileItemBtn = new JXButton("  Profilo", FontIcon.of(MaterialDesign.MDI_ACCOUNT, 18, new Color(60, 60, 60)));
     	changePwItemBtn = new JXButton(" Cambia Password", FontIcon.of(MaterialDesign.MDI_LOCK, 18, new Color(60, 60, 60)));
@@ -182,16 +181,31 @@ public class ProfileDropdownPanel extends JXPanel
 	public void disposeListeners()
 	{
 		if(profileItemBtn!= null && profileItemBtnListener != null)
+		{
 			profileItemBtn.removeActionListener(profileItemBtnListener);
+			profileItemBtnListener = null;
+		}
+			
 		if(logoutItemBtn != null && logoutItemBtnListener != null)
+		{
 			logoutItemBtn.removeActionListener(logoutItemBtnListener);	
+			logoutItemBtnListener = null;
+		}
+			
 		if(changePwItemBtn != null && changePwItemBtnListener != null)
-			changePwItemBtn.removeActionListener(changePwItemBtnListener);	
+		{
+			changePwItemBtn.removeActionListener(changePwItemBtnListener);
+			changePwItemBtnListener = null;
+		}	
 	
         if(hoverListener != null) 
         {
-            if (profileItemBtn != null) profileItemBtn.removeMouseListener(hoverListener);
-            if (logoutItemBtn != null) logoutItemBtn.removeMouseListener(hoverListener);
+            if(profileItemBtn != null) 
+            	profileItemBtn.removeMouseListener(hoverListener);
+            if(logoutItemBtn != null) 
+            	logoutItemBtn.removeMouseListener(hoverListener);
+            
+            hoverListener = null;
         }
 	}
 	

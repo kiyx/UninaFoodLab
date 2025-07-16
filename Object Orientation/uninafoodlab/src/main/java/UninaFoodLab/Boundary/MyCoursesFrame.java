@@ -117,12 +117,7 @@ public class MyCoursesFrame extends JXFrame implements CourseFilterable
     @Override
     public void filterCorsi(String testo)
     {
-        List<Corso> corsiFiltrati = corsiOriginali.stream()
-            .filter(c -> c.getTitolo().toLowerCase().contains(testo)
-                      || c.getDescrizione().toLowerCase().contains(testo))
-            .collect(Collectors.toList());
-
-        aggiornaTabella(corsiFiltrati);
+       
     }
     
     /**

@@ -13,7 +13,7 @@ import org.jdesktop.swingx.JXFrame;
 
 import UninaFoodLab.Controller.Controller;
 
-public class HomepageFrame extends JXFrame implements CourseFilterable
+public class HomepageFrame extends JXFrame
 {
 	private static final long serialVersionUID = 1L;
 
@@ -40,7 +40,7 @@ public class HomepageFrame extends JXFrame implements CourseFilterable
 	{
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
-		contentPane = new JPanel();
+		JPanel contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		JXButton prova = new JXButton("cliccami");

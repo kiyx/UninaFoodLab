@@ -761,7 +761,7 @@ public class CreateCourseDialog extends JDialog
             
             for (Component comp : components)
                 if(comp instanceof JButton)
-                    spinner.remove(comp); // rimuove i bottoni freccia ↑↓
+                    spinner.remove(comp);
             
             spinner.revalidate();
             spinner.repaint();
@@ -772,44 +772,27 @@ public class CreateCourseDialog extends JDialog
     {
         Color orange = new Color(225, 126, 47);
         Color orangeDark = new Color(140, 85, 20);
-        Color background = new Color(255, 255, 255); // bianco puro
-        Color lightBackground = new Color(255, 250, 245); // arancio molto chiaro
+        Color background = new Color(255, 255, 255);
+        Color lightBackground = new Color(255, 250, 245);
         Color grayText = new Color(60, 60, 60);
         Color disabledText = new Color(160, 160, 160);
 
-        // Sfondo generale calendario chiaro e pulito (bianco/arancio molto chiaro)
         settings.setColor(DateArea.BackgroundOverallCalendarPanel, lightBackground);
-
-        // Date normali: sfondo bianco e testo grigio scuro
         settings.setColor(DateArea.CalendarBackgroundNormalDates, background);
         settings.setColor(DateArea.CalendarTextNormalDates, grayText);
-
-        // Data selezionata: arancio pieno con bordo definito 
         settings.setColor(DateArea.CalendarBackgroundSelectedDate, orange);
         settings.setColor(DateArea.CalendarBorderSelectedDate, orangeDark);
-        settings.setColor(DateArea.DatePickerTextValidDate, grayText); // testo campo input visibile
-
-        // Evidenziazione oggi: bordi sottili arancio scuro, sfondo bianco (no riempimento)
+        settings.setColor(DateArea.DatePickerTextValidDate, grayText);
         settings.setColor(DateArea.BackgroundTodayLabel, background);
         settings.setColor(DateArea.TextTodayLabel, orangeDark);
-
-        // Date non selezionabili (vetoed): grigio molto chiaro e testo grigio smorzato
         settings.setColor(DateArea.CalendarBackgroundVetoedDates, new Color(245, 245, 245));
         settings.setColor(DateArea.DatePickerTextVetoedDate, disabledText);
-
-        // Sfondo e testo input disabilitato 
         settings.setColor(DateArea.TextFieldBackgroundDisabled, new Color(245, 245, 245));
         settings.setColor(DateArea.DatePickerTextDisabled, disabledText);
-
-        // Pulsanti di navigazione mese/anno: arancio pieno con testo bianco, senza bordi spostanti
         settings.setColor(DateArea.BackgroundMonthAndYearNavigationButtons, orange);
         settings.setColor(DateArea.TextMonthAndYearNavigationButtons, Color.WHITE);
-
-        // Giorni settimana e numeri settimana in grigio arancio scuro
         settings.setColor(DateArea.CalendarTextWeekdays, orangeDark);
         settings.setColor(DateArea.CalendarTextWeekNumbers, orangeDark);
-
-        // Rimuove la barra azzurra di sfondo del mese (per sicurezza)
         settings.setColor(DateArea.BackgroundMonthAndYearMenuLabels, background);
     }
 }
