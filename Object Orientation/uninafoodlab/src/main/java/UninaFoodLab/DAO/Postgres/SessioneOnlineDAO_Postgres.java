@@ -26,13 +26,26 @@ public class SessioneOnlineDAO_Postgres implements SessioneOnlineDAO
 	}
 	
 	@Override
-    public void save(SessioneOnline toSaveSessione)
+	public void save(SessioneOnline sessione) 
+	{
+	    try(Connection conn = ConnectionManager.getConnection()) 
+	    {
+	        save(sessione, conn);
+	    } 
+	    catch (SQLException e) 
+	    {
+	        throw new DAOException("Errore DB durante salvataggio SessioneOnline", e);
+	    }
+	}
+	
+	@Override
+    public void save(SessioneOnline toSaveSessione, Connection conn)
     {
         String sql = "INSERT INTO SessioneOnline (Durata, Orario, Data, LinkRiunione, IdCorso) "
         		   + "VALUES (?, ?, ?, ?, ?)";
         
         
-        try(Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
+        try(PreparedStatement s = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
         {
             s.setInt(1, toSaveSessione.getDurata());
             s.setTime(2, toSaveSessione.getOrario());
@@ -154,7 +167,6 @@ public class SessioneOnlineDAO_Postgres implements SessioneOnlineDAO
 			}
 		}
 	}
-
 
 	@Override
     public void delete(int IdSessioneOnline)

@@ -19,7 +19,7 @@ public class SessionePraticaDAO_Postgres implements SessionePraticaDAO
 		    				  rs.getInt("Durata"), 
 		    				  rs.getTime("Orario"),
 		    				  rs.getDate("Data").toLocalDate(), 
-		    				  rs.getString("Indirizzo"),
+		    				  rs.getString("Luogo"),
 		    				  new ArrayList<Ricetta>(new RicettaDAO_Postgres().getRicettaByIdSessionePratica(rs.getInt("IdSessionePratica")))
 		    			   );
 	    sp.setId(rs.getInt("IdSessionePratica"));
@@ -27,73 +27,6 @@ public class SessionePraticaDAO_Postgres implements SessionePraticaDAO
 	    return sp;
 	}
 	
-	@Override
-	public void save(SessionePratica sp)
-	{
-	    String sql = 
-	    			  "INSERT INTO SessionePratica (Durata, Orario, Data, Luogo, IdCorso) " +
-	    			  "VALUES (?, ?, ?, ?, ?)";
-	    Connection conn = null;
-
-	    try
-	    {
-	        conn = ConnectionManager.getConnection();
-	        conn.setAutoCommit(false);
-
-	        try(PreparedStatement s = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
-	        {
-	            s.setInt(1, sp.getDurata());
-	            s.setTime(2, sp.getOrario());
-	            s.setDate(3, sp.getData());
-	            s.setString(4, sp.getIndirizzo());
-	            s.setInt(5, sp.getCorso().getId());
-	            s.executeUpdate();
-
-	            try(ResultSet rs = s.getGeneratedKeys())
-	            {
-	                if(rs.next())
-	                    sp.setId(rs.getInt(1));
-	                else
-	                    throw new DAOException("Creazione SessionePratica fallita, nessun ID ottenuto.");
-	            }
-	        }
-
-	        savePreparazioni(sp, conn);
-	        conn.commit();
-	    }
-	    catch(Exception e)
-	    {
-	        if(conn != null)
-	        {
-	            try
-	            {
-	                conn.rollback();
-	            }
-	            catch(SQLException ex)
-	            {
-	            	 throw new DAOException("Errore durante rollback transazionale SessionePratica", e);
-	            }
-	        }
-
-	        throw new DAOException("Errore durante salvataggio transazionale SessionePratica", e);
-	    }
-	    finally
-	    {
-	        if(conn != null)
-	        {
-	            try
-	            {
-	                conn.setAutoCommit(true);
-	                conn.close();
-	            }
-	            catch(SQLException ex)
-	            {
-	            	 throw new DAOException("Errore chiusura connessione SessionePratica", ex);
-	            }
-	        }
-	    }
-	}
-
 	private void savePreparazioni(SessionePratica sp, Connection conn) throws SQLException
 	{
 	    String sql = 
@@ -111,7 +44,61 @@ public class SessionePraticaDAO_Postgres implements SessionePraticaDAO
 	        ps.executeBatch();
 	    }
 	}
-        
+	
+	@Override
+	public void save(SessionePratica sp)
+	{
+	    try(Connection conn = ConnectionManager.getConnection())
+	    {
+	        conn.setAutoCommit(false);
+	        save(sp, conn);
+	        conn.commit();
+	    }
+	    catch (SQLException e)
+	    {
+	        throw new DAOException("Errore durante salvataggio completo e transazionale SessionePratica", e);
+	    }
+	}
+	
+	@Override
+	public void save(SessionePratica sp, Connection conn)
+	{
+	    String sql =
+	                 "INSERT INTO SessionePratica (Durata, Orario, Data, Luogo, IdCorso) " +
+	                 "VALUES (?, ?, ?, ?, ?)";
+
+	    try(PreparedStatement s = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
+	    {
+	        s.setInt(1, sp.getDurata());
+	        s.setTime(2, sp.getOrario());
+	        s.setDate(3, sp.getData());
+	        s.setString(4, sp.getIndirizzo());
+	        s.setInt(5, sp.getCorso().getId());
+	        s.executeUpdate();
+
+	        try (ResultSet rs = s.getGeneratedKeys())
+	        {
+	            if (rs.next())
+	                sp.setId(rs.getInt(1));
+	            else
+	                throw new DAOException("Creazione SessionePratica fallita, nessun ID ottenuto.");
+	        }
+	    }
+	    catch(SQLException e)
+	    {
+	        throw new DAOException("Errore durante save SessionePratica (conn esterna)", e);
+	    }
+
+	    try
+	    {
+	        savePreparazioni(sp, conn);
+	    }
+	    catch(SQLException e)
+	    {
+	        throw new DAOException("Errore durante savePreparazioni", e);
+	    }
+	}
+
 	@Override
     public SessionePratica getSessionePraticaById(int idSessionePratica)
     {

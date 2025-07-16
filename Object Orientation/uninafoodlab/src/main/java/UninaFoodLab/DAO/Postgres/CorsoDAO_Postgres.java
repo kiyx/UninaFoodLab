@@ -4,6 +4,8 @@ import UninaFoodLab.DAO.CorsoDAO;
 import UninaFoodLab.DTO.Argomento;
 import UninaFoodLab.DTO.Corso;
 import UninaFoodLab.DTO.Sessione;
+import UninaFoodLab.DTO.SessioneOnline;
+import UninaFoodLab.DTO.SessionePratica;
 import UninaFoodLab.DTO.FrequenzaSessioni;
 import UninaFoodLab.Exceptions.CorsoNotFoundException;
 import UninaFoodLab.Exceptions.DAOException;
@@ -43,38 +45,94 @@ public class CorsoDAO_Postgres implements CorsoDAO
 	}
 	
 	@Override
-	public void save(Corso toSaveCorso)
+	public void save(Corso toSaveCorso, Connection conn)
 	{
-        String sql =
-        		     "INSERT INTO Corso(Nome, DataInizio, FrequenzaSessioni, Limite, Descrizione, Costo, isPratico, IdChef) "
-        		   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        
-        try(Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
-        {
-            s.setString(1, toSaveCorso.getNome());
-            s.setDate(2, toSaveCorso.getDataInizio());
-            s.setInt(3, toSaveCorso.getNumeroSessioni());
-            s.setString(4, toSaveCorso.getFrequenzaSessioni().toString());
-            s.setInt(5, toSaveCorso.getLimite());
-            s.setString(6, toSaveCorso.getDescrizione());
-            s.setBigDecimal(7, toSaveCorso.getCosto());
-            s.setBoolean(8, toSaveCorso.getIsPratico());
-            s.setInt(9, toSaveCorso.getChef().getId());
-            s.executeUpdate();
-            
-            try(ResultSet genKeys = s.getGeneratedKeys())
-            {
-            	if(genKeys.next())
-            		toSaveCorso.setId(genKeys.getInt(1));
-            	else
-            		throw new DAOException("Creazione Corso fallita, nessun ID ottenuto.");
-            }   
-        }
-        catch(SQLException e)
-        {
-        	throw new DAOException("Errore DB durante salvataggio Corso", e);
-        }
-    }
+	    String sql =
+	            "INSERT INTO Corso(Nome, DataInizio, NumeroSessioni, FrequenzaSessioni, Limite, Descrizione, Costo, isPratico, IdChef) " +
+	            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+	    try(PreparedStatement s = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
+	    {
+	        s.setString(1, toSaveCorso.getNome());
+	        s.setDate(2, toSaveCorso.getDataInizio());
+	        s.setInt(3, toSaveCorso.getNumeroSessioni());
+	        s.setString(4, toSaveCorso.getFrequenzaSessioni().toString());
+	        s.setInt(5, toSaveCorso.getLimite());
+	        s.setString(6, toSaveCorso.getDescrizione());
+	        s.setBigDecimal(7, toSaveCorso.getCosto());
+	        s.setBoolean(8, toSaveCorso.getIsPratico());
+	        s.setInt(9, toSaveCorso.getChef().getId());
+	        s.executeUpdate();
+
+	        try(ResultSet genKeys = s.getGeneratedKeys())
+	        {
+	            if(genKeys.next())
+	                toSaveCorso.setId(genKeys.getInt(1));
+	            else
+	                throw new DAOException("Creazione Corso fallita, nessun ID ottenuto.");
+	        }
+	    }
+	    catch (SQLException e)
+	    {
+	        throw new DAOException("Errore DB durante salvataggio Corso (conn esterna)", e);
+	    }
+	}
+	
+	@Override
+	public void save(Corso corso) 
+	{
+	    Connection conn = null;
+
+	    try
+	    {
+	        conn = ConnectionManager.getConnection();
+	        conn.setAutoCommit(false);
+
+	        // salva solo il corso, con connessione esterna
+	        save(corso, conn);
+
+	        // salva tutte le sessioni collegate, sempre con la stessa connessione
+	        for(Sessione s : corso.getSessioni())
+	        {
+	            if(s instanceof SessioneOnline)
+	                new SessioneOnlineDAO_Postgres().save((SessioneOnline) s, conn);
+	            else if(s instanceof SessionePratica)
+	            	new SessionePraticaDAO_Postgres().save((SessionePratica) s, conn);
+	        }
+
+	        conn.commit();
+	    }
+	    catch(Exception e)
+	    {
+	        if(conn != null)
+	        {
+	            try 
+	            { 
+	            	conn.rollback(); 
+	            } 
+	            catch(SQLException ex)
+	            {
+	            	throw new DAOException("Errore durante rollback in salvataggio Corso", e); 
+	            }
+	        }
+	        throw new DAOException("Errore durante salvataggio transazionale Corso", e);
+	    }
+	    finally
+	    {
+	        if(conn != null)
+	        {
+	            try 
+	            { 
+	            	conn.setAutoCommit(true); 
+	            	conn.close(); 
+	            }
+	            catch (SQLException ex) 
+	            { 
+	            	throw new DAOException("Errore durante chiusura connessione Corso", ex);
+	            }
+	        }
+	    }
+	}
 	
 	@Override
     public Corso getCorsoById(int idCorso)
