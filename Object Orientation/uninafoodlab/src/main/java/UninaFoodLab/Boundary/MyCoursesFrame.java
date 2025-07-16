@@ -13,7 +13,7 @@ import com.formdev.flatlaf.FlatLightLaf;
 import net.miginfocom.swing.MigLayout;
 
 
-public class MyCoursesFrame extends JXFrame 
+public class MyCoursesFrame extends JXFrame implements CourseFilterable
 {
 
     private static final long serialVersionUID = 1L;
@@ -72,7 +72,7 @@ public class MyCoursesFrame extends JXFrame
         setContentPane(rootPanel);
 
         // Header
-        header = new HeaderPanel(this, getLayeredPane());
+        header = new HeaderPanel(this, getLayeredPane(), this);
         rootPanel.add(header, "dock north");
 
         // Pannello principale dei contenuti
@@ -112,6 +112,17 @@ public class MyCoursesFrame extends JXFrame
     {
     	disposeListeners();
         super.dispose();
+    }
+    
+    @Override
+    public void filterCorsi(String testo)
+    {
+        List<Corso> corsiFiltrati = corsiOriginali.stream()
+            .filter(c -> c.getTitolo().toLowerCase().contains(testo)
+                      || c.getDescrizione().toLowerCase().contains(testo))
+            .collect(Collectors.toList());
+
+        aggiornaTabella(corsiFiltrati);
     }
     
     /**

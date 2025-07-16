@@ -91,6 +91,8 @@ public class CorsoDAO_Postgres implements CorsoDAO
 	        // salva solo il corso, con connessione esterna
 	        save(corso, conn);
 
+	        // salva gli argomenti
+	        new ArgomentoDAO_Postgres().saveArgomentiCorso(corso.getId(), corso.getArgomenti(), conn);
 	        // salva tutte le sessioni collegate, sempre con la stessa connessione
 	        for(Sessione s : corso.getSessioni())
 	        {
@@ -112,7 +114,7 @@ public class CorsoDAO_Postgres implements CorsoDAO
 	            } 
 	            catch(SQLException ex)
 	            {
-	            	throw new DAOException("Errore durante rollback in salvataggio Corso", e); 
+	            	throw new DAOException("Errore durante rollback in salvataggio Corso", ex); 
 	            }
 	        }
 	        throw new DAOException("Errore durante salvataggio transazionale Corso", e);
@@ -166,7 +168,7 @@ public class CorsoDAO_Postgres implements CorsoDAO
         		   + "FROM Corso "
         		   + "WHERE IdChef = ?";
         
-        List<Corso> courses = new ArrayList<Corso>();
+        List<Corso> courses = new ArrayList<>();
         
         try(Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
         {

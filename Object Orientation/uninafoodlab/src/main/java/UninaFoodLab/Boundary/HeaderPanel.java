@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.*;
+import javax.swing.event.*;
 
 import org.jdesktop.swingx.*;
 import org.kordamp.ikonli.materialdesign.*;
@@ -13,7 +14,7 @@ import UninaFoodLab.Controller.Controller;
 import net.miginfocom.swing.MigLayout;
 
 /**
- * Pannello header personalizzato
+ * Pannello header personalizzato.
  * 
  * Questo pannello contiene:
  * <ul>
@@ -29,10 +30,14 @@ import net.miginfocom.swing.MigLayout;
  * 
  * I listener sono mantenuti come campi e possono essere rimossi con {@link #disposeListeners()} 
  * per evitare memory leak.
+ * 
+ * <p>Supporta anche il filtraggio dinamico dei corsi tramite
+ * l'interfaccia {@link CourseFilterable}, se fornita nel costruttore.
+ * In tal caso vengono aggiunti listener per aggiornare il filtro al variare del testo di ricerca
+ * o al click sul pulsante Cerca.</p>
  */
 public class HeaderPanel extends JXPanel
 {
-
 	private static final long serialVersionUID = 1L;
 
 	/** Riferimento al frame genitore */
@@ -50,16 +55,19 @@ public class HeaderPanel extends JXPanel
 	/** Campo di testo per la ricerca */
 	private JXTextField searchField;
 	
+	/** Eventuale classe che implementa l'interfaccia **/
+	private CourseFilterable filterCallback;
+	
 	 /** Pannello dropdown profilo */
 	private ProfileDropdownPanel dropdownPanel;
 	
 	/** Sidebar laterale */
 	private SidebarPanel sidebar;
-	
+
 	/** Listeners */
+	private DocumentListener searchListener;
 	private MouseListener logoClickListener;
-    private ActionListener profileBtnListener;
-    private ActionListener hamburgerBtnListener;
+    private ActionListener profileBtnListener, hamburgerBtnListener, searchBtnListener;
     private AWTEventListener dropdownClickListener;
     private ComponentListener componentResizeListener;
 	
@@ -95,6 +103,26 @@ public class HeaderPanel extends JXPanel
         EventQueue.invokeLater(() -> searchField.requestFocusInWindow());
 	}
 
+	/**
+     * Costruisce un HeaderPanel associato a un frame genitore e a un layered pane,
+     * aggiungendo la funzionalità di filtraggio dei corsi tramite un callback.
+     * 
+     * <p>Se il parametro {@code filterCallback} è non null,
+     * vengono aggiunti listener sul campo di testo e sul pulsante Cerca
+     * che richiamano il metodo {@code filtraCorsi(String)} del callback.</p>
+     * 
+     * @param parentFrame il frame genitore che contiene questo header
+     * @param layeredPane il layered pane dove saranno aggiunti sidebar e dropdown
+     * @param filterCallback callback per filtrare i corsi in base al testo di ricerca
+     */
+	public HeaderPanel(JXFrame parentFrame, JLayeredPane layeredPane, CourseFilterable filterCallback)
+	{
+	    this(parentFrame, layeredPane);
+	    this.filterCallback = filterCallback;
+
+	    initFilterListeners();
+	}
+	
 	/**
      * Inizializza tutti i componenti grafici del pannello header,
      * inclusi sidebar, dropdown profilo, pulsanti, campo di ricerca e logo.
@@ -334,6 +362,58 @@ public class HeaderPanel extends JXPanel
     }
 	
 	/**
+     * Inizializza i listener dedicati al filtraggio dei corsi.
+     * 
+     * <p>Aggiunge un {@link DocumentListener} al campo di testo di ricerca
+     * per aggiornare dinamicamente il filtro ad ogni modifica del testo.
+     * Inoltre aggiunge un {@link ActionListener} al pulsante Cerca
+     * per applicare il filtro al click.</p>
+     * 
+     * <p>Questi listener richiamano il metodo
+     * {@link CourseFilterable#filtraCorsi(String)} con il testo corrente.</p>
+     */
+	private void initFilterListeners()
+	{  
+		/**
+		 * Un {@link DocumentListener} collegato al documento
+         * del campo di testo {@code searchField} che intercetta ogni modifica del testo,
+         * richiamando il metodo {@code filtraCorsi} del callback con il testo aggiornato.
+		 */
+    	searchListener = new DocumentListener()
+				         {
+    						 @Override	
+				             public void insertUpdate(DocumentEvent e)  { aggiornaFiltro(); }
+    						 @Override
+				             public void removeUpdate(DocumentEvent e)  { aggiornaFiltro(); }
+    						 @Override
+				             public void changedUpdate(DocumentEvent e) { aggiornaFiltro(); }
+				
+				             private void aggiornaFiltro()
+				             {
+				                 String testo = searchField.getText().trim().toLowerCase();
+				                 filterCallback.filterCorsi(testo);
+				             }
+				         };
+        searchField.getDocument().addDocumentListener(searchListener);
+
+        /**
+         * Un {ActionListener} collegato al pulsante {@code searchBtn}
+         * che, al click, esegue la stessa azione di filtraggio con il testo corrente.
+         */
+        searchBtnListener = new ActionListener()
+			        		{
+        						@Override
+        						public void actionPerformed(ActionEvent e)
+        						{
+        							String testo = searchField.getText().trim().toLowerCase();
+    					            filterCallback.filterCorsi(testo);
+        						}
+					            
+			        		};
+        searchBtn.addActionListener(searchBtnListener);      
+	}
+	
+	/**
      * Aggiorna la visibilità dei componenti (es. search bar) 
      * in base al frame genitore attuale.
      */
@@ -346,26 +426,30 @@ public class HeaderPanel extends JXPanel
         searchBtn.setVisible(!isProfile);
     }
     
-	 /**
+    /**
      * Rimuove tutti i listener aggiunti ai componenti e al toolkit,
      * da chiamare quando il pannello non è più utilizzato per evitare memory leak.
      * Rimuove inoltre listener da sidebar e dropdownPanel.
+     * 
+     * <p>Rimuove anche i listener di filtraggio se è stato impostato un
+     * {@link CourseFilterable} e sono stati registrati i listener su
+     * {@code searchField} e {@code searchBtn}.</p>
      */
 	public void disposeListeners()
     {
-		if(logoClickListener != null)
+		if(logoLabel != null && logoClickListener != null)
         {
             logoLabel.removeMouseListener(logoClickListener);
             logoClickListener = null;
         }
 
-        if(profileBtnListener != null)
+        if(profileBtn != null && profileBtnListener != null)
         {
             profileBtn.removeActionListener(profileBtnListener);
             profileBtnListener = null;
         }
 
-        if(hamburgerBtnListener != null)
+        if(hamburgerBtn != null && hamburgerBtnListener != null)
         {
             hamburgerBtn.removeActionListener(hamburgerBtnListener);
             hamburgerBtnListener = null;
@@ -385,6 +469,21 @@ public class HeaderPanel extends JXPanel
 
         sidebar.disposeListeners();
         dropdownPanel.disposeListeners();
+        
+        if(filterCallback != null)
+        {
+        	if(searchField != null && searchListener != null)
+        	{
+        		searchField.getDocument().removeDocumentListener(searchListener);
+        		searchListener = null;
+        	}
+        	
+        	if(searchBtn != null && searchBtnListener != null)
+        	{
+        		searchBtn.removeActionListener(searchBtnListener);
+        		searchBtnListener = null;
+        	}
+        }
     }
 	
 	 /**

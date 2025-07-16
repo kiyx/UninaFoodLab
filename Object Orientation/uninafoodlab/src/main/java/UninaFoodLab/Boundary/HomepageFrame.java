@@ -9,14 +9,14 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import org.jdesktop.swingx.JXButton;
+import org.jdesktop.swingx.JXFrame;
 
 import UninaFoodLab.Controller.Controller;
 
-public class HomepageFrame extends JFrame
+public class HomepageFrame extends JXFrame implements CourseFilterable
 {
-
 	private static final long serialVersionUID = 1L;
-	private JPanel contentPane;
+
 
 	public static void main(String[] args)
 	{

@@ -19,12 +19,12 @@ public class ArgomentoDAO_Postgres implements ArgomentoDAO
 	}
 	
 	@Override
-	public void saveArgomentiCorso(int idCorso, List<Argomento> argomenti)
+	public void saveArgomentiCorso(int idCorso, List<Argomento> argomenti, Connection conn)
 	{
 	    String sql = "INSERT INTO Argomenti_Corso (IdCorso, IdArgomento) "
 	    		   + "VALUES (?, ?)";
 
-	    try(Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
+	    try(PreparedStatement s = conn.prepareStatement(sql))
 	    {
 	        for(Argomento a : argomenti)
 	        {

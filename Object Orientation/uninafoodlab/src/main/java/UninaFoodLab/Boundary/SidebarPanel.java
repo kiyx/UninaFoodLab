@@ -90,7 +90,8 @@ public class SidebarPanel extends JXPanel
 	private void initComponents()
 	{
 		homeBtn = new JXButton("  Homepage");
-    	coursesBtn = new JXButton("  I miei corsi");
+		
+    	coursesBtn = new JXButton((Controller.getController().isChefLogged() ? "  I miei corsi" : " Iscrizioni"));
     	
     	add(homeBtn);
         add(coursesBtn);

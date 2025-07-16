@@ -56,7 +56,7 @@ public class PartecipanteDAO_Postgres implements PartecipanteDAO
         }
         catch(SQLException e)
         {
-        	throw new DAOException("Errore DB durante salvataggio Partecipante", e);
+        	throw new DAOException("Errore DB durante salvataggio Partecipante con username " + toSavePartecipante.getUsername(), e);
         }
     }
 	
@@ -80,10 +80,35 @@ public class PartecipanteDAO_Postgres implements PartecipanteDAO
         }
         catch(SQLException e)
         {
-        	throw new DAOException("Errore DB durante ricerca Partecipante per id", e);
+        	throw new DAOException("Errore DB durante ricerca Partecipante per id = " + idPartecipante, e);
         }
     }
     
+	@Override
+	public List<Partecipante> getPartecipantiIscrittiByIdCorso(int idCorso)
+	{
+		String sql = "SELECT * "
+				   + "FROM Partecipante P JOIN Iscrizioni I ON P.IdPartecipante = I.IdPartecipante "
+				   + "WHERE IdCorso = ?";
+   
+	   List<Partecipante> partecipanti = new ArrayList<>();
+	   
+	   try(Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
+	   {
+	       s.setInt(1, idCorso);
+	       ResultSet rs = s.executeQuery();
+	
+	       while(rs.next())
+	    	   partecipanti.add(mapResultSetToPartecipante(rs));
+	   }
+	   catch(SQLException e)
+	   {
+	   	throw new DAOException("Errore DB durante getPartecipantiIscrittiByIdCorso con id = " + idCorso, e);
+	   }
+	     
+	   return partecipanti;
+	}
+	
 	@Override
     public boolean existsPartecipanteByEmail(String email)
     {
@@ -98,7 +123,7 @@ public class PartecipanteDAO_Postgres implements PartecipanteDAO
         }
         catch(SQLException e)
         {
-        	throw new DAOException("Errore DB durante ricerca di Partecipante per  email", e);
+        	throw new DAOException("Errore DB durante ricerca di Partecipante con email = " + email, e);
         }
     }
     
@@ -116,7 +141,7 @@ public class PartecipanteDAO_Postgres implements PartecipanteDAO
         }
         catch(SQLException e)
         {
-        	throw new DAOException("Errore DB durante ricerca di Partecipante per codice fiscale", e);
+        	throw new DAOException("Errore DB durante ricerca di Partecipante con codice fiscale = " + codFisc, e);
         }
     }
 
@@ -140,7 +165,7 @@ public class PartecipanteDAO_Postgres implements PartecipanteDAO
         }
         catch(SQLException e)
         {
-        	throw new DAOException("Errore DB durante ricerca Partecipante per username", e);
+        	throw new DAOException("Errore DB durante ricerca Partecipante con username = " + username, e);
         }
     }
 
@@ -208,7 +233,7 @@ public class PartecipanteDAO_Postgres implements PartecipanteDAO
             }
             catch(SQLException e)
             {
-            	throw new DAOException("Errore DB durante aggiornamento Partecipante", e);
+            	throw new DAOException("Errore DB durante aggiornamento Partecipante con username = " + previousPartecipante.getId(), e);
             }
         }
     }
@@ -230,7 +255,7 @@ public class PartecipanteDAO_Postgres implements PartecipanteDAO
         }
         catch(SQLException e)
         {
-        	throw new DAOException("Errore DB durante eliminazione Partecipante", e);
+        	throw new DAOException("Errore DB durante eliminazione Partecipante con id = " + idPartecipante, e);
         }
     }
 }

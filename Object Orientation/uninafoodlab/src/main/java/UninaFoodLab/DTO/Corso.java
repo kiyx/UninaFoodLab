@@ -23,8 +23,9 @@ public class Corso
     private boolean isPratico;
     
     private Chef chef; 
-    private ArrayList<Sessione> sessioni = new ArrayList<>();
+    private ArrayList<Sessione> sessioni;
     private ArrayList<Argomento> argomenti;
+    private ArrayList<Partecipante> partecipanti = new ArrayList<>();
     
     
     public Corso(String nome, LocalDate dataInizio, int numeroSessioni, FrequenzaSessioni frequenzaSessioni, int limite, String descrizione, BigDecimal costo, boolean isPratico, Chef chef,
@@ -135,5 +136,15 @@ public class Corso
     public void addArgomento(Argomento toAddArgomento)
     {
         argomenti.add(toAddArgomento);
+    }
+    
+    public ArrayList<Partecipante> getPartecipanti()
+    {
+    	return partecipanti;
+    }
+    
+    public void addPartecipante(Partecipante toAddPartecipante)
+    {
+    	partecipanti.add(toAddPartecipante);
     }
 }

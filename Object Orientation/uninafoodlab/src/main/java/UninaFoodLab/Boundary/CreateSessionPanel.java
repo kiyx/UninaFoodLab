@@ -623,8 +623,8 @@ public class CreateSessionPanel extends JXPanel
 	 */
 	public void setDateChangeListener(DateChangeListener listener)
 	{
-	    if(this.dateChangeListener != null)
-	        getDatePicker().removeDateChangeListener(this.dateChangeListener);
+	    if(dateChangeListener != null)
+	        getDatePicker().removeDateChangeListener(dateChangeListener);
 
 	    this.dateChangeListener = listener;
 
