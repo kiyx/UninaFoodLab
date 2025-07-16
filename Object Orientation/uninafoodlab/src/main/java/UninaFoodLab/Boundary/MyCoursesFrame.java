@@ -2,18 +2,14 @@ package UninaFoodLab.Boundary;
 
 import java.awt.*;
 import javax.swing.*;
-import javax.swing.border.*;
 
 import org.jdesktop.swingx.*;
-import org.kordamp.ikonli.materialdesign.*;
-import org.kordamp.ikonli.swing.*;
 
 import UninaFoodLab.Controller.Controller;
 import net.miginfocom.swing.MigLayout;
 
 import com.formdev.flatlaf.FlatLightLaf;
 
-import UninaFoodLab.Controller.Controller;
 import net.miginfocom.swing.MigLayout;
 
 
