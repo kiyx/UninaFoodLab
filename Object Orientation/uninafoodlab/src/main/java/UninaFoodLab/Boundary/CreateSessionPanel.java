@@ -76,7 +76,7 @@ public class CreateSessionPanel extends JXPanel
 	private JXTextField ricercaRicetteField;
 	private List<Ricetta> ricette;
 	private List<JCheckBox> ricettaChecks = new ArrayList<>();
-	private List<Integer> ricetteSelezionate = new ArrayList<>();
+	private List<Ricetta> ricetteSelezionate = new ArrayList<>();
 
 	 /**
      * Costruttore principale per creare un pannello di sessione.
@@ -180,11 +180,11 @@ public class CreateSessionPanel extends JXPanel
 	 *
 	 * @return Lista di ID numerici delle ricette selezionate
 	 */
-	public List<Integer> getIdRicetteSelezionate()
+	public List<Ricetta> getIdRicetteSelezionate()
 	{
 	    if(!pratica)
 	        throw new IllegalStateException("La sessione non è pratica: nessuna ricetta selezionabile.");
-	    return new ArrayList<>(ricetteSelezionate);
+	    return ricetteSelezionate;
 	}
 
 	/**
@@ -314,11 +314,10 @@ public class CreateSessionPanel extends JXPanel
 							           @Override
 							           public void itemStateChanged(ItemEvent e) 
 							           {
-							        	   int id = r.getId();
-							        	   if(cb.isSelected() && !ricetteSelezionate.contains(id))
-							        	        ricetteSelezionate.add(id);
+							        	   if(cb.isSelected() && !ricetteSelezionate.contains(r))
+							        	        ricetteSelezionate.add(r);
 							        	    else
-							        	        ricetteSelezionate.remove(Integer.valueOf(id));
+							        	        ricetteSelezionate.remove(r);
 							           }
 							        });
 
@@ -787,7 +786,7 @@ public class CreateSessionPanel extends JXPanel
 	/**
      * Mostra o rimuove un errore visivo su un componente Swing con tooltip e outline.
      * 
-     * @param comp Componente target (es. JTextField, JSpinner)
+     * @param comp Componente target
      * @param errore {@code true} per mostrare l'errore, {@code false} per rimuoverlo
      * @param tooltip Messaggio di errore da visualizzare come tooltip
      */
@@ -826,19 +825,49 @@ public class CreateSessionPanel extends JXPanel
 	{
 	    focusSet = false;
 	    boolean valido = true;
+	    String errori = new String();
 
-	    valido &= validateData();
-	    valido &= validateTime();
-	    valido &= validateDurata();
+	    if(!validateData())
+	    {
+	        valido = false;
+	        errori += "• Data sessione obbligatoria\n";
+	    }
+	    
+	    if(!validateTime())
+	    {
+	        valido = false;
+	        errori += "• Orario sessione obbligatorio\n";
+	    }
 
+	    if(!validateDurata())
+	    {
+	        valido = false;
+	        errori += "• Durata sessione obbligatoria\n";
+	    }
+	    
 	    if(pratica)
 	    {
-	        valido &= validateRicetta();
-	        valido &= validateAddress();
+	    	if(!validateRicetta())
+		    {
+		        valido = false;
+		        errori += "• Seleziona almeno una ricetta\n";
+		    }
+	    	if(!validateAddress())
+		    {
+		        valido = false;
+		        errori += "• Indirizzo della sessione pratica obbligatorio\n";
+		    }
 	    }
 	    else
-	    	valido &= validateLink();
-
+	    	if(!validateLink())
+		    {
+		        valido = false;
+		        errori += "• Link Riunione della sessione online obbligatoria\n";
+		    }
+	    
+	    if(!valido)
+	        JOptionPane.showMessageDialog(this, errori.toString(), "Campi mancanti per la sessione #" + this.numero , JOptionPane.ERROR_MESSAGE);
+	    
 	    return valido;
 	}
 

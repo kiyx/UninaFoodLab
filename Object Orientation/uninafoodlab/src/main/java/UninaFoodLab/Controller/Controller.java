@@ -688,6 +688,19 @@ public class Controller
 		}
 	}
 
+	public void createCourse(JDialog currDialog, Corso corso)
+	{
+		try
+		{
+			getCorsoDAO().save(corso);
+			currDialog.dispose();
+		}
+		catch(DAOException e)
+		{
+			
+		}	
+	}
+	
 	
 	/**
      *  -------------------------
@@ -733,7 +746,7 @@ public class Controller
 	
 	public void saveRicettaUtilizzi(MyRecipesFrame parent, CreateRecipesDialog currDialog, Ricetta toSaveRicetta, ArrayList<Utilizzo> utilizzi)
 	{
-		try
+		/*try
 		{
 			if(getRicettaDAO().existsRicettaByNome(toSaveRicetta, ((Chef)getLoggedUser()).getId()))
 			{
@@ -751,7 +764,7 @@ public class Controller
 		{
 			LOGGER.log(Level.SEVERE, "Errore salvataggio ricetta nel DB", e);	
 			currDialog.showError("Errore salvataggio ricetta nel DB");
-		}
+		}*/
 		
 	}
 	

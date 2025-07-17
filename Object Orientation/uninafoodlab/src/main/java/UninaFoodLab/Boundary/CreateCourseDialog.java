@@ -2,6 +2,8 @@ package UninaFoodLab.Boundary;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.math.BigDecimal;
+import java.sql.Time;
 import java.time.*;
 import java.util.List;
 import java.util.ArrayList;
@@ -18,7 +20,13 @@ import com.github.lgooddatepicker.zinternaltools.*;
 
 import UninaFoodLab.Controller.Controller;
 import UninaFoodLab.DTO.Argomento;
+import UninaFoodLab.DTO.Chef;
+import UninaFoodLab.DTO.Corso;
 import UninaFoodLab.DTO.FrequenzaSessioni;
+import UninaFoodLab.DTO.Sessione;
+import UninaFoodLab.DTO.Ricetta;
+import UninaFoodLab.DTO.SessioneOnline;
+import UninaFoodLab.DTO.SessionePratica;
 import net.miginfocom.swing.MigLayout;
 
 public class CreateCourseDialog extends JDialog
@@ -33,7 +41,8 @@ public class CreateCourseDialog extends JDialog
         new LineBorder(BORDER_COLOR, 1, true),
         BorderFactory.createEmptyBorder(12, 12, 12, 12)
     );
-    
+    private boolean focusSet = false;
+
     private JPanel argomentiPanel, scrollContentWrapper;
     private JXPanel buttons, container, detailPanel, infoPanel, formPanel, leftPanel, mainPanel, sessionPanel, sessionsContainer;
     private JXLabel aggiungiSessioneLabel, sessioniLabel, limitLabel, sessionTitle, title;
@@ -55,6 +64,7 @@ public class CreateCourseDialog extends JDialog
     
     private List<CreateSessionPanel> sessionCards = new ArrayList<>();
     private List<JCheckBox> argumentsCheck = new ArrayList<>();
+    private List<Argomento> selectedArguments = new ArrayList<>();
     
     public CreateCourseDialog(JXFrame parent)
     {
@@ -138,33 +148,27 @@ public class CreateCourseDialog extends JDialog
         
         argomentiPanel = new JPanel(new GridLayout(0, 1));
         argomentiPanel.setOpaque(false);
-        
-        argomentiCheckBoxListener = new ItemListener()
-        {
-            @Override
-            public void itemStateChanged(ItemEvent e)
-            {
-                int selectedCount = 0;
-                for(JCheckBox cb : argumentsCheck)
-                    if(cb.isSelected())
-                        selectedCount++;
 
-                if(selectedCount >= 5)
-                {
-                    for(JCheckBox cb : argumentsCheck)
-                        if(!cb.isSelected())
-                            cb.setEnabled(false);
-                }
-                else
-                   for(JCheckBox cb : argumentsCheck)
-                       cb.setEnabled(true);
-            }
-        };
         
         for(Argomento a : Controller.getController().loadArgomenti())
         {
             JCheckBox cb = new JCheckBox(a.getNome());
-            cb.addItemListener(argomentiCheckBoxListener);
+            cb.addItemListener( new ItemListener()
+						        {
+						            @Override
+						            public void itemStateChanged(ItemEvent e)
+						            {    		
+						            	if(cb.isSelected() && !selectedArguments.contains(a))
+						            		selectedArguments.add(a);
+						            	else
+						            		selectedArguments.remove(a);
+						            	
+						            	// Se raggiungo il limite disabilito quelle non selezionate 
+						            	for(JCheckBox cb : argumentsCheck)
+						            		if(!cb.isSelected())
+						                       cb.setEnabled(!(selectedArguments.size() >= 5));					        		                   
+						            }
+						         });
             argumentsCheck.add(cb);
             argomentiPanel.add(cb);
         }
@@ -328,8 +332,7 @@ public class CreateCourseDialog extends JDialog
 						               if(e.getStateChange() == ItemEvent.SELECTED)
 						                   togglePartecipantiLimit(true);
 						               else if(e.getStateChange() == ItemEvent.DESELECTED)
-						                   onPraticoDeselected();
-						
+						                   onPraticoDeselected();			
 						           }
 						       };
         praticoCheck.addItemListener(praticoCheckListener);
@@ -344,8 +347,7 @@ public class CreateCourseDialog extends JDialog
 						            }
 						        };
         frequencyList.addItemListener(frequencyListListener);
-        
-        
+               
         dataInizioListener = new DateChangeListener()
         {
             @Override
@@ -361,24 +363,66 @@ public class CreateCourseDialog extends JDialog
         	
             @Override
             public void actionPerformed(ActionEvent e)
-            {
-                if(sessionCards.isEmpty())               
-                    JOptionPane.showMessageDialog(CreateCourseDialog.this, "Devi aggiungere almeno una sessione.", "Errore", JOptionPane.ERROR_MESSAGE);
-                else
+            {               
+                if(isValidCourse())
                 {
-                	for(CreateSessionPanel card : sessionCards)
-                    {
-                        if(!card.isValidSession())
+                	if(!sessionCards.isEmpty())
+                	{
+                		ArrayList<Sessione> sessioni = new ArrayList<>();
+                		
+                		boolean check = true;
+                		for(CreateSessionPanel card : sessionCards)
                         {
-                            JOptionPane.showMessageDialog(CreateCourseDialog.this, "Errore nei dati di una sessione. Controlla i campi", "Errore", JOptionPane.ERROR_MESSAGE);
-                            return;
-                        }
-                    }
+                            if(!card.isValidSession())
+                            {
+                                JOptionPane.showMessageDialog(CreateCourseDialog.this, "Errore nei dati di una sessione. Controlla i campi", 
+                                						   	  "Errore", JOptionPane.ERROR_MESSAGE);
+                                check = false;
+                                break;
+                            }
+                            else
+                            {
+                            	if(card.getTipo().equals("Online"))
+                            		sessioni.add(new SessioneOnline(
+                            									     	card.getDurata(), 
+                            									     	Time.valueOf(card.getOrario()), 
+                            									     	card.getDataSessione(),
+                            									     	card.getLinkRiunione()
+                            									    ));
+                            	else
+                            		sessioni.add(new SessionePratica( 
+                            										 	card.getDurata(), 
+                            										 	Time.valueOf(card.getOrario()), 
+                            										 	card.getDataSessione(),
+                            										 	card.getIndirizzo(),
+                            										 	new ArrayList<Ricetta>(card.getIdRicetteSelezionate())
+                            										));
+                            }  	
+                        } 	
 
-                    // TODO: invia dati al Controller
-                    dispose();
-                }
-                
+                    	if(check)
+                    	{
+                    		Controller.getController().createCourse(CreateCourseDialog.this, 
+                    											    new Corso(
+                    														    nameField.getText().trim(),
+                    														    dataInizioField.getDate(),
+                    														    (int) numeroSessioniSpinner.getValue(), 
+                    														    (FrequenzaSessioni) frequencyList.getSelectedItem(),
+                    														    (int) limitSpinner.getValue(),
+                    														    descrizioneArea.getText(),
+                    														    (BigDecimal) costSpinner.getValue(),
+                    														    praticoCheck.isSelected(),
+                    														    (Chef) Controller.getController().getLoggedUser(),
+                    														    (ArrayList<Argomento>) selectedArguments,
+                    														    sessioni        
+                    														 ));
+                    		
+                    	}
+                	}
+                	else
+                  		 JOptionPane.showMessageDialog(CreateCourseDialog.this, "Devi aggiungere almeno una sessione.", "Errore", 
+                  				 					   JOptionPane.ERROR_MESSAGE);                
+                } 
             }
         };
         confirmBtn.addActionListener(confirmBtnListener);
@@ -715,6 +759,109 @@ public class CreateCourseDialog extends JDialog
         else
             togglePartecipantiLimit(false);
     }
+    
+    /**
+     * Mostra o rimuove un errore visivo su un componente Swing con tooltip e outline.
+     * 
+     * @param comp Componente target
+     * @param errore {@code true} per mostrare l'errore, {@code false} per rimuoverlo
+     * @param tooltip Messaggio di errore da visualizzare come tooltip
+     */
+	private void showError(JComponent comp, boolean errore, String tooltip)
+	{
+		if(errore)
+		{
+			comp.putClientProperty("JComponent.outline", "error");
+			if(tooltip != null) 
+				comp.setToolTipText(tooltip);
+		}
+		else
+		{
+			comp.putClientProperty("JComponent.outline", null);
+			comp.setToolTipText(null);
+		}
+	}
+	    
+    /**
+     * Valida tutti i campi del corso e imposta il focus sul primo campo errato.
+     * 
+     * @return {@code true} se tutti i campi obbligatori sono validi, {@code false} altrimenti
+     */
+	public boolean isValidCourse()
+	{
+	    focusSet = false;
+	    boolean valido = true;
+	    String errori = new String();
+
+	    if(!validateNome())
+	    {
+	        valido = false;
+	        errori += "• Nome Corso obbligatorio\n";
+	    }
+
+	    if(!validateDescrizione())
+	    {
+	        valido = false;
+	        errori += "• Descrizione Corso obbligatoria\n";
+	    }
+
+	    if(!validateArgomenti())
+	    {
+	        valido = false;
+	        errori += "• Inserire almeno un argomento\n";
+	    }
+
+	    if(!validateDataInizio())
+	    {
+	        valido = false;
+	        errori += "• Data Inizio obbligatoria\n";
+	    }
+
+	    if(!valido)
+	        JOptionPane.showMessageDialog(this, errori.toString(), "Campi mancanti", JOptionPane.ERROR_MESSAGE);
+
+	    return valido;
+	}
+
+
+	/**
+	 * Metodo di utilità per validare un singolo campo e impostare il focus se errato.
+	 *
+	 * @param comp Componente da validare
+	 * @param errore {@code true} se c'è errore, {@code false} altrimenti
+	 * @param tooltip Messaggio di errore da mostrare
+	 * @return {@code true} se il campo è valido, {@code false} se c'è errore
+	 */
+	private boolean validateField(JComponent comp, boolean errore, String tooltip)
+	{
+	    showError(comp, errore, tooltip);
+	    if(errore && !focusSet)
+	    {
+	        comp.requestFocusInWindow();
+	        focusSet = true;
+	    }
+	    return !errore;
+	}
+
+	private boolean validateNome()
+	{
+	    return validateField(nameField, nameField.getText().length()<=0 , "Nome Corso obbligatorio");
+	}
+	
+	private boolean validateDataInizio()
+	{
+	    return validateField(dataInizioField, dataInizioField.getDate() == null, "Data obbligatoria");
+	}
+
+	private boolean validateArgomenti()
+	{
+	    return validateField(argomentiPanel, selectedArguments.size() <= 0, "Inserire almeno un argomento");
+	}
+
+	private boolean validateDescrizione()
+	{
+	    return validateField(descrizioneArea, descrizioneArea.getText().length() <= 0 , "Descrizione Corso obbligatoria");
+	}
     
     private void refreshSessionLayout()
     {

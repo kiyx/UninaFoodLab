@@ -42,6 +42,7 @@ public class Corso
         if(sessioni == null || sessioni.isEmpty())
             throw new RequiredSessioneException();
         
+        this.sessioni = new ArrayList<>();
         for(Sessione s : sessioni)
         {
             s.setCorso(this);

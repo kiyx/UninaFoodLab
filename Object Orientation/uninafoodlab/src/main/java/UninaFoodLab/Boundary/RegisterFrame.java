@@ -30,7 +30,6 @@ import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTextField;
 
-import com.formdev.flatlaf.FlatLightLaf;
 import com.github.lgooddatepicker.components.*;
 import com.github.lgooddatepicker.optionalusertools.DateVetoPolicy;
 import com.github.lgooddatepicker.zinternaltools.DateVetoPolicyMinimumMaximumDate;
@@ -39,8 +38,6 @@ import UninaFoodLab.Controller.Controller;
 
 import javax.swing.JRadioButton;
 import javax.swing.JToggleButton;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 
 import net.miginfocom.swing.MigLayout;
 import java.awt.Font;
