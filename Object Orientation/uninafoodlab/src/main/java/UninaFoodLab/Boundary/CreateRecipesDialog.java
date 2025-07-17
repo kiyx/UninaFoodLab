@@ -104,6 +104,7 @@ public class CreateRecipesDialog extends JDialog
     private List<JCheckBox> ingredientiCheck;
     
     private ArrayList<Utilizzo> utilizzi = new ArrayList<>();
+    private ArrayList<Ingrediente> ingredientiUtil = new ArrayList<>();
     
     private MyRecipesFrame parent;
 	public CreateRecipesDialog(MyRecipesFrame parent)
@@ -198,7 +199,7 @@ public class CreateRecipesDialog extends JDialog
 	        */
 
 	        calorieLabel = new JXLabel("Calorie per porzione:");
-	        SpinnerNumberModel calorieModel = new SpinnerNumberModel(0.1, 0.0, null, 0.1);
+	        SpinnerNumberModel calorieModel = new SpinnerNumberModel(1, 0, null, 1);
 	        calorieSpinner = new JSpinner(calorieModel);
 	        ((JSpinner.DefaultEditor)calorieSpinner.getEditor()).getTextField().setColumns(5);
 	        infoPanel.add(calorieLabel);
@@ -307,7 +308,8 @@ public class CreateRecipesDialog extends JDialog
         	 @Override
         	 public void actionPerformed(ActionEvent e)
         	 {
-        		 new CreateIngredienteDialog(CreateRecipesDialog.this).setVisible(true);
+        		 CreateIngredienteDialog nuovoIngrediente = new CreateIngredienteDialog(CreateRecipesDialog.this);
+        		 nuovoIngrediente.setVisible(true);
         	 }
         		};
         aggiungiIngredienteBtn.addActionListener(aggiungiIngredienteBtnListener);
@@ -334,30 +336,25 @@ public class CreateRecipesDialog extends JDialog
 
                 if(!checkNome())
                 {
-                	
+                	showError("Bisogna inserire il nome della ricetta.");
                 }
                 else if (!checkProvenienza())
                 {
-                	
+                	showError("Bisogna inserire la provenienza della ricetta.");
                 }
                 else
                 {
                 	for(CreateUtilizzoPanel card : ingredientiCards)
                     {	 
-                		for(int i=0; i<ingredienti.size(); i++)
-                		{
-                			if(ingredienti.get(i).getId()==card.getId())
-                				utilizzi.add(new Utilizzo(card.getQuantita(), card.getUnita(), ingredienti.get(i)));               				
-                		}                        
+                		utilizzi.add(new Utilizzo(card.getQuantita(), card.getUnita(), card.getIngrediente()));               			                    
                     }
 
             		Ricetta toSaveRicetta = new Ricetta(nameField.getText(), provenienzaField.getText(), (int)tempoSpinner.getValue(), (int)calorieSpinner.getValue(),
             								(LivelloDifficolta)difficoltaList.getSelectedItem(), allergeniArea.getText(), ((Chef)Controller.getController().getLoggedUser()), utilizzi);
             											
-            		Controller.getController().saveRicettaUtilizzi(parent, toSaveRicetta, utilizzi);
+            		Controller.getController().saveRicettaUtilizzi(parent, CreateRecipesDialog.this, toSaveRicetta, utilizzi);
 
                 }
-                dispose();
             }
         };
         confirmBtn.addActionListener(confirmBtnListener);
@@ -459,13 +456,11 @@ public class CreateRecipesDialog extends JDialog
 	    if(text.isEmpty())
 	    {
 	    	nameField.setBorder(errorBorder);
-	    	showError("Bisogna inserire il nome della ricetta.");
 	    	check = false;
 	    }
 	    else
 	    {
 	    	nameField.setBorder(defaultBorder);
-
 	    }
 	    
 	    return check;
@@ -479,7 +474,6 @@ public class CreateRecipesDialog extends JDialog
 	    if(text.isEmpty())
 	    {
 	    	provenienzaField.setBorder(errorBorder);
-	    	showError("Bisogna inserire la provenienza della ricetta.");
 	    	check = false;
 	    }
 	    else
@@ -499,13 +493,53 @@ public class CreateRecipesDialog extends JDialog
 		}
     }
     
+    public void setAllResearch() 
+    {
+    	for(CreateUtilizzoPanel card : ingredientiCards)
+        {	 
+    		card.setResearchNeutral();              
+        }
+    }
+    
     public List<Ingrediente> getIngredienti()
     {
     	return ingredienti;
+    }
+    
+    public List<Ingrediente> getIngredientiUtil()
+    {
+    	return ingredientiUtil;
+    }
+    
+    public void addListaUtilizzi(Ingrediente oldIng, Ingrediente newIng, CreateUtilizzoPanel currPanel)
+    {
+    	if(oldIng ==null)
+    	{
+    		ingredientiUtil.add(newIng);     		
+    	}    		
+    	else 
+    	{
+    		for(int i=0; i<ingredientiUtil.size(); i++)
+    			if(ingredientiUtil.get(i).getId()==oldIng.getId())
+    				ingredientiUtil.remove(i);
+    		ingredientiUtil.add(newIng);  
+    	}
+    	
+    	for(CreateUtilizzoPanel card : ingredientiCards)
+		{
+			if(card!=currPanel)
+			{
+				card.disabilitaIngrediente(oldIng, newIng);
+			}
+		}
     }
     
 	public void showError(String msg)
 	{
 		JOptionPane.showMessageDialog(this, msg, "Errore", JOptionPane.ERROR_MESSAGE);
 	}
+	
+	public void showSuccess(String msg) {
+        JOptionPane.showMessageDialog(this, msg, "Successo", JOptionPane.INFORMATION_MESSAGE);
+    }
 }

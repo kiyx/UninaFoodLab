@@ -28,6 +28,7 @@ public class Controller
 	private static final Logger LOGGER = Logger.getLogger(Controller.class.getName());
 	private static final String ERR_CF_EXISTING = "Esiste già un account associato a questo codice fiscale.";
 	private static final String ERR_EMAIL_EXISTING = "Esiste già un account associato a questa email";
+	private static final String ERR_RECIPE_EXISTING = "Esiste già una ricetta con questo nome per questo chef";
 	
 	/** Istanza Singleton */
     private static Controller instance = null;
@@ -718,6 +719,9 @@ public class Controller
 		{
 			getIngredienteDAO().save(i);
 			parent.addIngrediente(i);
+			currentDialog.dispose();
+			parent.showSuccess("Ingrediente creato correttamente, cercalo oppure selezionalo dal fondo della lista.");
+			parent.setAllResearch();
 		}
 		catch(DAOException e)
 		{
@@ -727,21 +731,26 @@ public class Controller
 		
 	}
 	
-	public void saveRicettaUtilizzi(MyRecipesFrame parent, Ricetta toSaveRicetta, ArrayList<Utilizzo> utilizzi)
+	public void saveRicettaUtilizzi(MyRecipesFrame parent, CreateRecipesDialog currDialog, Ricetta toSaveRicetta, ArrayList<Utilizzo> utilizzi)
 	{
 		try
 		{
-			getRicettaDAO().save(toSaveRicetta, getLoggedUser().getId());
-			for(int i=0; i<utilizzi.size(); i++)
+			if(getRicettaDAO().existsRicettaByNome(toSaveRicetta, ((Chef)getLoggedUser()).getId()))
 			{
-				utilizzi.get(i).setIdRicetta(i);
-				getUtilizzoDAO().save(utilizzi.get(i));
+				currDialog.showError(ERR_RECIPE_EXISTING);
+				LOGGER.log(Level.SEVERE, "Ricetta con lo stesso nome per lo stesso chef");
 			}
+	            
+			
+			getRicettaDAO().save(toSaveRicetta, getLoggedUser().getId());
+			LOGGER.log(Level.INFO, "Ricetta salvata con successo");	
+			currDialog.showSuccess("Ricetta salvata con successo");
+			currDialog.dispose();
 		}
 		catch(DAOException e)
 		{
 			LOGGER.log(Level.SEVERE, "Errore salvataggio ricetta nel DB", e);	
-			parent.showError("Errore salvataggio ricetta nel DB");
+			currDialog.showError("Errore salvataggio ricetta nel DB");
 		}
 		
 	}

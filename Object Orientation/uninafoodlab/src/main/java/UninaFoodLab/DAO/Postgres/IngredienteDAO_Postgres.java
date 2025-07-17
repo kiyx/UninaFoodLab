@@ -27,7 +27,7 @@ public class IngredienteDAO_Postgres implements IngredienteDAO
     {
         String sql = 
         		     "INSERT INTO Ingrediente(Nome, Origine) " +
-                     "VALUES(?, ?)";
+                     "VALUES(?, ?::naturaingrediente)";
 
         try(Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
         {

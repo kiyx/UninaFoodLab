@@ -29,13 +29,13 @@ public class UtilizzoDAO_Postgres implements UtilizzoDAO
 	}
 	
 	@Override
-    public void save(Utilizzo toSaveUtilizzo)
+    public void save(Utilizzo toSaveUtilizzo, Connection conn)
     {
 		 String sql = 
 				 	  "INSERT INTO Utilizzi(IdRicetta, IdIngrediente, Quantita, UDM) " +
-                 	  "VALUES(?, ?, ?, ?)";
+                 	  "VALUES(?, ?, ?, ?::unitadimisura)";
 
-	    try(Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
+	    try(PreparedStatement s = conn.prepareStatement(sql))
 	    {
 	        s.setInt(1, toSaveUtilizzo.getIdRicetta());
 	        s.setInt(2, toSaveUtilizzo.getIdIngrediente());

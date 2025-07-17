@@ -2,6 +2,8 @@ package UninaFoodLab.DTO;
 
 import java.util.Objects;
 
+import UninaFoodLab.Exceptions.RequiredIngredienteException;
+
 public class Utilizzo
 {
 	private int idRicetta;
@@ -12,9 +14,12 @@ public class Utilizzo
 
     public Utilizzo(Double quantita, UnitaDiMisura udm, Ingrediente ingrediente)
     {
+    	if(ingrediente == null) throw new RequiredIngredienteException();
+    		
         this.quantita = quantita;
         this.udm = udm;
         this.ingrediente = ingrediente;
+        this.idIngrediente = ingrediente.getId();
     }
 
     @Override

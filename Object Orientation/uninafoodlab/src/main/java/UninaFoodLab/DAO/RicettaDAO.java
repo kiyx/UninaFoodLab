@@ -9,6 +9,7 @@ public interface RicettaDAO
 	void save(Ricetta toSaveRicetta, int IdChef);
 	Ricetta getRicettaById(int idRicetta);
     List<Ricetta> getRicetteByIdChef(int idChef);
+    boolean existsRicettaByNome(Ricetta toSaveRicetta, int idChef);
     List<Ricetta> getRicettaByIdSessionePratica(int idSessionePratica);
     void update(Ricetta previousRicetta, Ricetta updatedRicetta);
     void delete(int idRicetta);
