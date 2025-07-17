@@ -33,31 +33,72 @@ public class RicettaDAO_Postgres implements RicettaDAO
     {
         String sql = 
         		     "INSERT INTO Ricetta(Nome, Provenienza, Tempo, Calorie, Difficolta, Allergeni, IdChef) " +
-                     "VALUES(?, ?, ?, ?, ?, ?, ?)";
+                     "VALUES(?, ?, ?, ?, ?::livellodifficolta, ?, ?)";
+        Connection conn = null;
 
-        try(Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
+        try
         {
-            s.setString(1, toSaveRicetta.getNome());
-            s.setString(2, toSaveRicetta.getProvenienza());
-            s.setInt(3, toSaveRicetta.getTempo());
-            s.setInt(4, toSaveRicetta.getCalorie());
-            s.setString(5, toSaveRicetta.getDifficolta().toString());
-            s.setString(6, toSaveRicetta.getAllergeni());
-            s.setInt(7, idChef);
-            s.executeUpdate();
-            
-            try(ResultSet genKeys = s.getGeneratedKeys())
-            {
-            	if(genKeys.next())
-            		toSaveRicetta.setId(genKeys.getInt(1));
-            	else
-            		throw new DAOException("Creazione Ricetta fallita, nessun ID ottenuto.");
-            }    
+        	conn = ConnectionManager.getConnection();
+        	conn.setAutoCommit(false);
+        	
+        	try(PreparedStatement s = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
+        	{
+                s.setString(1, toSaveRicetta.getNome());
+                s.setString(2, toSaveRicetta.getProvenienza());
+                s.setInt(3, toSaveRicetta.getTempo());
+                s.setInt(4, toSaveRicetta.getCalorie());
+                s.setString(5, toSaveRicetta.getDifficolta().toString());
+                s.setString(6, toSaveRicetta.getAllergeni());
+                s.setInt(7, idChef);
+                s.executeUpdate();
+                
+                try(ResultSet genKeys = s.getGeneratedKeys())
+                {
+                	if(genKeys.next())
+                		toSaveRicetta.setId(genKeys.getInt(1));
+                	else
+                		throw new DAOException("Creazione Ricetta fallita, nessun ID ottenuto.");
+                }           		
+        	}
+
+        	for(Utilizzo util: toSaveRicetta.getUtilizzi())
+        	{
+        		util.setIdRicetta(toSaveRicetta.getId());
+        		new UtilizzoDAO_Postgres().save(util, conn);
+        	}
+	        conn.commit();
         }
-        catch(SQLException e)
-        {
-        	throw new DAOException("Errore DB durante salvataggio Ricetta", e);
-        }
+        catch(Exception e)
+	    {
+	        if(conn != null)
+	        {
+	            try
+	            {
+	                conn.rollback();
+	            }
+	            catch(SQLException ex)
+	            {
+	            	 throw new DAOException("Errore durante rollback transazionale Utilizzi", ex);
+	            }
+	        }
+
+	        throw new DAOException("Errore durante salvataggio transazionale Utilizzi", e);
+	    }
+	    finally
+	    {
+	        if(conn != null)
+	        {
+	            try
+	            {
+	                conn.setAutoCommit(true);
+	                conn.close();
+	            }
+	            catch(SQLException ex)
+	            {
+	            	 throw new DAOException("Errore chiusura connessione Utilizzi", ex);
+	            }
+	        }
+	    }
     }
 	
 	@Override
@@ -106,6 +147,25 @@ public class RicettaDAO_Postgres implements RicettaDAO
         
         return ricette;
     }
+	
+	@Override
+	public boolean existsRicettaByNome(Ricetta toSaveRicetta, int idChef)
+	{
+		String sql = "SELECT EXISTS (SELECT 1 FROM Ricetta WHERE Nome = ? AND IdChef = ?)";
+
+        try(Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
+        {
+            s.setString(1, toSaveRicetta.getNome());
+            s.setInt(2, idChef);
+            ResultSet rs = s.executeQuery();
+
+            return rs.next() && rs.getBoolean(1);
+        }
+        catch(SQLException e)
+        {
+        	throw new DAOException("Errore DB durante ricerca di Partecipante per codice fiscale", e);
+        }
+	}
 	
 	@Override
     public List<Ricetta> getRicettaByIdSessionePratica(int idSessionePratica)

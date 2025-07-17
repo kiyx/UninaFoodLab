@@ -6,6 +6,6 @@ public class RequiredIngredienteException extends RuntimeException
 
 	public RequiredIngredienteException()
 	{
-		super("La Ricetta deve avere almeno un ingrediente associato.");
+		super("Deve essere inserito un ingrediente.");
 	}
 }

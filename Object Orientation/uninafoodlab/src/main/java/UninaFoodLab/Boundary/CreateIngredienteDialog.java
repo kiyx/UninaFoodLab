@@ -226,9 +226,5 @@ public class CreateIngredienteDialog extends JDialog {
 		conferma.setEnabled(true);
 	}
 
-	public void showSuccess(String msg) {
-        JOptionPane.showMessageDialog(this, msg, "Successo", JOptionPane.INFORMATION_MESSAGE);
-        conferma.setEnabled(true);
-        dispose(); 
-    }
+
 }

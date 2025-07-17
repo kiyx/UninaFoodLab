@@ -77,7 +77,7 @@ public class CreateUtilizzoPanel extends JXPanel {
 	private ActionListener removeBtnActionListener;
 	private DocumentListener ricercaIngredientiFieldListener;
 	private MouseAdapter clearButtonListener;
-	private int idSelezionato;
+	private Ingrediente ingSelezionato = null;
 	
 	public CreateUtilizzoPanel(CreateRecipesDialog parent)
 	{
@@ -122,7 +122,6 @@ public class CreateUtilizzoPanel extends JXPanel {
 
 		    group = new ButtonGroup();
 		    
-		    //ingredienti = Controller.getController().loadIngredienti();
 		    for(Ingrediente r : parent.getIngredienti())
 		    {
 		        JRadioButton cb = new JRadioButton(r.getNome());
@@ -138,15 +137,21 @@ public class CreateUtilizzoPanel extends JXPanel {
 			           @Override
 			           public void itemStateChanged(ItemEvent e) 
 			           {
-			        	   int id = r.getId();
 			        	   if(cb.isSelected())
-			        	        idSelezionato = id;
+			        	   {
+			        		   parent.addListaUtilizzi(ingSelezionato, r, CreateUtilizzoPanel.this);
+			        		   ingSelezionato = r;
+			        	   }
 			           }
+			           
 			        });
 		        
 		        ingredientiChecks.add(cb);
 		        group.add(cb);
 		        ingredientiPanel.add(cb, "growx");
+		        for(Ingrediente i: parent.getIngredientiUtil())
+		        	if(i.getId()==r.getId())
+		        		cb.setEnabled(false);
 		    }
 
 		    scrollIngredienti = new JScrollPane(ingredientiPanel);
@@ -209,7 +214,7 @@ public class CreateUtilizzoPanel extends JXPanel {
 								    	     @Override
 								    	     public void mouseClicked(MouseEvent e)
 								    	     {
-								    	         ricercaIngredientiField.setText("");
+								    	    	 ricercaIngredientiField.setText("");
 								    	     }
 								    	 });
 
@@ -279,6 +284,21 @@ public class CreateUtilizzoPanel extends JXPanel {
         cb.setFocusPainted(false);
         cb.setOpaque(false);
         cb.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));       
+        
+        cb.addItemListener(new ItemListener() 
+	       {
+	           @Override
+	           public void itemStateChanged(ItemEvent e) 
+	           {
+	        	   if(cb.isSelected())
+	        	   {
+	        		   parent.addListaUtilizzi(ingSelezionato, ing, CreateUtilizzoPanel.this);
+	        		   ingSelezionato = ing;
+	        	   }
+	           }
+	           
+	        });
+        
         ingredientiChecks.add(cb);
         group.add(cb);
         ingredientiPanel.add(cb, "growx");
@@ -300,7 +320,7 @@ public class CreateUtilizzoPanel extends JXPanel {
 	{
 		boolean check = true;
 		
-		if((int)quantitaField.getValue()==0)
+		if((double)quantitaField.getValue()==0)
 		{
 			check = false;
 		}
@@ -327,9 +347,9 @@ public class CreateUtilizzoPanel extends JXPanel {
         return null; // Nessun bottone selezionato
     }
     
-    public int getId()
+    public Ingrediente getIngrediente()
     {
-    	return idSelezionato;
+    	return ingSelezionato;
     }
     
     public UnitaDiMisura getUnita()
@@ -340,5 +360,24 @@ public class CreateUtilizzoPanel extends JXPanel {
     public Double getQuantita()
     {
     	return (Double)quantitaField.getValue();
+    }
+    
+    public void setResearchNeutral()
+    {
+    	ricercaIngredientiField.setText(ricercaIngredientiField.getText());   	
+    }
+    
+    public void disabilitaIngrediente(Ingrediente oldIng, Ingrediente newIng)
+    {
+    	for(int i=0; i<ingredientiChecks.size(); i++)
+	    {
+	        JRadioButton cb = ingredientiChecks.get(i);
+	        
+	        if(oldIng!=null && cb.getText()==oldIng.getNome())
+	        	cb.setEnabled(true);	        
+	        if(cb.getText()==newIng.getNome())
+	        	cb.setEnabled(false);
+	    }
+
     }
 }
