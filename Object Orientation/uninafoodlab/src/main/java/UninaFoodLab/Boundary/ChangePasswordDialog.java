@@ -1,6 +1,5 @@
 package UninaFoodLab.Boundary;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -31,6 +30,8 @@ import net.miginfocom.swing.MigLayout;
 
 public class ChangePasswordDialog extends JDialog {
 
+	private static final long serialVersionUID = 1L;
+	
 	FontIcon eyeIconOld = FontIcon.of(MaterialDesign.MDI_EYE, 18);
 	FontIcon eyeOffIconOld = FontIcon.of(MaterialDesign.MDI_EYE_OFF, 18);
 
@@ -79,8 +80,6 @@ public class ChangePasswordDialog extends JDialog {
 	private void initComponents()
 	{
 		setTitle("Cambia Password");
-		// Le dimensioni verranno calcolate da pack(), ma una dimensione iniziale può aiutare MigLayout
-		// setSize(450, 350);
 		panel = new JXPanel(new MigLayout("wrap 2", "[grow, fill]5[]", "[]10[]10[]10[]10[]10[]30[]"));
         panel.setBackground(Color.WHITE);
         setContentPane(panel);
@@ -88,8 +87,8 @@ public class ChangePasswordDialog extends JDialog {
         oldPasswordErrorLabel = new JXLabel(" ");
         oldPasswordErrorLabel.setFont(new Font("SansSerif", Font.BOLD, 13));
         oldPasswordErrorLabel.setForeground(Color.RED);
-		oldPasswordErrorLabel.setPreferredSize(new Dimension(300, 20)); // Aggiunto per visibilità
-		panel.add(oldPasswordErrorLabel, "span 2, wrap, align center, h 20!"); // Aggiornato per visibilità
+		oldPasswordErrorLabel.setPreferredSize(new Dimension(300, 20));
+		panel.add(oldPasswordErrorLabel, "span 2, wrap, align center, h 20!");
 
 		oldPasswordLabel = new JXLabel("Inserisci la vecchia password: ");
 		oldPasswordLabel.setFont(new Font("SansSerif", Font.BOLD, 15));
@@ -97,8 +96,8 @@ public class ChangePasswordDialog extends JDialog {
 
 		oldPasswordField = new JPasswordField();
 		oldPasswordField.setPreferredSize(new Dimension(200, 30));
-		oldPasswordField.setBorder(defaultBorder); // Imposta il bordo predefinito
-		panel.add(oldPasswordField, "growx"); // Modificato in growx per espansione orizzontale
+		oldPasswordField.setBorder(defaultBorder);
+		panel.add(oldPasswordField, "growx");
 
     	showOldPassBtn= new JToggleButton();
     	showOldPassBtn.setIcon(eyeOffIconOld);
@@ -107,13 +106,13 @@ public class ChangePasswordDialog extends JDialog {
     	showOldPassBtn.setToolTipText("Mostra/Nascondi password");
     	showOldPassBtn.setBorderPainted(false);
     	showOldPassBtn.setContentAreaFilled(false);
-		panel.add(showOldPassBtn, "w 30!, h 25!, wrap, gapleft 5"); // Aggiunto wrap qui
+		panel.add(showOldPassBtn, "w 30!, h 25!, wrap, gapleft 5"); 
 
 		newPasswordErrorLabel = new JXLabel(" ");
 		newPasswordErrorLabel.setFont(new Font("SansSerif", Font.BOLD, 13));
 		newPasswordErrorLabel.setForeground(Color.RED);
-		newPasswordErrorLabel.setPreferredSize(new Dimension(300, 20)); // Aggiunto per visibilità
-		panel.add(newPasswordErrorLabel, "span 2, wrap, align center, h 20!"); // Aggiornato per visibilità
+		newPasswordErrorLabel.setPreferredSize(new Dimension(300, 20)); 
+		panel.add(newPasswordErrorLabel, "span 2, wrap, align center, h 20!"); 
 
 		newPasswordLabel = new JXLabel("Inserisci la nuova password: ");
 		newPasswordLabel.setFont(new Font("SansSerif", Font.BOLD, 15));
@@ -121,17 +120,17 @@ public class ChangePasswordDialog extends JDialog {
 
 		newPasswordField = new JPasswordField();
 		newPasswordField.setPreferredSize(new Dimension(200, 30));
-		newPasswordField.setBorder(defaultBorder); // Imposta il bordo predefinito
-		panel.add(newPasswordField, "growx"); // Modificato in growx per espansione orizzontale
+		newPasswordField.setBorder(defaultBorder); 
+		panel.add(newPasswordField, "growx"); 
 
 		showNewPassBtn= new JToggleButton();
-		showNewPassBtn.setIcon(eyeOffIconNew); // Corretto a eyeOffIconNew
+		showNewPassBtn.setIcon(eyeOffIconNew); 
 		showNewPassBtn.setPreferredSize(new Dimension(30, 30));
 		showNewPassBtn.setFocusable(false);
 		showNewPassBtn.setToolTipText("Mostra/Nascondi password");
 		showNewPassBtn.setBorderPainted(false);
 		showNewPassBtn.setContentAreaFilled(false);
-		panel.add(showNewPassBtn, "w 30!, h 25!, wrap, gapleft 5"); // Aggiunto wrap qui
+		panel.add(showNewPassBtn, "w 30!, h 25!, wrap, gapleft 5");
 
 
     	conferma= new JXButton("Conferma");
@@ -155,13 +154,13 @@ public class ChangePasswordDialog extends JDialog {
 			{
 				if(showOldPassBtn.isSelected())
 				{
-			    	oldPasswordField.setEchoChar((char)0); // Mostra la password
-			    	showOldPassBtn.setIcon(eyeIconOld); // Corretto a eyeIconOld
+			    	oldPasswordField.setEchoChar((char)0);
+			    	showOldPassBtn.setIcon(eyeIconOld); 
 			    }
 			    else
 			    {
-			    	oldPasswordField.setEchoChar('•'); // Nasconde la password
-			    	showOldPassBtn.setIcon(eyeOffIconOld); // Corretto a eyeOffIconOld
+			    	oldPasswordField.setEchoChar('•');
+			    	showOldPassBtn.setIcon(eyeOffIconOld);
 			    }
 			}
 		  };
@@ -174,19 +173,18 @@ public class ChangePasswordDialog extends JDialog {
 			{
 				if(showNewPassBtn.isSelected())
 				{
-			    	newPasswordField.setEchoChar((char)0); // Mostra la password
+			    	newPasswordField.setEchoChar((char)0);
 			    	showNewPassBtn.setIcon(eyeIconNew);
 			    }
 			    else
 			    {
-			    	newPasswordField.setEchoChar('•'); // Nasconde la password
+			    	newPasswordField.setEchoChar('•'); 
 			    	showNewPassBtn.setIcon(eyeOffIconNew);
 			    }
 			}
 		  };
 		showNewPassBtn.addActionListener(showNewPassBtnActionListener);
 
-		// Listener per la validazione in tempo reale della vecchia password
 		oldPassFieldDocumentListener = new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -200,12 +198,10 @@ public class ChangePasswordDialog extends JDialog {
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                // Non usato per PlainDocument
             }
         };
         oldPasswordField.getDocument().addDocumentListener(oldPassFieldDocumentListener);
 
-        // Listener per la validazione in tempo reale della nuova password
         newPassFieldDocumentListener = new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -219,7 +215,6 @@ public class ChangePasswordDialog extends JDialog {
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                // Non usato per PlainDocument
             }
         };
         newPasswordField.getDocument().addDocumentListener(newPassFieldDocumentListener);
@@ -229,7 +224,6 @@ public class ChangePasswordDialog extends JDialog {
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				// Esegui entrambi i controlli e sposta il focus se uno fallisce
 				boolean oldPassValid = checkOldPass();
 				boolean newPassValid = checkNewPass();
 
@@ -238,9 +232,8 @@ public class ChangePasswordDialog extends JDialog {
 				} else if (!newPassValid) {
 					newPasswordField.requestFocus();
 				} else {
-		        	conferma.setEnabled(false); // Disabilita il pulsante durante l'operazione
+		        	conferma.setEnabled(false);
 		        	Controller.getController().checkNewPassword(ChangePasswordDialog.this, parent, oldPasswordField.getPassword(), newPasswordField.getPassword());
-		        	// La riabilitazione del pulsante e la chiusura della dialog (o gestione errori) dovrebbe avvenire dopo la risposta del controller
 		        }
 		    }
 		};
@@ -261,7 +254,7 @@ public class ChangePasswordDialog extends JDialog {
 	        check = false;
 	    } else {
 	    	oldPasswordField.setBorder(defaultBorder);
-	    	oldPasswordErrorLabel.setText(" "); // Pulisce il messaggio di errore
+	    	oldPasswordErrorLabel.setText(" ");
 	    }
 	    return check;
 	}
@@ -285,7 +278,7 @@ public class ChangePasswordDialog extends JDialog {
 	    else
 	    {
 	    	newPasswordField.setBorder(defaultBorder);
-	    	newPasswordErrorLabel.setText(" "); // Pulisce il messaggio di errore
+	    	newPasswordErrorLabel.setText(" ");
 	    }
 
 	    return check;

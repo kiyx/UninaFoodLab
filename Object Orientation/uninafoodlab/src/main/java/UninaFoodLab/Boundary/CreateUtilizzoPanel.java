@@ -3,13 +3,9 @@ package UninaFoodLab.Boundary;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
-import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
@@ -22,17 +18,13 @@ import java.util.Locale;
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
-import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.NumberFormatter;
@@ -44,28 +36,19 @@ import org.jdesktop.swingx.JXTextField;
 import org.kordamp.ikonli.materialdesign.MaterialDesign;
 import org.kordamp.ikonli.swing.FontIcon;
 
-import com.github.lgooddatepicker.optionalusertools.DateChangeListener;
-import com.github.lgooddatepicker.optionalusertools.TimeChangeListener;
-import com.github.lgooddatepicker.zinternaltools.DateChangeEvent;
-import com.github.lgooddatepicker.zinternaltools.TimeChangeEvent;
-
 import UninaFoodLab.Controller.Controller;
-import UninaFoodLab.DTO.FrequenzaSessioni;
-import UninaFoodLab.DTO.Ingrediente;
-import UninaFoodLab.DTO.LivelloDifficolta;
-import UninaFoodLab.DTO.Ricetta;
-import UninaFoodLab.DTO.UnitaDiMisura;
 import net.miginfocom.swing.MigLayout;
 
 public class CreateUtilizzoPanel extends JXPanel {
 
+	private static final long serialVersionUID = 1L;
+	
 	private Font fieldFont = new Font("Segoe UI", Font.PLAIN, 12);
 	
 	private JXButton removeBtn;
 	private CreateRecipesDialog parent;
-	private JComboBox<UnitaDiMisura> misuraList;
+	private JComboBox<String> misuraList;
 	private JFormattedTextField quantitaField;
-	private boolean focusSet = false;
 	
 	private JXLabel clearButton;
 	private ButtonGroup group;
@@ -77,7 +60,13 @@ public class CreateUtilizzoPanel extends JXPanel {
 	private ActionListener removeBtnActionListener;
 	private DocumentListener ricercaIngredientiFieldListener;
 	private MouseAdapter clearButtonListener;
-	private Ingrediente ingSelezionato = null;
+	private int ingSelezionato = -1;
+	
+	private ArrayList<String> nomiIngredienti = new ArrayList<>();
+	private ArrayList<Integer> idIngredienti = new ArrayList<>();
+	
+	private ArrayList<String> nomiIngredientiUtil = new ArrayList<>();
+	private ArrayList<Integer> idIngredientiUtil = new ArrayList<>();
 	
 	public CreateUtilizzoPanel(CreateRecipesDialog parent)
 	{
@@ -118,39 +107,28 @@ public class CreateUtilizzoPanel extends JXPanel {
 		    ingredientiPanel.setOpaque(false);
 		    ingredientiPanel.setBackground(Color.WHITE);
 
-		    // Inizializzazione e popolamento lista ingredienti 
-
 		    group = new ButtonGroup();
 		    
-		    for(Ingrediente r : parent.getIngredienti())
+
+		    parent.getIngredienti(nomiIngredienti, idIngredienti);
+
+		    for(int i=0; i<nomiIngredienti.size(); i++)
 		    {
-		        JRadioButton cb = new JRadioButton(r.getNome());
+		        JRadioButton cb = new JRadioButton(nomiIngredienti.get(i));
 		        
-		        // Impostazioni base RadioButton (font, focus, cursor)
 		        cb.setFont(fieldFont);
 		        cb.setFocusPainted(false);
 		        cb.setOpaque(false);
 		        cb.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		        
-		        cb.addItemListener(new ItemListener() 
-			       {
-			           @Override
-			           public void itemStateChanged(ItemEvent e) 
-			           {
-			        	   if(cb.isSelected())
-			        	   {
-			        		   parent.addListaUtilizzi(ingSelezionato, r, CreateUtilizzoPanel.this);
-			        		   ingSelezionato = r;
-			        	   }
-			           }
-			           
-			        });
+		        itemListener(cb, idIngredienti.get(i));
 		        
 		        ingredientiChecks.add(cb);
 		        group.add(cb);
 		        ingredientiPanel.add(cb, "growx");
-		        for(Ingrediente i: parent.getIngredientiUtil())
-		        	if(i.getId()==r.getId())
+		        parent.getIngredientiUtil(nomiIngredientiUtil, idIngredientiUtil);
+		        for(int z=0; z<nomiIngredientiUtil.size(); z++)
+		        	if(idIngredientiUtil.get(z)==idIngredienti.get(i))
 		        		cb.setEnabled(false);
 		    }
 
@@ -169,7 +147,7 @@ public class CreateUtilizzoPanel extends JXPanel {
 	        add(new JLabel("Quantità per una porzione:"));
 	        add(quantitaField, "h 30!");
 	        
-	        misuraList = new JComboBox<>(UnitaDiMisura.values());
+	        misuraList = new JComboBox<>(Controller.getController().loadUnita());
 	        add(new JLabel("Unità di misura:"));
 	        add(misuraList, "h 30!");
 
@@ -190,10 +168,6 @@ public class CreateUtilizzoPanel extends JXPanel {
 	
 	private void initListeners()
 	{
-		/**
-		 * Listener associato al pulsante di rimozione dell'utilizzo.
-		 * <p>Invoca {@link CreateRecipesDialog#removeUtilizzoCard(CreateUtilizzoPanel)} per eliminare dinamicamente il pannello dal dialogo genitore.
-		 */
 	    removeBtnActionListener = new ActionListener()
 								  {
 								      @Override
@@ -204,9 +178,6 @@ public class CreateUtilizzoPanel extends JXPanel {
 								  };
 	    removeBtn.addActionListener(removeBtnActionListener);
 
-	    /**
-	     * Listener su label x che svuota il campo di ricerca degli ingredienti
-	     */
 	    if(clearButton != null)
 	    {
 	    	clearButton.addMouseListener(new MouseAdapter()
@@ -232,12 +203,11 @@ public class CreateUtilizzoPanel extends JXPanel {
 
 			    	  ingredientiPanel.removeAll();
 
-			    	  // Prima inserisco quelli matching
-			    	  for(int i = 0; i < parent.getIngredienti().size(); i++)
+			    	  for(int i = 0; i < nomiIngredienti.size(); i++)
 			    	  {
-			    	      Ingrediente r = parent.getIngredienti().get(i);
+			    	      String r = nomiIngredienti.get(i);
 			    	      JRadioButton cb = ingredientiChecks.get(i);
-			    	      boolean match = r.getNome().toLowerCase().contains(filtro);
+			    	      boolean match = r.toLowerCase().contains(filtro);
 			    	      if(match)
 			    	      {
 			    	          ingredientiPanel.add(cb, "growx");
@@ -268,7 +238,6 @@ public class CreateUtilizzoPanel extends JXPanel {
 	
 	public boolean isValidUtilizzo()
 	{
-	    focusSet = false;
 	    boolean valido = true;
 
 	    valido &= validateIngrediente();
@@ -277,14 +246,16 @@ public class CreateUtilizzoPanel extends JXPanel {
 	    return valido;
 	}
 	
-	public void refresh(Ingrediente ing)
+	public void refresh(String ingNome, int ingId)
 	{
-        JRadioButton cb = new JRadioButton(ing.getNome());
+        JRadioButton cb = new JRadioButton(ingNome);
         cb.setFont(fieldFont);
         cb.setFocusPainted(false);
         cb.setOpaque(false);
         cb.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));       
         
+        nomiIngredienti.add(ingNome);
+        idIngredienti.add(ingId);
         cb.addItemListener(new ItemListener() 
 	       {
 	           @Override
@@ -292,8 +263,8 @@ public class CreateUtilizzoPanel extends JXPanel {
 	           {
 	        	   if(cb.isSelected())
 	        	   {
-	        		   parent.addListaUtilizzi(ingSelezionato, ing, CreateUtilizzoPanel.this);
-	        		   ingSelezionato = ing;
+	        		   parent.addListaUtilizzi(ingSelezionato, ingId, CreateUtilizzoPanel.this);
+	        		   ingSelezionato = ingId;
 	        	   }
 	           }
 	           
@@ -341,20 +312,20 @@ public class CreateUtilizzoPanel extends JXPanel {
         for (java.util.Enumeration<AbstractButton> buttons = group.getElements(); buttons.hasMoreElements();) {
             AbstractButton button = buttons.nextElement();
             if (button.isSelected()) {
-                return button.getText(); // oppure button.getActionCommand()
+                return button.getText();
             }
         }
-        return null; // Nessun bottone selezionato
+        return null; 
     }
     
-    public Ingrediente getIngrediente()
+    public int getIngrediente()
     {
     	return ingSelezionato;
     }
     
-    public UnitaDiMisura getUnita()
+    public String getUnita()
     {
-    	return (UnitaDiMisura)misuraList.getSelectedItem();
+    	return (String)misuraList.getSelectedItem();
     }
     
     public Double getQuantita()
@@ -367,17 +338,47 @@ public class CreateUtilizzoPanel extends JXPanel {
     	ricercaIngredientiField.setText(ricercaIngredientiField.getText());   	
     }
     
-    public void disabilitaIngrediente(Ingrediente oldIng, Ingrediente newIng)
+    public void disabilitaIngrediente(String oldIng, String newIng)
     {
     	for(int i=0; i<ingredientiChecks.size(); i++)
 	    {
 	        JRadioButton cb = ingredientiChecks.get(i);
 	        
-	        if(oldIng!=null && cb.getText()==oldIng.getNome())
+	        if(oldIng!=null && cb.getText().equals(oldIng))
 	        	cb.setEnabled(true);	        
-	        if(cb.getText()==newIng.getNome())
+	        if(cb.getText().equals(newIng))
 	        	cb.setEnabled(false);
 	    }
 
     }
+    
+    public void enableIngrediente(String Ing)
+    {
+    	for(int i=0; i<ingredientiChecks.size(); i++)
+	    {
+	        JRadioButton cb = ingredientiChecks.get(i);
+	        
+	        if(cb.getText().equals(Ing))
+	        	cb.setEnabled(true);	        
+	    }
+
+    }
+    
+     private void itemListener(JRadioButton cb, int id)
+        {
+        	cb.addItemListener(new ItemListener() 
+ 	       {
+ 	           @Override
+ 	           public void itemStateChanged(ItemEvent e) 
+ 	           {
+ 	        	   if(cb.isSelected())
+ 	        	   {
+ 	        		   parent.addListaUtilizzi(ingSelezionato, id, CreateUtilizzoPanel.this);
+ 	        		   ingSelezionato = id;
+ 	        	   }
+ 	           }
+ 	           
+ 	        });
+        }
+        
 }

@@ -69,14 +69,16 @@ public class MyRecipesFrame extends JXFrame
         // Esempio: apertura dialog di creazione corso
         CreateRecipesDialog dialog = new CreateRecipesDialog(this);
         SwingUtilities.invokeLater(() -> dialog.setVisible(true));
+        
+        
     }
  
  
     
     private void initListeners()
     {
-        /*newCourseButton.addActionListener(e -> {
-            CreateCourseDialog dialog = new CreateCourseDialog(this);
+        /*newRecipeButton.addActionListener(e -> {
+            CreateRecipeDialog dialog = new CreateRecipeDialog(this);
             dialog.setVisible(true);
             // Aggiungi un listener per ricaricare i corsi quando il dialogo si chiude
         });*/

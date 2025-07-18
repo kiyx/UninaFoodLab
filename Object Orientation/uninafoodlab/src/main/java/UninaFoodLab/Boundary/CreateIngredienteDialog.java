@@ -6,19 +6,12 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-import javax.swing.JToggleButton;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
@@ -26,18 +19,16 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import org.jdesktop.swingx.JXButton;
-import org.jdesktop.swingx.JXDialog;
-import org.jdesktop.swingx.JXFrame;
 import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
 
 import UninaFoodLab.Controller.Controller;
-import UninaFoodLab.DTO.LivelloDifficolta;
-import UninaFoodLab.DTO.NaturaIngrediente;
 import net.miginfocom.swing.MigLayout;
 
 public class CreateIngredienteDialog extends JDialog {
 
+	private static final long serialVersionUID = 1L;
+	
 	private JXLabel nomeLabel, origineLabel;
 	private JTextField nomeField;
 	
@@ -49,15 +40,13 @@ public class CreateIngredienteDialog extends JDialog {
         	new EmptyBorder(0, 6, 0, 0));
 	
 	private JXButton conferma;
-	private JComboBox<NaturaIngrediente> origineList;
+	private JComboBox<String> origineList;
 	
 	private JXPanel panel;
 	private CreateRecipesDialog parent;
 	
 	private DocumentListener nomeListener;
-	private FocusAdapter nomeFocusListener;
 	private ActionListener ConfermaBtnActionListener;
-	private WindowAdapter windowListener;
 	
 	public CreateIngredienteDialog(CreateRecipesDialog parent)
 	{
@@ -75,7 +64,7 @@ public class CreateIngredienteDialog extends JDialog {
 
 	    panel = new JXPanel(new MigLayout("wrap 2", "[grow][grow,fill]", "[]5[]5[]5[]30[]"));
 	    panel.setBackground(Color.WHITE);
-	    panel.setBorder(new EmptyBorder(20, 25, 20, 25)); // Spaziatura esterna
+	    panel.setBorder(new EmptyBorder(20, 25, 20, 25));
 	    setContentPane(panel);
 
 	    Font labelFont = new Font("Segoe UI", Font.BOLD, 14);
@@ -100,7 +89,7 @@ public class CreateIngredienteDialog extends JDialog {
 	    origineLabel.setForeground(new Color(50, 50, 50));
 	    panel.add(origineLabel, "span 2, left");
 
-	    origineList = new JComboBox<>(NaturaIngrediente.values());
+	    origineList = new JComboBox<>(Controller.getController().loadOrigine());
 	    origineList.setFont(inputFont);
 	    origineList.setPreferredSize(new Dimension(250, 36));
 	    origineList.setBackground(Color.WHITE);
@@ -152,29 +141,12 @@ public class CreateIngredienteDialog extends JDialog {
 					} else if (!origineValid) {
 						origineList.requestFocus();
 					} else {
-			        	conferma.setEnabled(false); // Disabilita il pulsante durante l'operazione
-			        	Controller.getController().createNewIngredient(CreateIngredienteDialog.this, parent, nomeField.getText(), (NaturaIngrediente)origineList.getSelectedItem());
-			        	// La riabilitazione del pulsante e la chiusura della dialog (o gestione errori) dovrebbe avvenire dopo la risposta del controller
+			        	conferma.setEnabled(false);
+			        	Controller.getController().createNewIngredient(CreateIngredienteDialog.this, parent, nomeField.getText(), (String)origineList.getSelectedItem());
 			        }
 			    }
 			};
 			conferma.addActionListener(ConfermaBtnActionListener);
-			
-			/*windowListener = new WindowAdapter() 
-	        {
-	            @Override
-	            public void windowClosed(WindowEvent e) 
-	            {
-	            	disposeListeners();
-	            }
-
-	            @Override
-	            public void windowClosing(WindowEvent e) 
-	            {
-	            	disposeListeners();
-	            }
-	        };
-	        CreateIngredienteDialog.addWindowListener(windowListener);*/
 	}
 	
    private void disposeListeners() 

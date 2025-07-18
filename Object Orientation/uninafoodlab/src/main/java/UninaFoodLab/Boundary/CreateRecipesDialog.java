@@ -5,26 +5,18 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.text.NumberFormat;
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
-import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -34,31 +26,14 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
-import javax.swing.text.NumberFormatter;
 
 import org.jdesktop.swingx.JXButton;
-import org.jdesktop.swingx.JXDialog;
-import org.jdesktop.swingx.JXFrame;
 import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTextArea;
 import org.jdesktop.swingx.JXTextField;
 
-import com.github.lgooddatepicker.components.DatePicker;
-import com.github.lgooddatepicker.components.DatePickerSettings;
-import com.github.lgooddatepicker.optionalusertools.DateVetoPolicy;
-import com.github.lgooddatepicker.zinternaltools.DateVetoPolicyMinimumMaximumDate;
-
 import UninaFoodLab.Controller.Controller;
-import UninaFoodLab.DAO.Postgres.RicettaDAO_Postgres;
-import UninaFoodLab.DTO.Argomento;
-import UninaFoodLab.DTO.Chef;
-import UninaFoodLab.DTO.FrequenzaSessioni;
-import UninaFoodLab.DTO.Ingrediente;
-import UninaFoodLab.DTO.LivelloDifficolta;
-import UninaFoodLab.DTO.Ricetta;
-import UninaFoodLab.DTO.Utilizzo;
-import UninaFoodLab.Exceptions.DAOException;
 import net.miginfocom.swing.MigLayout;
 
 public class CreateRecipesDialog extends JDialog
@@ -68,13 +43,11 @@ public class CreateRecipesDialog extends JDialog
 
     private JPanel  scrollContentWrapper;
 	private JXButton aggiungiIngredienteBtn;
-    private JXPanel buttons, container, specifichePanel, infoPanel, leftPanel, mainPanel, ingredientiPanel, ingredientiContainer;
+    private JXPanel buttons, container, infoPanel, leftPanel, mainPanel, ingredientiPanel, ingredientiContainer;
     private JXLabel aggiungiIngredienteLabel, ingredientiTitle, title, notIngrediente;
-    private JXButton addBtn, cancelBtn, confirmBtn, goBackBtn;
+    private JXButton confirmBtn, goBackBtn;
     private JScrollPane rootScroll, scrollAllergeni, scrollIngredienti;
-    private JComboBox<LivelloDifficolta> difficoltaList;
-    private JDialog addSessionDialog;
-    private JFormattedTextField calorieField, tempoField;
+    private JComboBox<String> difficoltaList;
     private JXTextArea allergeniArea;
     private JXTextField nameField, provenienzaField;
     private JSpinner tempoSpinner, calorieSpinner;
@@ -87,7 +60,7 @@ public class CreateRecipesDialog extends JDialog
         	new LineBorder(Color.RED, 1),
         	new EmptyBorder(0, 6, 0, 0));
 	
-    private ActionListener addSessionsListener, cancelAddSessionsListener, confirmBtnListener, goBackBtnListener, aggiungiIngredienteBtnListener;
+    private ActionListener confirmBtnListener, goBackBtnListener, aggiungiIngredienteBtnListener;
     private MouseListener aggiungiIngredienteMouseListener;
     
     private static final Color BACKGROUND_COLOR = new Color(245, 248, 250);
@@ -99,12 +72,17 @@ public class CreateRecipesDialog extends JDialog
         BorderFactory.createEmptyBorder(12, 12, 12, 12)
     );
     
-    private List<CreateUtilizzoPanel> ingredientiCards;
-    private List<Ingrediente> ingredienti;
-    private List<JCheckBox> ingredientiCheck;
+    private ArrayList<CreateUtilizzoPanel> ingredientiCards;
     
-    private ArrayList<Utilizzo> utilizzi = new ArrayList<>();
-    private ArrayList<Ingrediente> ingredientiUtil = new ArrayList<>();
+    private ArrayList<String> nomiIngredienti= new ArrayList<>();
+    private ArrayList<Integer> idIngredienti= new ArrayList<>();
+    
+    private ArrayList<String> nomiIngredientiUtil= new ArrayList<>();
+    private ArrayList<Integer> idIngredientiUtil= new ArrayList<>();
+
+    private ArrayList<Integer> idIngredientiRicetta = new ArrayList<>();
+    private ArrayList<Double> quantitaIngredienti = new ArrayList<>();
+    private ArrayList<String> udmIngredienti = new ArrayList<>();
     
     private MyRecipesFrame parent;
 	public CreateRecipesDialog(MyRecipesFrame parent)
@@ -120,7 +98,7 @@ public class CreateRecipesDialog extends JDialog
 
         initComponents();
         initListeners();
-
+        setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         pack();
 	}
 	
@@ -138,7 +116,7 @@ public class CreateRecipesDialog extends JDialog
         mainPanel.setBackground(BACKGROUND_COLOR);
         container.add(mainPanel, BorderLayout.CENTER);
 
-        ingredienti = Controller.getController().loadIngredienti();
+        Controller.getController().loadIngredienti(nomiIngredienti, idIngredienti);
         initLeftPanel(mainPanel);
         initRightPanel(mainPanel);
 	}
@@ -167,7 +145,7 @@ public class CreateRecipesDialog extends JDialog
 	        infoPanel.add(new JLabel("Provenienza ricetta:"), "cell 0 1");
 	        infoPanel.add(provenienzaField, "h 30!, cell 1 1");
 	        
-	        difficoltaList = new JComboBox<>(LivelloDifficolta.values());
+	        difficoltaList = new JComboBox<>(Controller.getController().loadDifficolta());
 	        infoPanel.add(new JLabel("Livello di difficoltà:"));
 	        infoPanel.add(difficoltaList, "h 30!");
 
@@ -181,8 +159,6 @@ public class CreateRecipesDialog extends JDialog
 	        infoPanel.add(new JLabel("Eventuali allergeni:"));
 	        infoPanel.add(scrollAllergeni, "h 80!");
 	        
-	        //specifichePanel = new JXPanel(new MigLayout("wrap 3", "[right][grow,fill][]", "[][]"));
-	        
 	        tempoLabel = new JXLabel("Tempo di preparazione:");
 	        SpinnerNumberModel tempoModel = new SpinnerNumberModel(1, 1, null, 1);
 	        tempoSpinner = new JSpinner(tempoModel);
@@ -191,12 +167,6 @@ public class CreateRecipesDialog extends JDialog
 	        infoPanel.add(tempoSpinner, "h 36!, growx, split 2");
 	        minLabel = new JXLabel(" min");
 	        infoPanel.add(minLabel);
-	        /*
-	        tempoField = new JFormattedTextField(integerFormatter());
-	        specifichePanel.add(new JLabel("Tempo di preparazione:"), "cell 0 0");
-	        specifichePanel.add(tempoField, "h 30!, cell 1 0");
-	        specifichePanel.add(new JLabel(" min"), "cell 2 0");
-	        */
 
 	        calorieLabel = new JXLabel("Calorie per porzione:");
 	        SpinnerNumberModel calorieModel = new SpinnerNumberModel(1, 0, null, 1);
@@ -206,20 +176,12 @@ public class CreateRecipesDialog extends JDialog
 	        infoPanel.add(calorieSpinner, "h 36!, growx, split 2");
 	        kcalLabel = new JXLabel(" kcal");
 	        infoPanel.add(kcalLabel);
-	        /*
-	        calorieField = new JFormattedTextField(calorieFormatter());
-	        specifichePanel.add(new JLabel("Calorie per porzione:"), "cell 0 1");
-	        specifichePanel.add(calorieField, "h 30!, cell 1 1");
-	        specifichePanel.add(new JLabel(" kcal"), "cell 2 1");
-	        */
-	        
-	        //infoPanel.add(specifichePanel, "span 2, cell 0 4");
 	        
 	        
 
 	        leftPanel.add(infoPanel);
 
-	        // Pulsanti
+
 	        buttons = new JXPanel(new MigLayout("center", "[]20[]"));
 	        buttons.setBackground(BACKGROUND_COLOR);
 
@@ -310,6 +272,7 @@ public class CreateRecipesDialog extends JDialog
         	 {
         		 CreateIngredienteDialog nuovoIngrediente = new CreateIngredienteDialog(CreateRecipesDialog.this);
         		 nuovoIngrediente.setVisible(true);
+        		 
         	 }
         		};
         aggiungiIngredienteBtn.addActionListener(aggiungiIngredienteBtnListener);
@@ -346,13 +309,13 @@ public class CreateRecipesDialog extends JDialog
                 {
                 	for(CreateUtilizzoPanel card : ingredientiCards)
                     {	 
-                		utilizzi.add(new Utilizzo(card.getQuantita(), card.getUnita(), card.getIngrediente()));               			                    
+                	    idIngredientiRicetta.add(card.getIngrediente());                	    
+                	    quantitaIngredienti.add(card.getQuantita());
+                	    udmIngredienti.add(card.getUnita());         			                    
                     }
 
-            		Ricetta toSaveRicetta = new Ricetta(nameField.getText(), provenienzaField.getText(), (int)tempoSpinner.getValue(), (int)calorieSpinner.getValue(),
-            								(LivelloDifficolta)difficoltaList.getSelectedItem(), allergeniArea.getText(), ((Chef)Controller.getController().getLoggedUser()), utilizzi);
-            											
-            		Controller.getController().saveRicettaUtilizzi(parent, CreateRecipesDialog.this, toSaveRicetta, utilizzi);
+            		Controller.getController().saveRicettaUtilizzi(parent, CreateRecipesDialog.this, nameField.getText(), provenienzaField.getText(), (int)tempoSpinner.getValue(), (int)calorieSpinner.getValue(),
+							(String)difficoltaList.getSelectedItem(), allergeniArea.getText(), idIngredientiRicetta, quantitaIngredienti, udmIngredienti);
 
                 }
             }
@@ -373,6 +336,7 @@ public class CreateRecipesDialog extends JDialog
 	@Override
 	public void dispose()
 	{
+		Controller.getController().clearRecipeDialogCache();
 	    disposeListeners();
 	    super.dispose();
 	}
@@ -392,7 +356,6 @@ public class CreateRecipesDialog extends JDialog
 	    	goBackBtnListener = null;
 	    }      
 	
-	    // Rimuovi i listener dei pannelli sessione
 	    for (CreateUtilizzoPanel card : ingredientiCards)
 	    	card.disposeListeners();
 
@@ -423,6 +386,19 @@ public class CreateRecipesDialog extends JDialog
     public void removeUtilizzoCard(CreateUtilizzoPanel panel)
     {
         panel.disposeListeners();
+        for(CreateUtilizzoPanel card : ingredientiCards)
+		{
+        	for(int i=0; i<idIngredienti.size(); i++)
+        		if(idIngredienti.get(i)==panel.getIngrediente())
+        			card.enableIngrediente(nomiIngredienti.get(i));
+		}
+        for(int i=0; i<idIngredientiUtil.size(); i++)
+    		if(idIngredientiUtil.get(i)==panel.getIngrediente())
+    		{
+    			nomiIngredientiUtil.remove(i);
+    			idIngredientiUtil.remove(i);
+    		}
+        
         ingredientiCards.remove(panel);
         ingredientiContainer.remove(panel);
         
@@ -430,6 +406,7 @@ public class CreateRecipesDialog extends JDialog
         ingredientiContainer.revalidate();
         ingredientiContainer.repaint();
     }
+    
     private void updateUtilizziLayout()
     {
         int count = ingredientiCards.size();
@@ -484,12 +461,13 @@ public class CreateRecipesDialog extends JDialog
 	    return check;
     }
     
-    public void addIngrediente(Ingrediente ing)
+    public void addIngrediente(String ingNome, int ingId)
     {
-		ingredienti.add(ing);
+    	nomiIngredienti.add(ingNome);
+    	idIngredienti.add(ingId);
 		for(CreateUtilizzoPanel card : ingredientiCards)
 		{
-			card.refresh(ing);
+			card.refresh(ingNome, ingId);
 		}
     }
     
@@ -501,35 +479,62 @@ public class CreateRecipesDialog extends JDialog
         }
     }
     
-    public List<Ingrediente> getIngredienti()
+    public void getIngredienti(ArrayList<String> nomiIngredienti, ArrayList<Integer> idIngredienti)
     {
-    	return ingredienti;
+    	for(int i=0; i<this.nomiIngredienti.size(); i++)
+    		nomiIngredienti.add(this.nomiIngredienti.get(i));
+    	for(int i=0; i<this.idIngredienti.size(); i++)
+    		idIngredienti.add(this.idIngredienti.get(i));
     }
     
-    public List<Ingrediente> getIngredientiUtil()
+    public void getIngredientiUtil(ArrayList<String> nomiIngredientiUtil, ArrayList<Integer> idIngredientiUtil)
     {
-    	return ingredientiUtil;
+    	for(int i=0; i<this.nomiIngredientiUtil.size(); i++)
+    		nomiIngredientiUtil.add(this.nomiIngredientiUtil.get(i));
+    	for(int i=0; i<this.idIngredientiUtil.size(); i++)
+    		idIngredientiUtil.add(this.idIngredientiUtil.get(i));
     }
     
-    public void addListaUtilizzi(Ingrediente oldIng, Ingrediente newIng, CreateUtilizzoPanel currPanel)
+    public void addListaUtilizzi(int oldIng, int newIng, CreateUtilizzoPanel currPanel)
     {
-    	if(oldIng ==null)
+    	String oldIngNome=null;
+    	String newIngNome=null;
+    	if(oldIng == -1)
     	{
-    		ingredientiUtil.add(newIng);     		
+    		for(int i=0; i<idIngredienti.size(); i++)
+    		{
+    			if(idIngredienti.get(i)==newIng)
+    			{
+    				idIngredientiUtil.add(newIng); 
+    				nomiIngredientiUtil.add(newIngNome = nomiIngredienti.get(i));
+    				
+    			}
+    		}    		
     	}    		
     	else 
     	{
-    		for(int i=0; i<ingredientiUtil.size(); i++)
-    			if(ingredientiUtil.get(i).getId()==oldIng.getId())
-    				ingredientiUtil.remove(i);
-    		ingredientiUtil.add(newIng);  
+    		for(int i=0; i<idIngredientiUtil.size(); i++)
+    			if(idIngredientiUtil.get(i)==oldIng)
+    			{
+    				idIngredientiUtil.remove(i);
+    				oldIngNome = nomiIngredientiUtil.get(i);
+    				nomiIngredientiUtil.remove(i);
+    			}
+    		for(int i=0; i<idIngredienti.size(); i++)
+    		{
+    			if(idIngredienti.get(i)==newIng)
+    			{
+    				idIngredientiUtil.add(newIng); 
+    				nomiIngredientiUtil.add(newIngNome = nomiIngredienti.get(i));
+    			}
+    		}   
     	}
     	
     	for(CreateUtilizzoPanel card : ingredientiCards)
 		{
 			if(card!=currPanel)
 			{
-				card.disabilitaIngrediente(oldIng, newIng);
+				card.disabilitaIngrediente(oldIngNome, newIngNome);
 			}
 		}
     }

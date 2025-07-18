@@ -19,7 +19,6 @@ import com.github.lgooddatepicker.optionalusertools.DateVetoPolicy;
 import com.github.lgooddatepicker.zinternaltools.DateVetoPolicyMinimumMaximumDate;
 
 import UninaFoodLab.Controller.Controller;
-import UninaFoodLab.DTO.Chef;
 import net.miginfocom.swing.MigLayout;
 
 public class ProfileFrame extends JXFrame
@@ -321,7 +320,7 @@ public class ProfileFrame extends JXFrame
 		}
 		else
 			selectedFile = new File(System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" + File.separator
-								    + ((Chef)Controller.getController().getLoggedUser()).getCurriculum());
+								    + (Controller.getController().getLoggedChef()).getCurriculum());
 
 		
     	eliminaProfiloBtn = new JXButton ("Elimina Profilo");
@@ -447,7 +446,7 @@ public class ProfileFrame extends JXFrame
 									    try 
 									    {
 									        File myFile = new File(System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" 
-									        		               + File.separator + ((Chef)Controller.getController().getLoggedUser()).getCurriculum());
+									        		               + File.separator + (Controller.getController().getLoggedChef()).getCurriculum());
 									        if(myFile.exists()) 
 									            Desktop.getDesktop().open(myFile);
 									    } 
@@ -476,7 +475,7 @@ public class ProfileFrame extends JXFrame
 									{
 										visualizzaCurriculumBtn.setEnabled(true);
 										selectedFile = new File(System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" + 
-															    File.separator + ((Chef)Controller.getController().getLoggedUser()).getCurriculum());
+															    File.separator + (Controller.getController().getLoggedChef()).getCurriculum());
 									}
 									setEditMode(false);
 							   }
