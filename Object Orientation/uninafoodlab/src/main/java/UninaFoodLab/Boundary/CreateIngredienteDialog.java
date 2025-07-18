@@ -43,12 +43,12 @@ public class CreateIngredienteDialog extends JDialog {
 	private JComboBox<String> origineList;
 	
 	private JXPanel panel;
-	private CreateRecipesDialog parent;
+	private JDialog parent;
 	
 	private DocumentListener nomeListener;
 	private ActionListener ConfermaBtnActionListener;
 	
-	public CreateIngredienteDialog(CreateRecipesDialog parent)
+	public CreateIngredienteDialog(JDialog parent)
 	{
 		super(parent, "Cambia Password", true);
 		this.parent=parent;

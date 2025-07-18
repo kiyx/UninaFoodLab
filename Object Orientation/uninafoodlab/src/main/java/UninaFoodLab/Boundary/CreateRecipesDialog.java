@@ -137,11 +137,11 @@ public class CreateRecipesDialog extends JDialog
 	        infoPanel.setBackground(Color.WHITE);
 	        infoPanel.setBorder(mainBorder);
 
-	        nameField = new JXTextField("nome");
+	        nameField = new JXTextField();
 	        infoPanel.add(new JLabel("Nome ricetta:"), "cell 0 0");
 	        infoPanel.add(nameField, "h 30!, cell 1 0");
 
-	        provenienzaField = new JXTextField("provenienza");
+	        provenienzaField = new JXTextField();
 	        infoPanel.add(new JLabel("Provenienza ricetta:"), "cell 0 1");
 	        infoPanel.add(provenienzaField, "h 30!, cell 1 1");
 	        

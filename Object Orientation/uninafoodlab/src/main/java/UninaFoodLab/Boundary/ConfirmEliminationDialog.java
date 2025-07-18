@@ -1,6 +1,5 @@
 package UninaFoodLab.Boundary;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor; // Import necessario per Cursor
 import java.awt.Dimension;
@@ -31,6 +30,8 @@ import net.miginfocom.swing.MigLayout;
 
 public class ConfirmEliminationDialog extends JDialog {
 
+    	private static final long serialVersionUID = 1L;
+    
 		FontIcon eyeIcon = FontIcon.of(MaterialDesign.MDI_EYE, 18);
 		FontIcon eyeOffIcon = FontIcon.of(MaterialDesign.MDI_EYE_OFF, 18);
 		

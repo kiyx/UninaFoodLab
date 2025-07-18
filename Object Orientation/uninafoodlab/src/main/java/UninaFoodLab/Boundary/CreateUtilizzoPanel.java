@@ -19,6 +19,7 @@ import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -46,7 +47,7 @@ public class CreateUtilizzoPanel extends JXPanel {
 	private Font fieldFont = new Font("Segoe UI", Font.PLAIN, 12);
 	
 	private JXButton removeBtn;
-	private CreateRecipesDialog parent;
+	private JDialog parent;
 	private JComboBox<String> misuraList;
 	private JFormattedTextField quantitaField;
 	
@@ -68,7 +69,7 @@ public class CreateUtilizzoPanel extends JXPanel {
 	private ArrayList<String> nomiIngredientiUtil = new ArrayList<>();
 	private ArrayList<Integer> idIngredientiUtil = new ArrayList<>();
 	
-	public CreateUtilizzoPanel(CreateRecipesDialog parent)
+	public CreateUtilizzoPanel(JDialog parent)
 	{
 		this.parent = parent;
 		initComponents();
@@ -109,8 +110,10 @@ public class CreateUtilizzoPanel extends JXPanel {
 
 		    group = new ButtonGroup();
 		    
-
-		    parent.getIngredienti(nomiIngredienti, idIngredienti);
+		    if(parent instanceof CreateRecipesDialog)
+		    	((CreateRecipesDialog)parent).getIngredienti(nomiIngredienti, idIngredienti);
+		    else
+		    	((ChangeRecipeDialog)parent).getIngredienti(nomiIngredienti, idIngredienti);
 
 		    for(int i=0; i<nomiIngredienti.size(); i++)
 		    {
@@ -126,7 +129,11 @@ public class CreateUtilizzoPanel extends JXPanel {
 		        ingredientiChecks.add(cb);
 		        group.add(cb);
 		        ingredientiPanel.add(cb, "growx");
-		        parent.getIngredientiUtil(nomiIngredientiUtil, idIngredientiUtil);
+		        if(parent instanceof CreateRecipesDialog)
+			    	((CreateRecipesDialog)parent).getIngredientiUtil(nomiIngredientiUtil, idIngredientiUtil);
+			    else
+			    	((ChangeRecipeDialog)parent).getIngredientiUtil(nomiIngredientiUtil, idIngredientiUtil);
+
 		        for(int z=0; z<nomiIngredientiUtil.size(); z++)
 		        	if(idIngredientiUtil.get(z)==idIngredienti.get(i))
 		        		cb.setEnabled(false);
@@ -173,7 +180,11 @@ public class CreateUtilizzoPanel extends JXPanel {
 								      @Override
 								      public void actionPerformed(ActionEvent e)
 								      {
-								          parent.removeUtilizzoCard(CreateUtilizzoPanel.this);
+									        if(parent instanceof CreateRecipesDialog)
+										    	((CreateRecipesDialog)parent).removeUtilizzoCard(CreateUtilizzoPanel.this);
+										    else
+										    	((ChangeRecipeDialog)parent).removeUtilizzoCard(CreateUtilizzoPanel.this);
+
 								      }
 								  };
 	    removeBtn.addActionListener(removeBtnActionListener);
@@ -256,19 +267,7 @@ public class CreateUtilizzoPanel extends JXPanel {
         
         nomiIngredienti.add(ingNome);
         idIngredienti.add(ingId);
-        cb.addItemListener(new ItemListener() 
-	       {
-	           @Override
-	           public void itemStateChanged(ItemEvent e) 
-	           {
-	        	   if(cb.isSelected())
-	        	   {
-	        		   parent.addListaUtilizzi(ingSelezionato, ingId, CreateUtilizzoPanel.this);
-	        		   ingSelezionato = ingId;
-	        	   }
-	           }
-	           
-	        });
+        itemListener(cb, ingId);
         
         ingredientiChecks.add(cb);
         group.add(cb);
@@ -373,7 +372,10 @@ public class CreateUtilizzoPanel extends JXPanel {
  	           {
  	        	   if(cb.isSelected())
  	        	   {
- 	        		   parent.addListaUtilizzi(ingSelezionato, id, CreateUtilizzoPanel.this);
+ 	        		  if(parent instanceof CreateRecipesDialog)
+					    	((CreateRecipesDialog)parent).addListaUtilizzi(ingSelezionato, id, CreateUtilizzoPanel.this);
+					  else
+					    	((ChangeRecipeDialog)parent).addListaUtilizzi(ingSelezionato, id, CreateUtilizzoPanel.this);
  	        		   ingSelezionato = id;
  	        	   }
  	           }

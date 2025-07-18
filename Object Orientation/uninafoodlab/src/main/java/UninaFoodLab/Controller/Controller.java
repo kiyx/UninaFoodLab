@@ -820,135 +820,171 @@ public class Controller
 	 * -------------------------
 	 */
 	// CreateRecipesDialog
-		// DetailedRecipeFrame
-		
-		private ArrayList<Ingrediente> ingredienti = new ArrayList<>();
-		public void loadIngredienti(ArrayList<String> nomiIngredienti, ArrayList<Integer> idIngredienti)
+			// DetailedRecipeFrame
+			
+		private ArrayList<Ricetta> ricette;
+		public void loadAllRicette(ArrayList<String> nomiRicette, ArrayList<String> difficoltaRicette, ArrayList<Integer> calorieRicette, ArrayList<Integer> idRicette)
 		{
+			ricette = new ArrayList<>();
 			try
 			{
-				for(Ingrediente i: getIngredienteDAO().getAllIngredienti())
+				for(Ricetta r: getRicettaDAO().getRicetteByIdChef(getLoggedChef().getId()))
 				{
-					ingredienti.add(i);
-					nomiIngredienti.add(i.getNome());
-					idIngredienti.add(i.getId());
+					ricette.add(r);
+					nomiRicette.add(r.getNome());
+					difficoltaRicette.add(r.getDifficolta().toString());
+					calorieRicette.add(r.getCalorie());
+					idRicette.add(r.getId());
 				}
 			} 
 			catch (DAOException e)
 			{
-				LOGGER.log(Level.SEVERE, "Errore loadIngredienti da DB", e);
+				LOGGER.log(Level.SEVERE, "Errore loadRicette da DB", e);
 			}
 		}
 		
-		public String[] loadDifficolta()
-	    {
-			LivelloDifficolta[] diff = LivelloDifficolta.values();
-	        String[] namesDiff = new String[diff.length];
-
-	        for(int i = 0; i < diff.length; i++)
-	            namesDiff[i] = diff[i].name();
-
-	        return namesDiff;
-	    }
-		
-		public String[] loadOrigine()
-	    {
-			NaturaIngrediente[] orig = NaturaIngrediente.values();
-	        String[] namesOrig = new String[orig.length];
-
-	        for(int i = 0; i < orig.length; i++)
-	        	namesOrig[i] = orig[i].name();
-
-	        return namesOrig;
-	    }
-		public String[] loadUnita()
-	    {
-			UnitaDiMisura[] unit = UnitaDiMisura.values();
-	        String[] namesUnit = new String[unit.length];
-
-	        for(int i = 0; i < unit.length; i++)
-	        	namesUnit[i] = unit[i].name();
-
-	        return namesUnit;
-	    }
-		
-		public void createNewIngredient(CreateIngredienteDialog currentDialog, CreateRecipesDialog parent, String nome, String ni)
-		{
-			Ingrediente i = new Ingrediente(nome, NaturaIngrediente.valueOf(ni));
-			try
+			private ArrayList<Ingrediente> ingredienti ;
+			public void loadIngredienti(ArrayList<String> nomiIngredienti, ArrayList<Integer> idIngredienti)
 			{
-				ingredienti.add(i);
-				getIngredienteDAO().save(i);
-				parent.addIngrediente(i.getNome(), i.getId());
-				currentDialog.dispose();
-				parent.showSuccess("Ingrediente creato correttamente, cercalo oppure selezionalo dal fondo della lista.");
-				parent.setAllResearch();
-			}
-			catch(DAOException e)
-			{
-				LOGGER.log(Level.SEVERE, "Errore salvataggio ingrediente nel DB", e);	
-				currentDialog.showError("Errore salvataggio ingrediente nel DB, controllare se l'ingrediente è già presente");
-			}
-			
-		}
-		
-		public void saveRicettaUtilizzi(MyRecipesFrame parent, CreateRecipesDialog currDialog,  String nameRicetta, String provenienzaRicetta, int tempoRicetta, int calorieRicetta,
-				String difficoltaRicetta, String allergeniRicetta, ArrayList<Integer> idIngredientiRicetta, ArrayList<Double> quantitaIngredienti, ArrayList<String> udmIngredienti)
-		{
-			ArrayList<Utilizzo> utilizziRicetta = new ArrayList<>();
-			Ingrediente ingredienteUtil=null;
-			
-			for(int i=0; i<idIngredientiRicetta.size(); i++)
-			{
-	                boolean trovato = false;
-
-	                for(Ingrediente u : ingredienti)
-	                {
-	                    if(u.getId() == idIngredientiRicetta.get(i))
-	                    {
-	                    	ingredienteUtil=u;
-	                        trovato = true;
-	                        break;
-	                    }
-	                if(!trovato)
-	                	ingredienteUtil = getIngredienteDAO().getIngredienteById(idIngredientiRicetta.get(i));
-	                }
-	                
-				Utilizzo u = new Utilizzo(quantitaIngredienti.get(i), UnitaDiMisura.valueOf(udmIngredienti.get(i)),
-						ingredienteUtil);
-				utilizziRicetta.add(u);
-			}
-			try
-			{
-				Ricetta toSaveRicetta = new Ricetta(nameRicetta, provenienzaRicetta, tempoRicetta, calorieRicetta, 	LivelloDifficolta.valueOf(difficoltaRicetta), allergeniRicetta, (Chef)getLoggedUser(), utilizziRicetta);
-				if(getRicettaDAO().existsRicettaByNome(toSaveRicetta, ((Chef)getLoggedUser()).getId()))
+				ingredienti = new ArrayList<>();
+				try
 				{
-					currDialog.showError(ERR_RECIPE_EXISTING);
-					LOGGER.log(Level.SEVERE, "Ricetta con lo stesso nome per lo stesso chef");
+					for(Ingrediente i: getIngredienteDAO().getAllIngredienti())
+					{
+						ingredienti.add(i);
+						nomiIngredienti.add(i.getNome());
+						idIngredienti.add(i.getId());
+					}
+				} 
+				catch (DAOException e)
+				{
+					LOGGER.log(Level.SEVERE, "Errore loadIngredienti da DB", e);
 				}
-				else
+			}
+			
+			public String[] loadDifficolta()
+		    {
+				LivelloDifficolta[] diff = LivelloDifficolta.values();
+		        String[] namesDiff = new String[diff.length];
+
+		        for(int i = 0; i < diff.length; i++)
+		            namesDiff[i] = diff[i].name();
+
+		        return namesDiff;
+		    }
+			
+			public String[] loadOrigine()
+		    {
+				NaturaIngrediente[] orig = NaturaIngrediente.values();
+		        String[] namesOrig = new String[orig.length];
+
+		        for(int i = 0; i < orig.length; i++)
+		        	namesOrig[i] = orig[i].name();
+
+		        return namesOrig;
+		    }
+			public String[] loadUnita()
+		    {
+				UnitaDiMisura[] unit = UnitaDiMisura.values();
+		        String[] namesUnit = new String[unit.length];
+
+		        for(int i = 0; i < unit.length; i++)
+		        	namesUnit[i] = unit[i].name();
+
+		        return namesUnit;
+		    }
+			
+			public void createNewIngredient(CreateIngredienteDialog currentDialog, JDialog parent, String nome, String ni)
+			{
+
+				Ingrediente i = new Ingrediente(nome, NaturaIngrediente.valueOf(ni));
+				try
 				{
-					getRicettaDAO().save(toSaveRicetta, getLoggedUser().getId());
-					LOGGER.log(Level.INFO, "Ricetta salvata con successo");	
-					currDialog.showSuccess("Ricetta salvata con successo");
-					currDialog.dispose();
+					ingredienti.add(i);
+					getIngredienteDAO().save(i);
+					if(parent instanceof CreateRecipesDialog)
+						((CreateRecipesDialog)parent).addIngrediente(i.getNome(), i.getId());
+					else
+						((ChangeRecipeDialog)parent).addIngrediente(i.getNome(), i.getId());
+
+					currentDialog.dispose();
 					
+					if(parent instanceof CreateRecipesDialog)
+					{
+						((CreateRecipesDialog)parent).showSuccess("Ingrediente creato correttamente, cercalo oppure selezionalo dal fondo della lista.");
+						((CreateRecipesDialog)parent).setAllResearch();
+					}
+					else
+					{
+						((ChangeRecipeDialog)parent).showSuccess("Ingrediente creato correttamente, cercalo oppure selezionalo dal fondo della lista.");
+						((ChangeRecipeDialog)parent).setAllResearch();
+					}
+					
+				}
+				catch(DAOException e)
+				{
+					LOGGER.log(Level.SEVERE, "Errore salvataggio ingrediente nel DB", e);	
+					currentDialog.showError("Errore salvataggio ingrediente nel DB, controllare se l'ingrediente è già presente");
 				}
 				
 			}
-			catch(DAOException e)
+			
+			public void saveRicettaUtilizzi(MyRecipesFrame parent, CreateRecipesDialog currDialog,  String nameRicetta, String provenienzaRicetta, int tempoRicetta, int calorieRicetta,
+					String difficoltaRicetta, String allergeniRicetta, ArrayList<Integer> idIngredientiRicetta, ArrayList<Double> quantitaIngredienti, ArrayList<String> udmIngredienti)
 			{
-				LOGGER.log(Level.SEVERE, "Errore salvataggio ricetta nel DB", e);	
-				currDialog.showError("Errore salvataggio ricetta nel DB");
+				ArrayList<Utilizzo> utilizziRicetta = new ArrayList<>();
+				Ingrediente ingredienteUtil=null;
+				
+				for(int i=0; i<idIngredientiRicetta.size(); i++)
+				{
+		                boolean trovato = false;
+
+		                for(Ingrediente u : ingredienti)
+		                {
+		                    if(u.getId() == idIngredientiRicetta.get(i))
+		                    {
+		                    	ingredienteUtil=u;
+		                        trovato = true;
+		                        break;
+		                    }
+		                if(!trovato)
+		                	ingredienteUtil = getIngredienteDAO().getIngredienteById(idIngredientiRicetta.get(i));
+		                }
+		                
+					Utilizzo u = new Utilizzo(quantitaIngredienti.get(i), UnitaDiMisura.valueOf(udmIngredienti.get(i)),
+							ingredienteUtil);
+					utilizziRicetta.add(u);
+				}
+				try
+				{
+					Ricetta toSaveRicetta = new Ricetta(nameRicetta, provenienzaRicetta, tempoRicetta, calorieRicetta, 	LivelloDifficolta.valueOf(difficoltaRicetta), allergeniRicetta, (Chef)getLoggedUser(), utilizziRicetta);
+					if(getRicettaDAO().existsRicettaByNome(toSaveRicetta, ((Chef)getLoggedUser()).getId()))
+					{
+						currDialog.showError(ERR_RECIPE_EXISTING);
+						LOGGER.log(Level.SEVERE, "Ricetta con lo stesso nome per lo stesso chef");
+					}
+					else
+					{
+						getRicettaDAO().save(toSaveRicetta, getLoggedUser().getId());
+						LOGGER.log(Level.INFO, "Ricetta salvata con successo");	
+						currDialog.showSuccess("Ricetta salvata con successo");
+						currDialog.dispose();
+						
+					}
+					
+				}
+				catch(DAOException e)
+				{
+					LOGGER.log(Level.SEVERE, "Errore salvataggio ricetta nel DB", e);	
+					currDialog.showError("Errore salvataggio ricetta nel DB");
+				}
+				
 			}
 			
-		}
-		
-		public void clearRecipeDialogCache()
-		{
-			ingredienti=null;
-		}
-
+			public void clearRecipeDialogCache()
+			{
+				ingredienti=null;
+			}
 	/**
 	 * -------------------------
 	 * 
