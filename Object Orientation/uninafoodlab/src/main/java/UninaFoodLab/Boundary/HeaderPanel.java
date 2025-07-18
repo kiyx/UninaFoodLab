@@ -56,7 +56,7 @@ public class HeaderPanel extends JXPanel
 	private JXTextField searchField;
 	
 	/** Eventuale classe che implementa l'interfaccia **/
-	private CourseFilterable filterCallback;
+	private SearchFilterable filterCallback;
 	
 	 /** Pannello dropdown profilo */
 	private ProfileDropdownPanel dropdownPanel;
@@ -115,7 +115,7 @@ public class HeaderPanel extends JXPanel
      * @param layeredPane il layered pane dove saranno aggiunti sidebar e dropdown
      * @param filterCallback callback per filtrare i corsi in base al testo di ricerca
      */
-	public HeaderPanel(JXFrame parentFrame, JLayeredPane layeredPane, CourseFilterable filterCallback)
+	public HeaderPanel(JXFrame parentFrame, JLayeredPane layeredPane, SearchFilterable filterCallback)
 	{
 	    this(parentFrame, layeredPane);
 	    this.filterCallback = filterCallback;
@@ -370,14 +370,14 @@ public class HeaderPanel extends JXPanel
      * per applicare il filtro al click.</p>
      * 
      * <p>Questi listener richiamano il metodo
-     * {@link CourseFilterable#filtraCorsi(String)} con il testo corrente.</p>
+     * {@link CourseFilterable#filter(String)} con il testo corrente.</p>
      */
 	private void initFilterListeners()
 	{  
 		/**
 		 * Un {@link DocumentListener} collegato al documento
          * del campo di testo {@code searchField} che intercetta ogni modifica del testo,
-         * richiamando il metodo {@code filtraCorsi} del callback con il testo aggiornato.
+         * richiamando il metodo {@code filter} del callback con il testo aggiornato.
 		 */
     	searchListener = new DocumentListener()
 				         {
@@ -391,7 +391,7 @@ public class HeaderPanel extends JXPanel
 				             private void aggiornaFiltro()
 				             {
 				                 String testo = searchField.getText().trim().toLowerCase();
-				                 filterCallback.filterCorsi(testo);
+				                 filterCallback.filter(testo);
 				             }
 				         };
         searchField.getDocument().addDocumentListener(searchListener);
@@ -406,7 +406,7 @@ public class HeaderPanel extends JXPanel
         						public void actionPerformed(ActionEvent e)
         						{
         							String testo = searchField.getText().trim().toLowerCase();
-    					            filterCallback.filterCorsi(testo);
+    					            filterCallback.filter(testo);
         						}
 					            
 			        		};

@@ -254,8 +254,8 @@ public class Controller
 				currFrame.dispose();
 				new MyCoursesFrame().setVisible(true);
 			} 
-			else
-				((MyCoursesFrame) currFrame).resetView();
+			//else
+				//((MyCoursesFrame) currFrame).resetView();
 		});
 	}
 
