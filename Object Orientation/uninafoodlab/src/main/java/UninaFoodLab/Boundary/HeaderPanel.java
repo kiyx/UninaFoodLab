@@ -370,7 +370,7 @@ public class HeaderPanel extends JXPanel
      * per applicare il filtro al click.</p>
      * 
      * <p>Questi listener richiamano il metodo
-     * {@link CourseFilterable#filter(String)} con il testo corrente.</p>
+     * {@link SearchFilterable#filter(String)} con il testo corrente.</p>
      */
 	private void initFilterListeners()
 	{  

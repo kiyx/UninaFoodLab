@@ -79,7 +79,7 @@ public class CreateCourseDialog extends JDialog
     
     public CreateCourseDialog(JXFrame parent)
     {
-        super(parent, "Crea nuovo corso", true);
+        super(parent, "UninaFoodLab - Crea nuovo corso", true);
         setMinimumSize(new Dimension(1670, 725));
         setPreferredSize(new Dimension(1200, 700));
         setLocationRelativeTo(parent);
