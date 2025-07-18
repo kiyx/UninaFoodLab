@@ -1,6 +1,7 @@
 package UninaFoodLab.DAO.Postgres;
 
 import UninaFoodLab.DTO.Argomento;
+import UninaFoodLab.Exceptions.ChefNotFoundException;
 import UninaFoodLab.Exceptions.DAOException;
 import UninaFoodLab.DAO.ArgomentoDAO;
 
@@ -64,6 +65,30 @@ public class ArgomentoDAO_Postgres implements ArgomentoDAO
 	    }
 	}
 
+	@Override
+	public Argomento getArgomentoById(int idArgomento)
+	{
+		String sql = 
+	    			 "SELECT * "
+	    		   + "FROM Argomento "
+	    		   + "WHERE IdArgomento = ?";
+
+	    try(Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
+	    {
+	        s.setInt(1, idArgomento);
+	        ResultSet rs = s.executeQuery();
+	
+	        if(rs.next())
+	            return mapResultSetToArgomento(rs);
+	        else
+	        	throw new ChefNotFoundException("Argomento con id " + idArgomento + " non trovato");
+	    }
+	    catch(SQLException e)
+	    {
+	    	throw new DAOException("Errore DB durante ricerca Argomento per id", e);
+	    }
+	}
+	
 	@Override
     public List<Argomento> getAllArgomenti()
     {

@@ -19,36 +19,36 @@ import com.github.lgooddatepicker.optionalusertools.*;
 import com.github.lgooddatepicker.zinternaltools.*;
 
 import UninaFoodLab.Controller.Controller;
-import UninaFoodLab.DTO.Argomento;
-import UninaFoodLab.DTO.Chef;
-import UninaFoodLab.DTO.Corso;
-import UninaFoodLab.DTO.FrequenzaSessioni;
-import UninaFoodLab.DTO.Sessione;
-import UninaFoodLab.DTO.Ricetta;
-import UninaFoodLab.DTO.SessioneOnline;
-import UninaFoodLab.DTO.SessionePratica;
 import net.miginfocom.swing.MigLayout;
 
 public class CreateCourseDialog extends JDialog
 {
     private static final long serialVersionUID = 1L;
 
+    /** Colori principali utilizzati */
     private static final Color BACKGROUND_COLOR = new Color(245, 248, 250);
     private static final Color BORDER_COLOR = new Color(220, 225, 230);
     private static final Color BUTTON_COLOR = new Color(225, 126, 47, 220);
 
+    /**
+     * Bordo composto per sezioni con contorno e padding interno.
+     */
     private static final CompoundBorder mainBorder = new CompoundBorder(
         new LineBorder(BORDER_COLOR, 1, true),
         BorderFactory.createEmptyBorder(12, 12, 12, 12)
     );
+    
+    /**
+     * Indica se è già stato impostato il focus sul primo componente con errore.
+     */
     private boolean focusSet = false;
 
+    /** Componenti swing */
     private JPanel argomentiPanel, scrollContentWrapper;
     private JXPanel buttons, container, detailPanel, infoPanel, formPanel, leftPanel, mainPanel, sessionPanel, sessionsContainer;
     private JXLabel aggiungiSessioneLabel, sessioniLabel, limitLabel, sessionTitle, title;
     private JXButton addBtn, cancelBtn, confirmBtn, goBackBtn;
     private JScrollPane rootScroll, scrollArgomenti, scrollDescrizione, scrollSessions;
-    private JComboBox<FrequenzaSessioni> frequencyList;
     private JCheckBox praticoCheck; 
     private JDialog addSessionDialog;
     private JSpinner numeroSessioniSpinner, onlineSpinner, costSpinner, limitSpinner, praticheSpinner;
@@ -56,15 +56,26 @@ public class CreateCourseDialog extends JDialog
     private JXTextField nameField;
     private DatePicker dataInizioField;
 
+    /** Listeners per i vari componenti */
     private ActionListener addSessionsListener, cancelAddSessionsListener, confirmBtnListener, goBackBtnListener;
     private MouseListener aggiungiSessioniMouseListener;
     private ItemListener praticoCheckListener, argomentiCheckBoxListener, frequencyListListener;
     private DateChangeListener dataInizioListener;
     private WindowAdapter windowListener;
     
+    /** ComboBox per selezionare la frequenza delle sessioni (giornaliera, settimanale, etc.). */
+    private JComboBox<String> frequencyList;
+    
+    /** Elenco delle card delle sessioni create. */
     private List<CreateSessionPanel> sessionCards = new ArrayList<>();
+    
+    /** Lista di checkbox per gli argomenti caricati. */
     private List<JCheckBox> argumentsCheck = new ArrayList<>();
-    private List<Argomento> selectedArguments = new ArrayList<>();
+    
+    /** Liste temporanee per id e nomi degli argomenti disponibili e selezionati. */
+    private List<Integer> idsArguments = new ArrayList<>();
+    private List<String> namesArguments = new ArrayList<>();
+    private List<Integer> idsSelectedArguments = new ArrayList<>();
     
     public CreateCourseDialog(JXFrame parent)
     {
@@ -74,7 +85,8 @@ public class CreateCourseDialog extends JDialog
         setLocationRelativeTo(parent);
         setResizable(true);
         setIconImage(parent.getIconImage());
-
+        setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        
         initComponents();
         initListeners();
 
@@ -142,31 +154,40 @@ public class CreateCourseDialog extends JDialog
         infoPanel.add(new JXLabel("Descrizione:"));
         infoPanel.add(scrollDescrizione, "span 2, growx, growy");
 
-        frequencyList = new JComboBox<>(FrequenzaSessioni.values());
+        frequencyList = new JComboBox<>(Controller.getController().loadFrequenza()); 
         infoPanel.add(new JXLabel("Frequenza:"));
         infoPanel.add(frequencyList, "h 36!, growx");
         
         argomentiPanel = new JPanel(new GridLayout(0, 1));
         argomentiPanel.setOpaque(false);
 
+        Controller.getController().loadArgomenti(idsArguments, namesArguments);
         
-        for(Argomento a : Controller.getController().loadArgomenti())
+        for(int i = 0; i < idsArguments.size(); i++)
         {
-            JCheckBox cb = new JCheckBox(a.getNome());
+        	final int j = i;
+            JCheckBox cb = new JCheckBox(namesArguments.get(i));
+            
             cb.addItemListener( new ItemListener()
 						        {
 						            @Override
 						            public void itemStateChanged(ItemEvent e)
 						            {    		
-						            	if(cb.isSelected() && !selectedArguments.contains(a))
-						            		selectedArguments.add(a);
+						            	int argumentId = idsArguments.get(j);
+						            	 
+						            	if(cb.isSelected() && !idsSelectedArguments.contains(argumentId))
+						            		idsSelectedArguments.add(argumentId);
 						            	else
-						            		selectedArguments.remove(a);
+						            	{
+						            		int index = idsSelectedArguments.indexOf(argumentId);
+						                    if(index >= 0) 
+						                    	idsSelectedArguments.remove(index);
+						            	}
 						            	
 						            	// Se raggiungo il limite disabilito quelle non selezionate 
 						            	for(JCheckBox cb : argumentsCheck)
 						            		if(!cb.isSelected())
-						                       cb.setEnabled(!(selectedArguments.size() >= 5));					        		                   
+						                       cb.setEnabled(!(idsSelectedArguments.size() >= 5));					        		                   
 						            }
 						         });
             argumentsCheck.add(cb);
@@ -302,8 +323,15 @@ public class CreateCourseDialog extends JDialog
         mainPanel.add(sessionPanel, "cell 1 0, grow, push");
     }
 
+    
+    /**
+     * Registra i listener per tutti i componenti interattivi del dialog.
+     */
     private void initListeners()
-    {					          
+    {		
+    	 /**
+         * Listener per il pulsante "Annulla" che chiude il dialog.
+         */
     	goBackBtnListener = new ActionListener()
 					        {
 					            @Override
@@ -314,6 +342,10 @@ public class CreateCourseDialog extends JDialog
 					        };
         goBackBtn.addActionListener(goBackBtnListener);
         
+        /**
+         * Listener per l'etichetta "Aggiungi sessioni".
+         * Al click mostra il dialog per selezionare il numero di sessioni.
+         */
         aggiungiSessioniMouseListener = new MouseAdapter()
 								        {
 								            @Override
@@ -324,6 +356,11 @@ public class CreateCourseDialog extends JDialog
 								        };
         aggiungiSessioneLabel.addMouseListener(aggiungiSessioniMouseListener);
 
+        /**
+         * ItemListener per il checkbox "Pratico".
+         * Se selezionato mostra il limite partecipanti, altrimenti gestisce la rimozione automatica delle 
+         * sessioni pratiche su conferma utente.
+         */
         praticoCheckListener = new ItemListener()
 						       {
 						           @Override
@@ -337,6 +374,10 @@ public class CreateCourseDialog extends JDialog
 						       };
         praticoCheck.addItemListener(praticoCheckListener);
         
+        /**
+         * Listener per la combo "Frequenza".
+         * Quando cambia, rischedula le date delle sessioni in base alla nuova frequenza.
+         */
         frequencyListListener = new ItemListener()
 						        {
 						            @Override
@@ -347,7 +388,11 @@ public class CreateCourseDialog extends JDialog
 						            }
 						        };
         frequencyList.addItemListener(frequencyListListener);
-               
+             
+        /**
+         * Listener per il DatePicker "Data Inizio".
+         * Quando la data di inizio cambia, rischedula le date delle sessioni.
+         */
         dataInizioListener = new DateChangeListener()
         {
             @Override
@@ -358,6 +403,10 @@ public class CreateCourseDialog extends JDialog
         };
         dataInizioField.addDateChangeListener(dataInizioListener);
         
+        /**
+         * ActionListener per il pulsante "Crea Corso".
+         * Valida i campi, raccoglie i dati delle sessioni e invoca il controller per la creazione del corso.
+         */
         confirmBtnListener = new ActionListener()
         {
         	
@@ -368,7 +417,16 @@ public class CreateCourseDialog extends JDialog
                 {
                 	if(!sessionCards.isEmpty())
                 	{
-                		ArrayList<Sessione> sessioni = new ArrayList<>();
+                		List<Integer> durateOnline = new ArrayList<>();
+                		List<Time> orariOnline = new ArrayList<>();
+                		List<LocalDate> dateOnline = new ArrayList<>();
+                		List<String> linksOnline = new ArrayList<>();
+                		
+                		List<Integer> duratePratiche = new ArrayList<>();
+                		List<Time> orariPratiche = new ArrayList<>();	
+                		List<LocalDate> datePratiche = new ArrayList<>();
+                		List<String> indirizziPratiche = new ArrayList<>();
+                		List<ArrayList<Integer>> ricettePratiche = new ArrayList<>();
                 		
                 		boolean check = true;
                 		for(CreateSessionPanel card : sessionCards)
@@ -383,40 +441,31 @@ public class CreateCourseDialog extends JDialog
                             else
                             {
                             	if(card.getTipo().equals("Online"))
-                            		sessioni.add(new SessioneOnline(
-                            									     	card.getDurata(), 
-                            									     	Time.valueOf(card.getOrario()), 
-                            									     	card.getDataSessione(),
-                            									     	card.getLinkRiunione()
-                            									    ));
+                            	{
+                            		 durateOnline.add(card.getDurata());
+                            		 orariOnline.add(Time.valueOf(card.getOrario()));
+                            		 dateOnline.add(card.getDataSessione());
+                            		 linksOnline.add(card.getLinkRiunione());
+                            	}
                             	else
-                            		sessioni.add(new SessionePratica( 
-                            										 	card.getDurata(), 
-                            										 	Time.valueOf(card.getOrario()), 
-                            										 	card.getDataSessione(),
-                            										 	card.getIndirizzo(),
-                            										 	new ArrayList<Ricetta>(card.getIdRicetteSelezionate())
-                            										));
+                            	{
+                            		duratePratiche.add(card.getDurata());
+                            		orariPratiche.add(Time.valueOf(card.getOrario()));
+                            		datePratiche.add(card.getDataSessione());
+                           		 	indirizziPratiche.add(card.getIndirizzo());
+                           			ricettePratiche.add((ArrayList<Integer>) card.getIdRicetteSelezionate());
+                            	}
                             }  	
                         } 	
 
                     	if(check)
                     	{
-                    		Controller.getController().createCourse(CreateCourseDialog.this, 
-                    											    new Corso(
-                    														    nameField.getText().trim(),
-                    														    dataInizioField.getDate(),
-                    														    (int) numeroSessioniSpinner.getValue(), 
-                    														    (FrequenzaSessioni) frequencyList.getSelectedItem(),
-                    														    (int) limitSpinner.getValue(),
-                    														    descrizioneArea.getText(),
-                    														    (BigDecimal) costSpinner.getValue(),
-                    														    praticoCheck.isSelected(),
-                    														    (Chef) Controller.getController().getLoggedUser(),
-                    														    (ArrayList<Argomento>) selectedArguments,
-                    														    sessioni        
-                    														 ));
-                    		
+                    		Controller.getController().createCourse
+                    		(CreateCourseDialog.this, nameField.getText().trim(), dataInizioField.getDate(),
+                    		(int) numeroSessioniSpinner.getValue(), frequencyList.getSelectedItem().toString(), (int) limitSpinner.getValue(),
+                    		descrizioneArea.getText(), BigDecimal.valueOf((double)costSpinner.getValue()), praticoCheck.isSelected(),
+                    		idsSelectedArguments, durateOnline, orariOnline, dateOnline, linksOnline, duratePratiche,
+                    		orariPratiche, datePratiche, indirizziPratiche, ricettePratiche);
                     	}
                 	}
                 	else
@@ -428,6 +477,9 @@ public class CreateCourseDialog extends JDialog
         confirmBtn.addActionListener(confirmBtnListener);
     } 
 
+    /**
+     * Rimuove i listener associati alla finestra di aggiunta sessioni.
+     */
     private void removeDialogListeners()
     {
         if(addBtn != null && addSessionsListener != null)
@@ -449,6 +501,9 @@ public class CreateCourseDialog extends JDialog
         }
     }
 
+    /**
+     * Rimuove tutti i listener associati al dialog e ai pannelli di sessione.
+     */
     public void disposeListeners()
     {
         if(goBackBtn != null && goBackBtnListener != null)
@@ -505,35 +560,47 @@ public class CreateCourseDialog extends JDialog
         removeDialogListeners();
     }
     
+    /**
+     * Disposa il dialog liberando le risorse e i listeners, pulendo la cache nel controller.
+     */
     @Override
     public void dispose()
     {
+    	Controller.getController().clearCourseDialogCache();
         disposeListeners();
         super.dispose();
     } 
     
+    /**
+     * Riesegue la schedulazione automatica delle date delle sessioni in base a data iniziale e frequenza.
+     */
     private void rescheduleSessions()
     {
         LocalDate dataInizio = dataInizioField.getDate();
-        FrequenzaSessioni frequenza = (FrequenzaSessioni) frequencyList.getSelectedItem();
+        String frequenza = frequencyList.getSelectedItem().toString();
 
         if(dataInizio != null && frequenza != null)
         {
-        	if(frequenza == FrequenzaSessioni.Libera)
+        	if(frequenza.equals("Libera"))
                 rescheduleLibera(dataInizio);
             else
                 rescheduleFissa(dataInizio, frequenza);
         }
     }
     
-    private void rescheduleFissa(LocalDate dataInizio, FrequenzaSessioni frequenza)
+    /**
+     * Reschedula le date delle sessioni per frequenza fissa (giornaliera, settimanale, etc.).
+     * @param dataInizio Data di inizio del corso.
+     * @param frequenza Stringa che rappresenta la frequenza.
+     */
+    private void rescheduleFissa(LocalDate dataInizio, String frequenza)
     {
         int giorniFrequenza = switch(frequenza)
 						      {
-						          case Giornaliera -> 1;
-						          case Settimanale -> 7;
-						          case Bisettimanale -> 14;
-						          case Mensile -> 30;
+						          case "Giornaliera" -> 1;
+						          case "Settimanale" -> 7;
+						          case "Bisettimanale" -> 14;
+						          case "Mensile" -> 30;
 						          default -> -1;
 						      };
 
@@ -551,6 +618,10 @@ public class CreateCourseDialog extends JDialog
         }
     }
     
+    /**
+     * Abilita la selezione manuale delle date delle sessioni (frequenza libera).
+     * @param dataInizio Data minima consentita per le sessioni.
+     */
     private void rescheduleLibera(LocalDate dataInizio)
     {
         for(CreateSessionPanel panel : sessionCards)
@@ -561,6 +632,12 @@ public class CreateCourseDialog extends JDialog
         }
     }
     
+    /**
+     * Crea una politica di veto sulle date per evitare sovrapposizioni o date antecedenti.
+     * @param dataInizio Data di inizio obbligatoria per le sessioni.
+     * @param currentPanel Pannello della sessione corrente.
+     * @return Politica di veto per il DatePicker.
+     */
     private DateVetoPolicy getVetoPolicy(final LocalDate dataInizio, final CreateSessionPanel currentPanel)
     {
         return new DateVetoPolicy()
@@ -586,6 +663,13 @@ public class CreateCourseDialog extends JDialog
 			        };
     }
     
+    /**
+     * Imposta la data selezionata su un pannello se mancante o precedente al minimo.
+     * Garantisce che tutte le schede di sessione abbiano sempre una data valida, sia che non ne abbiano mai avuta una, 
+     * sia che la precedente non sia più conforme ai nuovi vincoli. 
+     * @param panel Pannello di sessione da aggiornare.
+     * @param dataInizio Data minima consentita.
+     */
     private void updateSelectedDate(CreateSessionPanel panel, LocalDate dataInizio)
     {
         LocalDate selected = panel.getDatePicker().getDate();
@@ -593,7 +677,11 @@ public class CreateCourseDialog extends JDialog
         if(selected == null || selected.isBefore(dataInizio.plusDays(1)))
             panel.getDatePicker().setDate(dataInizio.plusDays(1));
     }
-    
+
+    /**
+     * Aggiorna il listener di modifica data di un pannello di sessione.
+     * @param panel Pannello di sessione da aggiornare.
+     */
     private void updateSessionListener(CreateSessionPanel panel)
     {
     	 if(panel.getDateChangeListener() != null)
@@ -612,6 +700,10 @@ public class CreateCourseDialog extends JDialog
         SwingUtilities.invokeLater(() -> panel.getDatePicker().addDateChangeListener(listener));
     }
   
+    /**
+     * Aggiunge una nuova scheda di sessione al container.
+     * @param pratica True se la sessione è pratica, false se online.
+     */
     private void addNewSessionCard(boolean pratica)
     {
         CreateSessionPanel card = new CreateSessionPanel(sessionCards.size() + 1, pratica, this);
@@ -622,6 +714,10 @@ public class CreateCourseDialog extends JDialog
         rescheduleSessions();
     }
 
+    /**
+     * Rimuove una scheda di sessione e riorganizza le restanti.
+     * @param panel Pannello di sessione da rimuovere.
+     */
     public void removeSessionCard(CreateSessionPanel panel)
     {  
         sessionCards.remove(panel);
@@ -635,6 +731,9 @@ public class CreateCourseDialog extends JDialog
         rescheduleSessions();
     }
     
+    /**
+     * Mostra il dialog per selezionare il numero di sessioni da aggiungere.
+     */
     private void showAddSessionsDialog()
     {
         addSessionDialog = new JDialog(this, "Seleziona numero sessioni", true);
@@ -659,12 +758,10 @@ public class CreateCourseDialog extends JDialog
         };
         addSessionDialog.addWindowListener(windowListener);
         
-        // Spinner per sessioni online
         onlineSpinner = new JSpinner(new SpinnerNumberModel(1, 0, 20, 1));
         addSessionDialog.add(new JXLabel("Sessioni Online:"));
         addSessionDialog.add(onlineSpinner);
 
-        // Spinner per pratiche: inizializza sempre, ma lo aggiungi solo se pratico è selezionato
         praticheSpinner = new JSpinner(new SpinnerNumberModel(1, 0, 20, 1));
         if(praticoCheck.isSelected())
         {
@@ -716,6 +813,9 @@ public class CreateCourseDialog extends JDialog
         addSessionDialog.setVisible(true);
     }
 
+    /**
+     * Rimuove automaticamente tutte le sessioni di tipo pratico.
+     */
     private void rimuoviSessioniPratiche()
     {
         List<CreateSessionPanel> toRemove = new ArrayList<>();
@@ -728,6 +828,9 @@ public class CreateCourseDialog extends JDialog
             removeSessionCard(card);
     }   
     
+    /**
+     * Gestisce la deselezione del checkbox "pratico", chiedendo conferma per rimuovere le sessioni pratiche.
+     */
     private void onPraticoDeselected()
     {
         boolean hasPratiche = false;
@@ -761,11 +864,10 @@ public class CreateCourseDialog extends JDialog
     }
     
     /**
-     * Mostra o rimuove un errore visivo su un componente Swing con tooltip e outline.
-     * 
-     * @param comp Componente target
-     * @param errore {@code true} per mostrare l'errore, {@code false} per rimuoverlo
-     * @param tooltip Messaggio di errore da visualizzare come tooltip
+     * Applica o rimuove uno stato di errore visivo su un componente.
+     * @param comp Componente target.
+     * @param errore True per mostrare l'errore, false per rimuoverlo.
+     * @param tooltip Testo del tooltip di errore.
      */
 	private void showError(JComponent comp, boolean errore, String tooltip)
 	{
@@ -782,10 +884,9 @@ public class CreateCourseDialog extends JDialog
 		}
 	}
 	    
-    /**
-     * Valida tutti i campi del corso e imposta il focus sul primo campo errato.
-     * 
-     * @return {@code true} se tutti i campi obbligatori sono validi, {@code false} altrimenti
+	 /**
+     * Valida i campi obbligatori del corso e mostra un messaggio di errore se necessario.
+     * @return True se tutti i campi sono validi.
      */
 	public boolean isValidCourse()
 	{
@@ -823,7 +924,6 @@ public class CreateCourseDialog extends JDialog
 	    return valido;
 	}
 
-
 	/**
 	 * Metodo di utilità per validare un singolo campo e impostare il focus se errato.
 	 *
@@ -843,26 +943,46 @@ public class CreateCourseDialog extends JDialog
 	    return !errore;
 	}
 
+	 /**
+     * Controlla la validità del nome del corso.
+     * @return True se il nome non è vuoto.
+     */
 	private boolean validateNome()
 	{
 	    return validateField(nameField, nameField.getText().length()<=0 , "Nome Corso obbligatorio");
 	}
 	
+    /**
+     * Controlla la validità della data di inizio.
+     * @return True se è stata selezionata una data.
+     */
 	private boolean validateDataInizio()
 	{
 	    return validateField(dataInizioField, dataInizioField.getDate() == null, "Data obbligatoria");
 	}
 
+    /**
+     * Controlla che sia stato selezionato almeno un argomento.
+     * @return True se c'è almeno un argomento selezionato.
+     */
 	private boolean validateArgomenti()
 	{
-	    return validateField(argomentiPanel, selectedArguments.size() <= 0, "Inserire almeno un argomento");
+	    return validateField(argomentiPanel, idsSelectedArguments.size() <= 0, "Inserire almeno un argomento");
 	}
 
+	 /**
+     * Controlla la validità della descrizione del corso.
+     * @return True se la descrizione non è vuota.
+     */
 	private boolean validateDescrizione()
 	{
 	    return validateField(descrizioneArea, descrizioneArea.getText().length() <= 0 , "Descrizione Corso obbligatoria");
 	}
     
+
+    /**
+     * Aggiorna la numerica totale delle sessioni e il layout.
+     */
     private void refreshSessionLayout()
     {
         updateSessionTotal();
@@ -870,12 +990,18 @@ public class CreateCourseDialog extends JDialog
         sessionsContainer.revalidate();
         sessionsContainer.repaint();
     }
-    
+
+    /**
+     * Sincronizza il valore dello spinner con il numero di sessioni.
+     */
     private void updateSessionTotal()
     {
         numeroSessioniSpinner.setValue(sessionCards.size());
     }
     
+    /**
+     * Aggiorna il layout delle sessioni in base al numero di sessioni presente.
+     */
     private void updateSessionLayout()
     {
         int count = sessionCards.size();
@@ -891,6 +1017,10 @@ public class CreateCourseDialog extends JDialog
         sessionsContainer.setLayout(new MigLayout("wrap " + Math.min(count, 3) + ", gap 10 10, insets 5", columns));
     }
     
+    /**
+     * Mostra o nasconde i campi per il limite di partecipanti.
+     * @param visibile True per mostrare, false per nascondere.
+     */
     private void togglePartecipantiLimit(boolean visibile)
     {
         limitLabel.setVisible(visibile);
@@ -899,6 +1029,10 @@ public class CreateCourseDialog extends JDialog
         detailPanel.repaint();
     }
 
+    /**
+     * Rimuove i pulsanti di aumento/diminuzione da uno spinner per uno stile più pulito.
+     * @param spinner Spinner da cui rimuovere i pulsanti.
+     */
     private void removeSpinnerButtons(JSpinner spinner)
     {
         JComponent editor = spinner.getEditor();
@@ -915,6 +1049,10 @@ public class CreateCourseDialog extends JDialog
         }
     }
     
+    /**
+     * Applica un tema arancione al componente DatePicker.
+     * @param settings Impostazioni del DatePicker da personalizzare.
+     */
     public void applyOrangeTheme(DatePickerSettings settings)
     {
         Color orange = new Color(225, 126, 47);

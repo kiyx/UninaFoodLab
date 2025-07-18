@@ -13,7 +13,6 @@ import com.github.lgooddatepicker.optionalusertools.*;
 import com.github.lgooddatepicker.zinternaltools.*;
 
 import UninaFoodLab.Controller.Controller;
-import UninaFoodLab.DTO.Ricetta;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -74,9 +73,11 @@ public class CreateSessionPanel extends JXPanel
 	private JPanel ricettePanel;
 	private JScrollPane scrollRicette;
 	private JXTextField ricercaRicetteField;
-	private List<Ricetta> ricette;
-	private List<JCheckBox> ricettaChecks = new ArrayList<>();
-	private List<Ricetta> ricetteSelezionate = new ArrayList<>();
+	
+	private List<JCheckBox> ricettaChecks = new ArrayList<>();	
+	private List<Integer> idsRecipes = new ArrayList<>();
+	private List<String> namesRecipes = new ArrayList<>();
+	private List<Integer> idsSelectedRecipes = new ArrayList<>();
 
 	 /**
      * Costruttore principale per creare un pannello di sessione.
@@ -180,11 +181,11 @@ public class CreateSessionPanel extends JXPanel
 	 *
 	 * @return Lista di ID numerici delle ricette selezionate
 	 */
-	public List<Ricetta> getIdRicetteSelezionate()
+	public List<Integer> getIdRicetteSelezionate()
 	{
 	    if(!pratica)
 	        throw new IllegalStateException("La sessione non è pratica: nessuna ricetta selezionabile.");
-	    return ricetteSelezionate;
+	    return idsSelectedRecipes;
 	}
 
 	/**
@@ -285,7 +286,7 @@ public class CreateSessionPanel extends JXPanel
 		    clearButton = new JXLabel(FontIcon.of(MaterialDesign.MDI_CLOSE_CIRCLE_OUTLINE, 16, new Color(150, 150, 150)));
 		    clearButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		    clearButton.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 4));
-		    clearButton.setVisible(false); // appare solo quando c'è testo
+		    clearButton.setVisible(false);
 
 		    ricercaRicetteField.add(clearButton, BorderLayout.EAST);
 		    add(ricercaRicetteField, "span, growx, gaptop 10, gapbottom 5");
@@ -295,30 +296,35 @@ public class CreateSessionPanel extends JXPanel
 		    ricettePanel.setOpaque(false);
 		    ricettePanel.setBackground(Color.WHITE);
 
-		    // Inizializzazione e popolamento lista ricette (solo se pratica)
-		    ricette = Controller.getController().loadRicette();
+		    // Inizializzazione e popolamento lista stringhe  ricette (solo se pratica)
+		    Controller.getController().loadRicette(idsRecipes, namesRecipes);
 
-		    for(Ricetta r : ricette)
+		    for(int i = 0; i < idsRecipes.size(); i++) 
 		    {
-		        JCheckBox cb = new JCheckBox(r.getNome());
+		        final int j = i;
+		        JCheckBox cb = new JCheckBox(namesRecipes.get(i));
 		        
-		        // Impostazioni base checkbox (font, focus, cursor)
 		        cb.setFont(fieldFont);
 		        cb.setFocusPainted(false);
 		        cb.setOpaque(false);
 		        cb.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		        
-		        // Listener per aggiornare list quando selezionato/deselezionato
+
 		        cb.addItemListener(new ItemListener() 
-							       {
-							           @Override
-							           public void itemStateChanged(ItemEvent e) 
-							           {
-							        	   if(cb.isSelected() && !ricetteSelezionate.contains(r))
-							        	        ricetteSelezionate.add(r);
-							        	    else
-							        	        ricetteSelezionate.remove(r);
-							           }
+							        {
+							            @Override
+							            public void itemStateChanged(ItemEvent e) 
+							            {  	
+							                int recipeId = idsRecipes.get(j);
+							                
+							                if(cb.isSelected() && !idsSelectedRecipes.contains(recipeId)) 
+							                	idsSelectedRecipes.add(recipeId);
+							                else 
+							                {
+							                    int index = idsSelectedRecipes.indexOf(recipeId);
+							                    if(index >= 0) 
+							                    	idsSelectedRecipes.remove(index);
+							                }
+							            }
 							        });
 
 		        ricettaChecks.add(cb);
@@ -588,12 +594,12 @@ public class CreateSessionPanel extends JXPanel
 										    	  ricettePanel.removeAll();
 								
 										    	  // Prima inserisco quelli matching
-										    	  for(int i = 0; i < ricette.size(); i++)
+										    	  for(int i = 0; i < namesRecipes.size(); i++)
 										    	  {
-										    	      Ricetta r = ricette.get(i);
+										    	      String name = namesRecipes.get(i);
 										    	      JCheckBox cb = ricettaChecks.get(i);
 
-										    	      if(r.getNome().toLowerCase().contains(filtro))
+										    	      if(name.toLowerCase().contains(filtro))
 										    	      {
 										    	          ricettePanel.add(cb, "growx");
 										    	          cb.setVisible(true);
@@ -937,7 +943,7 @@ public class CreateSessionPanel extends JXPanel
      */
 	private boolean validateRicetta()
 	{
-	    boolean errore = ricetteSelezionate.isEmpty();
+	    boolean errore = idsSelectedRecipes.isEmpty();
 	    showError(scrollRicette, errore, "Seleziona almeno una ricetta");
 
 	    if(errore && !focusSet)

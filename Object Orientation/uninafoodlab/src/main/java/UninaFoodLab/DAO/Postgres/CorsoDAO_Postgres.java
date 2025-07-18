@@ -93,6 +93,7 @@ public class CorsoDAO_Postgres implements CorsoDAO
 
 	        // salva gli argomenti
 	        new ArgomentoDAO_Postgres().saveArgomentiCorso(corso.getId(), corso.getArgomenti(), conn);
+	        
 	        // salva tutte le sessioni collegate, sempre con la stessa connessione
 	        for(Sessione s : corso.getSessioni())
 	        {

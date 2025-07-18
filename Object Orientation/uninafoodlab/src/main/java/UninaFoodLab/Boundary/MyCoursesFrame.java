@@ -8,37 +8,20 @@ import org.jdesktop.swingx.*;
 import UninaFoodLab.Controller.Controller;
 import net.miginfocom.swing.MigLayout;
 
-import com.formdev.flatlaf.FlatLightLaf;
-
-import net.miginfocom.swing.MigLayout;
-
 
 public class MyCoursesFrame extends JXFrame implements CourseFilterable
 {
-
+	nome 
+	argomento
+	datainizio
+	numerosessioni
+	 
     private static final long serialVersionUID = 1L;
 
     private JXPanel rootPanel,  mainContentPanel, coursesPanel;
     private JScrollPane scrollPane;
     private HeaderPanel header;
-    
-    // Listeners
-    
 
-    
-    public static void main(String[] args) 
-    {
-        EventQueue.invokeLater(() -> {
-            try {
-                UIManager.setLookAndFeel(new FlatLightLaf());
-                new MyCoursesFrame().setVisible(true);
-    
-            } 
-            catch (UnsupportedLookAndFeelException e) {
-                e.printStackTrace();
-            }
-        });
-    }
 
     /**
      * Costruttore della finestra {@code CoursesFrame}.
@@ -62,7 +45,7 @@ public class MyCoursesFrame extends JXFrame implements CourseFilterable
    
     private void initComponents()
     {
-    	// Icona finestra
+        // Icona finestra
         ImageIcon windowLogo = new ImageIcon(getClass().getResource("/logo_finestra.png"));
         setIconImage(windowLogo.getImage());
 
@@ -79,15 +62,23 @@ public class MyCoursesFrame extends JXFrame implements CourseFilterable
         mainContentPanel = new JXPanel(new MigLayout("fill, insets 15", "[grow, fill]", "[][grow, fill]"));
         rootPanel.add(mainContentPanel, "grow");
 
-        coursesPanel = new JXPanel(new MigLayout("wrap 4, fillx, insets 10", "[]", "[]"));
+        // Container delle card
+        coursesPanel = new JXPanel(new MigLayout("wrap 4, fillx, insets 10", "[grow, fill]", "[]"));
         scrollPane = new JScrollPane(coursesPanel);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         mainContentPanel.add(scrollPane, "grow");
 
-        // Esempio: apertura dialog di creazione corso
-        CreateCourseDialog dialog = new CreateCourseDialog(this);
-        SwingUtilities.invokeLater(() -> dialog.setVisible(true));
+        // Carica i corsi e crea le card
+        List<Corso> corsi = Controller.getController().getMyCourses();
+        for(Course c : corsi) 
+        {
+            CourseCardPanel card = new CourseCardPanel(c);
+            coursesPanel.add(card, "grow");
+        }
+        coursesPanel.revalidate();
+        coursesPanel.repaint();
     }
+
  
  
     
