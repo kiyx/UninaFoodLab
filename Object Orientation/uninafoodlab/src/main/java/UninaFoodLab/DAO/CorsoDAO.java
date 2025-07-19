@@ -10,7 +10,8 @@ public interface CorsoDAO
 	void save(Corso toSaveCorso);
 	void save(Corso toSaveCorso, Connection conn);
     Corso getCorsoById(int idCorso);
-    List<Corso> getCorsiByChef(int idChef);
+    List<Corso> getCorsiByIdChef(int idChef);
+    List<Corso> getCorsiByIdPartecipante(int idPartecipante);
     List<Corso> getCorsiByArgomenti(List<Integer> idsArgomenti);
     List<Corso> getAllCorsi();
     void update(Corso oldCorso, Corso newCorso);

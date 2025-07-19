@@ -54,8 +54,8 @@ public class Controller
 	 */
 	private List<Argomento> cacheArgomenti = new ArrayList<>();
 	private List<Ricetta> cacheRicette = new ArrayList<>();
-	
-	
+	private List<Ingrediente> cacheIngredienti = new ArrayList<>();
+	private List<Corso> cacheCorsi = new ArrayList<>();
 	
 	/** Costruttore privato per pattern Singleton */
 	private Controller() {}
@@ -680,6 +680,16 @@ public class Controller
      *  -------------------------
 	*/
 	
+	public void showCreateCourseDialog(MyCoursesFrame parentFrame)
+	{
+		 new CreateCourseDialog(parentFrame).setVisible(true);	
+	}
+	
+	public void callRemoveSessionCard(CreateCourseDialog parent, CreateSessionPanel panel)
+	{
+		parent.removeSessionCard(panel);
+	}
+	
 	public void clearCourseDialogCache()
 	{
 		cacheArgomenti = null;
@@ -801,6 +811,8 @@ public class Controller
 			getCorsoDAO().save(new Corso(nomeCorso, dataInizio, numeroSessioni, FrequenzaSessioni.valueOf(frequenza), limite, descrizione, 
 								  costo, isPratico, (Chef) getLoggedUser(), argomenti, sessioni));
 
+			
+			
 			LOGGER.log(Level.INFO, "Salvataggio del corso " + nomeCorso + " dello chef " + getLoggedUser().getUsername() + " effettuato ");
 			currDialog.dispose();
 		} 
@@ -811,6 +823,11 @@ public class Controller
 		}
 	}
 
+	public void clearMyCoursesCache()
+	{
+		cacheCorsi = null;
+	}
+	
 	/**
 	 * -------------------------
 	 * 
@@ -822,15 +839,13 @@ public class Controller
 	// CreateRecipesDialog
 			// DetailedRecipeFrame
 			
-		private ArrayList<Ricetta> ricette;
 		public void loadAllRicette(ArrayList<String> nomiRicette, ArrayList<String> difficoltaRicette, ArrayList<Integer> calorieRicette, ArrayList<Integer> idRicette)
-		{
-			ricette = new ArrayList<>();
+		{	
 			try
 			{
 				for(Ricetta r: getRicettaDAO().getRicetteByIdChef(getLoggedChef().getId()))
 				{
-					ricette.add(r);
+					cacheRicette.add(r);
 					nomiRicette.add(r.getNome());
 					difficoltaRicette.add(r.getDifficolta().toString());
 					calorieRicette.add(r.getCalorie());
@@ -843,15 +858,14 @@ public class Controller
 			}
 		}
 		
-			private ArrayList<Ingrediente> ingredienti ;
+			
 			public void loadIngredienti(ArrayList<String> nomiIngredienti, ArrayList<Integer> idIngredienti)
 			{
-				ingredienti = new ArrayList<>();
 				try
 				{
 					for(Ingrediente i: getIngredienteDAO().getAllIngredienti())
 					{
-						ingredienti.add(i);
+						cacheIngredienti.add(i);
 						nomiIngredienti.add(i.getNome());
 						idIngredienti.add(i.getId());
 					}
@@ -900,7 +914,7 @@ public class Controller
 				Ingrediente i = new Ingrediente(nome, NaturaIngrediente.valueOf(ni));
 				try
 				{
-					ingredienti.add(i);
+					cacheIngredienti.add(i);
 					getIngredienteDAO().save(i);
 					if(parent instanceof CreateRecipesDialog)
 						((CreateRecipesDialog)parent).addIngrediente(i.getNome(), i.getId());
@@ -939,7 +953,7 @@ public class Controller
 				{
 		                boolean trovato = false;
 
-		                for(Ingrediente u : ingredienti)
+		                for(Ingrediente u : cacheIngredienti)
 		                {
 		                    if(u.getId() == idIngredientiRicetta.get(i))
 		                    {
@@ -983,7 +997,7 @@ public class Controller
 			
 			public void clearRecipeDialogCache()
 			{
-				ingredienti=null;
+				cacheIngredienti = null;
 			}
 	/**
 	 * -------------------------
@@ -1039,6 +1053,7 @@ public class Controller
 	 * 
 	 * -------------------------
 	 */
+	
 	 private void modifySuccess(ProfileFrame currFrame, Utente u) 
 	    {
 			LOGGER.log(Level.INFO, "Registrazione modifica per utente: {0}", u.getUsername());
@@ -1130,8 +1145,7 @@ public class Controller
                modifySuccess(currFrame, c);
        	}
 
-	    }
-	    
+	    }    
 	    
 	    private String changeCurriculumFile(String username, File selectedFile) throws IOException
 	    {
@@ -1197,6 +1211,12 @@ public class Controller
 				modifyFailed(currFrame, "Errore di modifica.");
 			}
 	    }
+	    
+	    
+	public void showChangePasswordDialog(JXFrame parentFrame)
+	{
+		new ChangePasswordDialog(parentFrame).setVisible(true);
+	}
 	    
 	public void checkNewPassword(ChangePasswordDialog currDialog, JXFrame parent, char[] oldPass, char[] newPass)
 	{
@@ -1317,4 +1337,6 @@ public class Controller
    {
    	return (Chef)getLoggedUser();
    }
+
+  
 }

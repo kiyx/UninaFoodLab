@@ -130,7 +130,7 @@ public class ProfileDropdownPanel extends JXPanel
 									 @Override
 									 public void actionPerformed(ActionEvent e)
 									 {
-										 new ChangePasswordDialog(parentFrame).setVisible(true);
+										 Controller.getController().showChangePasswordDialog(parentFrame);					 
 									 }
 	
 								  };

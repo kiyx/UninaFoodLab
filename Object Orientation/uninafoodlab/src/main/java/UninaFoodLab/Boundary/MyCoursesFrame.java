@@ -6,11 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.*;
-
 import org.jdesktop.swingx.*;
-import org.jdesktop.swingx.border.DropShadowBorder;
-import org.kordamp.ikonli.materialdesign.MaterialDesign;
-import org.kordamp.ikonli.swing.FontIcon;
+import org.jdesktop.swingx.border.*;
+import org.kordamp.ikonli.materialdesign.*;
+import org.kordamp.ikonli.swing.*;
 
 import UninaFoodLab.Controller.Controller;
 import net.miginfocom.swing.MigLayout;
@@ -32,8 +31,8 @@ public class MyCoursesFrame extends JXFrame implements SearchFilterable
     private List<JXPanel> allCourseCards = new ArrayList<>();
     private List<JXPanel> filteredCourseCards = new ArrayList<>();
     
-    private ActionListener leftArrowClicker, rightArrowClicker, addCourseClicker;
-    
+    private ActionListener leftArrowClicker, rightArrowClicker;
+    private MouseAdapter addCourseClicker;
 
     public MyCoursesFrame()
     {
@@ -69,15 +68,16 @@ public class MyCoursesFrame extends JXFrame implements SearchFilterable
 
         titleLabel = new JXLabel(Controller.getController().isChefLogged() ? "I MIEI CORSI" : "LE MIE ISCRIZIONI");
         titleLabel.setFont(new Font("Roboto", Font.BOLD, 30));
-        titleLabel.setForeground(Color.DARK_GRAY);
+        titleLabel.setForeground(new Color(225, 126, 47, 220));
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        contentPanel.add(titleLabel, "growx, split 2, align center");
+        contentPanel.add(titleLabel, "growx, align center");
         
         if(Controller.getController().isChefLogged())
         {
         	addCourseLabel = new JXLabel("<html><u>Aggiungi un corso</u></html>");
+        	addCourseLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
         	addCourseLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        	contentPanel.add(addCourseLabel , "growx, align right");
+        	contentPanel.add(addCourseLabel , "align right");
         }  	
 
         coursesPanel = new JXPanel(new MigLayout(
@@ -107,16 +107,14 @@ public class MyCoursesFrame extends JXFrame implements SearchFilterable
      	rightArrow.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
      	rightArrow.setEnabled(false);	
 
-     	// ScrollPane al centro che si espande
      	contentPanel.add(scrollPane, "grow, pushy");
 
-     	// Frecce sotto, pannello separato
      	navPanel = new JXPanel(new MigLayout("insets 0, gap 15", "[pref!][grow][pref!]", "[]"));
      	navPanel.setBackground(Color.WHITE);
      	navPanel.add(leftArrow, "aligny center");
      	navPanel.add(Box.createHorizontalGlue(), "growx");
      	navPanel.add(rightArrow, "aligny center");
-     	contentPanel.add(navPanel, "center");
+     	contentPanel.add(navPanel, "gaptop 10, center");
     }
 
     private void initListeners()
@@ -141,14 +139,48 @@ public class MyCoursesFrame extends JXFrame implements SearchFilterable
 						    }; 
     	rightArrow.addActionListener(rightArrowClicker);
     	
-    	addCourseClicker = new ActionListener()
-			    		   {
-					    		@Override
-								public void actionPerformed(ActionEvent e)
-								{
-									new CreateCourseDialog(MyCoursesFrame.this).setVisible(true);
-								}
-			    		   };
+    	if(addCourseLabel != null)
+    	{
+    		addCourseClicker= new MouseAdapter()
+						      {
+						          @Override
+						          public void mouseClicked(MouseEvent e)
+						          {
+						        	  Controller.getController().showCreateCourseDialog(MyCoursesFrame.this);						             
+						          }
+						      };	   
+	        addCourseLabel.addMouseListener(addCourseClicker);
+    	}
+    }
+    
+    private void disposeListeners()
+    {
+    	if(leftArrow != null && leftArrowClicker != null)
+    	{
+    		leftArrow.removeActionListener(leftArrowClicker);
+    		leftArrowClicker = null;   		
+    	}
+    	
+    	if(rightArrow != null && rightArrowClicker != null)
+    	{
+    		rightArrow.removeActionListener(rightArrowClicker);
+    		rightArrowClicker = null;   		
+    	}
+    	
+    	if(addCourseLabel != null && addCourseClicker != null)
+    	{
+    		addCourseLabel.removeMouseListener(addCourseClicker);
+    		addCourseClicker = null;
+    	}
+ 
+    }
+    
+    @Override
+    public void dispose()
+    {
+    	Controller.getController().clearMyCoursesCache();
+    	disposeListeners();
+    	super.dispose();
     }
     
     @Override
@@ -160,20 +192,12 @@ public class MyCoursesFrame extends JXFrame implements SearchFilterable
         {
             JXLabel label = (JXLabel)card.getComponent(0);
             
-            if(label.getText().toLowerCase().contains( filter))
+            if(label.getText().trim().toLowerCase().contains(filter))
                 filteredCourseCards.add(card);
         }
 
         currentPage = 0;
         caricaPagina(currentPage);
-    }
-    
-    private void creaTutteLeCardDemo()
-    {
-        allCourseCards.clear();
-
-        for(int i=1; i<=25; i++)
-            allCourseCards.add(creaCardCorso("Corso " + i, "Descrizione del corso " + i));
     }
     
     private JXPanel creaCardCorso(String titolo, String descrizione)
@@ -212,7 +236,15 @@ public class MyCoursesFrame extends JXFrame implements SearchFilterable
         });
 
         return card;
-    }  
+    } 
+    
+    private void creaTutteLeCardDemo()
+    {
+        allCourseCards.clear();
+
+        for(int i=1; i<=25; i++)
+            allCourseCards.add(creaCardCorso("Corso " + i, "Descrizione del corso " + i));
+    }
 
     private void caricaPagina(int page)
     {

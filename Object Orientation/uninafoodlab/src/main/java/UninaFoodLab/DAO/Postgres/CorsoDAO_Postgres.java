@@ -162,7 +162,7 @@ public class CorsoDAO_Postgres implements CorsoDAO
     }
 
 	@Override
-    public List<Corso> getCorsiByChef(int idChef)
+    public List<Corso> getCorsiByIdChef(int idChef)
     {
         String sql =
         			 "SELECT * "
@@ -187,6 +187,32 @@ public class CorsoDAO_Postgres implements CorsoDAO
         return courses;
     }
 
+	@Override 
+	public List<Corso> getCorsiByIdPartecipante(int idPartecipante)
+	{
+		String sql =
+		   			 "SELECT * "
+		   		   + "FROM Corso C JOIN Iscrizioni I ON C.IdCorso = I.IdCorso "
+		   		   + "WHERE IdPartecipante = ?";
+   
+	   List<Corso> courses = new ArrayList<>();
+	   
+	   try(Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
+	   {
+	       s.setInt(1, idPartecipante);
+	       ResultSet rs = s.executeQuery();
+	
+	       while(rs.next())
+	           courses.add(mapResultSetToCorso(rs));
+	   }
+	   catch(SQLException e)
+	   {
+	   		throw new DAOException("Errore DB durante getCorsiByIdPartecipante", e);
+	   }
+	     
+	   return courses;
+	}
+	
 	@Override
     public List<Corso> getAllCorsi()
     {

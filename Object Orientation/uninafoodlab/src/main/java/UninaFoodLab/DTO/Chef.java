@@ -37,12 +37,12 @@ public class Chef extends Utente
         return corsi;
     }
 
-    public void aggiungiRicetta(Ricetta toAddRicetta)
+    public void addRicetta(Ricetta toAddRicetta)
     {
         ricette.add(toAddRicetta);
     }
 
-    public void aggiungiCorso(Corso toAddCorso)
+    public void addCorso(Corso toAddCorso)
     {
         corsi.add(toAddCorso);
     }

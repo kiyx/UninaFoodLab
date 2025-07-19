@@ -5,13 +5,11 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.event.*;
-
 import org.jdesktop.swingx.*;
 import org.kordamp.ikonli.materialdesign.*;
 import org.kordamp.ikonli.swing.*;
-
+import net.miginfocom.swing.*;
 import UninaFoodLab.Controller.Controller;
-import net.miginfocom.swing.MigLayout;
 
 /**
  * Pannello header personalizzato.
@@ -391,7 +389,8 @@ public class HeaderPanel extends JXPanel
 				             private void aggiornaFiltro()
 				             {
 				                 String testo = searchField.getText().trim().toLowerCase();
-				                 filterCallback.filter(testo);
+				                 if(testo.equals(""))
+				                 	filterCallback.filter(testo);
 				             }
 				         };
         searchField.getDocument().addDocumentListener(searchListener);

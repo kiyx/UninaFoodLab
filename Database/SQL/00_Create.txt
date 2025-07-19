@@ -87,7 +87,7 @@ CREATE TABLE Corso
 CREATE TABLE SessionePratica
 (
 	IdSessionePratica SERIAL PRIMARY KEY, 
-	Durata INTEGER NOT NULL,																-- La durata è in minuti
+	Durata INTEGER NOT NULL,													  -- La durata è in minuti
 	Orario TIME NOT NULL,
 	Data DATE NOT NULL, 
 	NumeroPartecipanti INTEGER NOT NULL DEFAULT 0,
@@ -96,7 +96,7 @@ CREATE TABLE SessionePratica
 	CONSTRAINT check_data_non_passata_sessioneprat CHECK (Data > CURRENT_DATE),
 	CONSTRAINT check_durata_positiva_sessioneprat CHECK (Durata > 0),
 	CONSTRAINT check_empty_sessioneprat_luogo CHECK (LENGTH(Luogo) > 0),	
-	CONSTRAINT fk_corso_pratica FOREIGN KEY(IdCorso) REFERENCES Corso(IdCorso) ON DELETE CASCADE 			--Se eliminiamo il corso vengono eliminate anche tutte le sessioni pratiche associate
+	CONSTRAINT fk_corso_pratica FOREIGN KEY(IdCorso) REFERENCES Corso(IdCorso) ON DELETE CASCADE 	--Se eliminiamo il corso vengono eliminate anche tutte le sessioni pratiche associate
 );
 
 -- SessioneOnline
@@ -111,7 +111,7 @@ CREATE TABLE SessioneOnline
 	CONSTRAINT check_data_non_passata_sessioneonl CHECK (Data > CURRENT_DATE),
 	CONSTRAINT check_durata_positiva_sessioneonl CHECK (Durata > 0),
 	CONSTRAINT check_empty_sessioneonl_link CHECK (LENGTH(LinkRiunione) > 0),
-	CONSTRAINT fk_corso_online FOREIGN KEY(IdCorso) REFERENCES Corso(IdCorso) ON DELETE CASCADE			--Se eliminiamo il corso vengono eliminate anche tutte le sessioni online associate
+	CONSTRAINT fk_corso_online FOREIGN KEY(IdCorso) REFERENCES Corso(IdCorso) ON DELETE CASCADE		--Se eliminiamo il corso vengono eliminate anche tutte le sessioni online associate
 );
 
 -- Enum per il tipo di difficoltà della ricetta
@@ -153,7 +153,7 @@ CREATE TABLE Iscrizioni
 (
 	IdPartecipante  INTEGER NOT NULL,
 	IdCorso  INTEGER NOT NULL,
-	CONSTRAINT pk_iscrizioni_corso PRIMARY KEY(IdPartecipante, IdCorso),					      	   			-- Lo stesso utente non puo' partecipare due volte allo stesso corso
+	CONSTRAINT pk_iscrizioni_corso PRIMARY KEY(IdPartecipante, IdCorso),					      	 -- Lo stesso utente non puo' partecipare due volte allo stesso corso
 	CONSTRAINT fk_partecipante_iscrizioni FOREIGN KEY(IdPartecipante) REFERENCES Partecipante(IdPartecipante) ON DELETE CASCADE,
 	CONSTRAINT fk_corso_iscrizioni FOREIGN KEY(IdCorso) REFERENCES Corso(IdCorso)
 );
@@ -163,7 +163,7 @@ CREATE TABLE  Argomenti_Corso
 (
 	IdCorso  INTEGER NOT NULL,
 	IdArgomento  INTEGER NOT NULL,
-	CONSTRAINT pk_argomenti_corso PRIMARY KEY(IdCorso, IdArgomento),									-- Minimo un argomento e niente argomenti ripetuti per corso
+	CONSTRAINT pk_argomenti_corso PRIMARY KEY(IdCorso, IdArgomento),						-- Minimo un argomento e niente argomenti ripetuti per corso
 	CONSTRAINT fk_corso_argomenticorso FOREIGN KEY(IdCorso) REFERENCES Corso(IdCorso) ON DELETE CASCADE,
 	CONSTRAINT fk_argomenti_argomenticorso FOREIGN KEY(IdArgomento) REFERENCES Argomento(IdArgomento)
 );

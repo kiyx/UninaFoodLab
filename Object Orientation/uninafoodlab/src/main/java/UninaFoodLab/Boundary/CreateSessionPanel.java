@@ -381,7 +381,7 @@ public class CreateSessionPanel extends JXPanel
 								      @Override
 								      public void actionPerformed(ActionEvent e)
 								      {
-								          parent.removeSessionCard(CreateSessionPanel.this);
+								    	  Controller.getController().callRemoveSessionCard(parent, CreateSessionPanel.this);		          
 								      }
 								  };
 	    removeBtn.addActionListener(removeBtnActionListener);
