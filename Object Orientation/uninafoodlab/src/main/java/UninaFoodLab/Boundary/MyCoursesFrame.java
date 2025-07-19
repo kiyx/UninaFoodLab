@@ -2,19 +2,19 @@ package UninaFoodLab.Boundary;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.*;
 import org.jdesktop.swingx.*;
-import org.jdesktop.swingx.border.*;
 import org.kordamp.ikonli.materialdesign.*;
 import org.kordamp.ikonli.swing.*;
 
 import UninaFoodLab.Controller.Controller;
 import net.miginfocom.swing.MigLayout;
 
-public class MyCoursesFrame extends JXFrame implements TopicFilterable
+public class MyCoursesFrame extends JXFrame implements ArgumentFilterable
 {
     private static final long serialVersionUID = 1L;
 
@@ -28,14 +28,20 @@ public class MyCoursesFrame extends JXFrame implements TopicFilterable
     private JXLabel titleLabel, addCourseLabel;
     private JScrollPane scrollPane;
     
+    private List<Integer> idsCorsi = new ArrayList<>();
+    private List<String> namesCorsi = new ArrayList<>();
+    private List<List<Integer>> idsArguments = new ArrayList<>();
+    private List<List<String>> namesArguments = new ArrayList<>();
+    private List<Date> startDates = new ArrayList<>();
+    private List<Integer> sessionsNumbers = new ArrayList<>();
+    
     private String currentSearchText = "";
     private List<Integer> currentSelectedArgumentsIds = new ArrayList<>();
-
-    private List<JXPanel> allCourseCards = new ArrayList<>();
-    private List<JXPanel> filteredCourseCards = new ArrayList<>();
+    private List<CourseCardPanel> allCourseCards = new ArrayList<>();
+    private List<CourseCardPanel> filteredCourseCards = new ArrayList<>();
 
     private ActionListener leftArrowClicker, rightArrowClicker;
-    private MouseAdapter addCourseClicker;
+    private MouseAdapter addCourseClicker, cardClickListener;
 
     public MyCoursesFrame()
     {
@@ -43,13 +49,15 @@ public class MyCoursesFrame extends JXFrame implements TopicFilterable
 
         setDefaultCloseOperation(JXFrame.EXIT_ON_CLOSE);
         setMinimumSize(new Dimension(929, 739));
+        setExtendedState(MAXIMIZED_BOTH);
         setLocationRelativeTo(null);
 
         initComponents();
         initListeners();
-        creaTutteLeCardDemo();
+        loadInitialCards();
         filter("");
 
+        loadPage(0);
         setVisible(true);
     }
 
@@ -84,10 +92,10 @@ public class MyCoursesFrame extends JXFrame implements TopicFilterable
         }  	
 
         coursesPanel = new JXPanel(new MigLayout(
-        	    "wrap 3, gap 10 10, insets 10, aligny top", 
-        	    "[grow,fill][grow,fill][grow,fill]", 
-        	    ""
+        	    "wrap 3, gap 15 15, insets 15",
+        	    "[33%][33%][33%]"
         	));
+
         coursesPanel.setBackground(Color.WHITE);
         coursesPanel.setOpaque(true);
         
@@ -127,7 +135,7 @@ public class MyCoursesFrame extends JXFrame implements TopicFilterable
 			    				@Override
 			    				public void actionPerformed(ActionEvent e)
 			    				{
-			    					caricaPagina(currentPage - 1);
+			    					loadPage(currentPage - 1);
 			    				}
 			    		   };    		   
     	leftArrow.addActionListener(leftArrowClicker);
@@ -137,7 +145,7 @@ public class MyCoursesFrame extends JXFrame implements TopicFilterable
 								 @Override
 								 public void actionPerformed(ActionEvent e)
 								 {
-									 caricaPagina(currentPage + 1);
+									 loadPage(currentPage + 1);
 								 }
 						    }; 
     	rightArrow.addActionListener(rightArrowClicker);
@@ -154,6 +162,16 @@ public class MyCoursesFrame extends JXFrame implements TopicFilterable
 						      };	   
 	        addCourseLabel.addMouseListener(addCourseClicker);
     	}
+    	 	
+    	cardClickListener = new MouseAdapter() 
+    	{
+    	    @Override
+    	    public void mouseClicked(MouseEvent e) 
+    	    {
+    	        CourseCardPanel card = (CourseCardPanel)e.getSource();
+    	        //Controller.getController().showCourseDetail(card.getId());
+    	    }
+    	};
     }
     
     private void disposeListeners()
@@ -175,7 +193,16 @@ public class MyCoursesFrame extends JXFrame implements TopicFilterable
     		addCourseLabel.removeMouseListener(addCourseClicker);
     		addCourseClicker = null;
     	}
- 
+    	
+    	if(cardClickListener != null)
+    	{
+    		for(CourseCardPanel card : allCourseCards)
+      	        card.removeCourseClickListener(cardClickListener);
+
+      	cardClickListener = null;
+    	}
+    	
+    	  
     }
     
     @Override
@@ -186,72 +213,6 @@ public class MyCoursesFrame extends JXFrame implements TopicFilterable
     	super.dispose();
     }
     
-    private boolean matchesText(JXPanel card, String search)
-    {
-        if (search == null || search.trim().isEmpty())
-            return true;
-
-        search = search.trim().toLowerCase();
-
-        for (Component comp : card.getComponents())
-        {
-            if (comp instanceof JLabel label)
-            {
-                if (label.getText().toLowerCase().contains(search))
-                    return true;
-            }
-        }
-
-        return false;
-    }
-
-    
-    private boolean matchesTopics(JXPanel card, List<Integer> selectedTopicIds)
-    {
-        if (selectedTopicIds == null || selectedTopicIds.isEmpty())
-            return true;
-
-        int corsoId = extractCourseId(card); // Metodo che estrae ID del corso dalla card
-
-        List<Integer> argomenti = Controller.getController().getArgomentiByCorso(corsoId);
-
-        for (Integer selectedId : selectedTopicIds)
-        {
-            if (argomenti.contains(selectedId))
-                return true;
-        }
-
-        return false;
-    }
-
-    
-    private void refreshCoursesPanel()
-    {
-        coursesPanel.removeAll(); // il tuo container dei corsi
-        for (JXPanel card : filteredCourseCards)
-            coursesPanel.add(card);
-
-        coursesPanel.revalidate();
-        coursesPanel.repaint();
-    }
-
-    
-    private void applyFilters()
-    {
-        filteredCourseCards.clear();
-
-        for (JXPanel card : allCourseCards)
-        {
-            boolean matchesSearch = matchesText(card, currentSearchText);
-            boolean matchesTopics = matchesTopics(card, currentSelectedArgumentsIds);
-
-            if (matchesSearch && matchesTopics)
-                filteredCourseCards.add(card);
-        }
-
-        refreshCoursesPanel();
-    }
-
     @Override
     public void filter(String filter)
     {
@@ -262,59 +223,54 @@ public class MyCoursesFrame extends JXFrame implements TopicFilterable
     @Override
     public void filterByArgumentsIds(List<Integer> idsArgomenti)
     {
-        currentSelectedTopicIds = idsArgomenti;
+    	currentSelectedArgumentsIds = idsArgomenti;
         applyFilters();
-    }
-
-    
-    
-    private JXPanel creaCardCorso(String titolo, String descrizione)
-    {
-        JXPanel card = new JXPanel(new BorderLayout());
-        card.setMinimumSize(new Dimension(200, 150));
-        card.setBackground(Color.WHITE);
-
-        DropShadowBorder shadow = new DropShadowBorder();
-        shadow.setShadowColor(new Color(0,0,0,50));
-        shadow.setShadowSize(6);
-        card.setBorder(shadow);
-
-        JXLabel titoloLabel = new JXLabel(titolo);
-        titoloLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        titoloLabel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
-        card.add(titoloLabel, BorderLayout.NORTH);
-
-        JXTextArea descArea = new JXTextArea(descrizione);
-        descArea.setLineWrap(true);
-        descArea.setWrapStyleWord(true);
-        descArea.setEditable(false);
-        descArea.setOpaque(false);
-        descArea.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
-        card.add(descArea, BorderLayout.CENTER);
-
-        // Rende la card cliccabile
-        card.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        card.addMouseListener(new MouseAdapter()
-        {
-            @Override
-            public void mouseClicked(MouseEvent e)
-            {
-                
-            }
-        });
-
-        return card;
     } 
     
-    private void creaTutteLeCardDemo()
+    private void applyFilters()
     {
-        allCourseCards.clear();
+        filteredCourseCards.clear();
+        
+        for(CourseCardPanel card : allCourseCards) 
+            if(card.matchesText(currentSearchText) && card.matchesArguments(currentSelectedArgumentsIds)) 
+                filteredCourseCards.add(card);
 
-        for(int i=1; i<=25; i++)
-            allCourseCards.add(creaCardCorso("Corso " + i, "Descrizione del corso " + i));
+        currentPage = 0;
+        loadPage(currentPage);
+    }
+    
+    private void loadInitialCards()
+    {
+    	allCourseCards.clear();
+
+    	Controller.getController().loadCorsiForMyCourses(idsCorsi, namesCorsi, idsArguments, namesArguments, startDates, sessionsNumbers);    	
+    	
+        for(int i = 0; i < idsCorsi.size(); i++)
+        {
+        	CourseCardPanel card = new CourseCardPanel(idsCorsi.get(i), namesCorsi.get(i), idsArguments.get(i), namesArguments.get(i),
+		 			startDates.get(i), sessionsNumbers.get(i));
+        	card.addCourseClickListener(cardClickListener);
+        	allCourseCards.add(card);
+        }
+             
+        loadPage(currentPage);
+    }
+    
+    /**
+     * Aggiunge una nuova CourseCardPanel alla lista e, se
+     * rispetta i filtri correnti, la rende visibile subito.
+     */
+    public void addCourseCard(CourseCardPanel card) 
+    {
+        allCourseCards.add(card);
+
+        if(card.matchesText(currentSearchText) && card.matchesArguments(currentSelectedArgumentsIds))
+            filteredCourseCards.add(card);
+
+        loadPage(currentPage);
     }
 
-    private void caricaPagina(int page)
+    private void loadPage(int page)
     {
         int maxPage = (filteredCourseCards.size() - 1) / CARDS_PER_PAGE;
 
@@ -327,40 +283,35 @@ public class MyCoursesFrame extends JXFrame implements TopicFilterable
         int endIndex = Math.min(startIndex + CARDS_PER_PAGE, filteredCourseCards.size());
 
         for(int i = startIndex; i < endIndex; i++)
-            coursesPanel.add(filteredCourseCards.get(i), "grow");
+        	coursesPanel.add(filteredCourseCards.get(i), "grow, push");
 
-        // Riempie i buchi per mantenere layout 3x3 pieno
-        int cardsThisPage = endIndex - startIndex;
-        for(int i = 0; i < CARDS_PER_PAGE - cardsThisPage; i++)
+        // Riempio di pannelli vuoti per il grid 3x3
+        for(int i =  endIndex - startIndex; i < CARDS_PER_PAGE; i++) 
         {
-            JXPanel filler = new JXPanel();
-            filler.setBackground(Color.WHITE);
-            coursesPanel.add(filler, "grow");
+            JXPanel empty = new JXPanel();
+            empty.setOpaque(false);
+            coursesPanel.add(empty, "grow, push");
         }
-
+        
         SwingUtilities.invokeLater(() -> 
-        {
-            int availableHeight = scrollPane.getViewport().getHeight();
-
-            for(Component comp : coursesPanel.getComponents())
-                if(comp instanceof JXPanel)
-                    comp.setPreferredSize(new Dimension(0, availableHeight));
+        { 
+        	int available = scrollPane.getViewport().getHeight();       
+        
+        	for(Component c : coursesPanel.getComponents())
+        			c.setPreferredSize(new Dimension(0, available));
 
             coursesPanel.revalidate();
             coursesPanel.repaint();
         });
 
         currentPage = page;
-        aggiornaStatoFrecce();
+        updateArrows();
     }
 
-
-    private void aggiornaStatoFrecce()
+    private void updateArrows()
     {
         int maxPage = (filteredCourseCards.size() - 1) / CARDS_PER_PAGE;
         leftArrow.setEnabled(currentPage > 0);
         rightArrow.setEnabled(currentPage < maxPage);
     }
-
-	
 }

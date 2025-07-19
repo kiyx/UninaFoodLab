@@ -19,6 +19,7 @@ import java.io.*;
 import java.math.*;
 import java.nio.file.*;
 import java.sql.*;
+import java.sql.Date;
 import java.time.*;
 
 public class Controller
@@ -743,7 +744,42 @@ public class Controller
 		}
 	}
 	
-	public void createCourse(CreateCourseDialog currDialog, String nomeCorso, LocalDate dataInizio, int numeroSessioni, String frequenza,
+	public void loadCorsiForMyCourses(List<Integer> idsCorsi, List<String> namesCorsi, List<List<Integer>> idsArguments,
+						  List<List<String>> namesArguments, List<Date> startDates, List<Integer> sessionsNumbers)
+	{
+		try
+		{
+			cacheCorsi = (isChefLogged()) ? getCorsoDAO().getCorsiByIdChef(loggedUser.getId()) : 
+										    getCorsoDAO().getCorsiByIdPartecipante(loggedUser.getId());
+
+			for(Corso c : cacheCorsi)
+			{				
+				idsCorsi.add(c.getId());
+				namesCorsi.add(c.getNome());
+
+	            List<Integer> thisCourseArgIds   = new ArrayList<>();
+	            List<String> thisCourseArgNames = new ArrayList<>();
+	            
+				for(Argomento a : c.getArgomenti())	
+				{
+					thisCourseArgIds.add(a.getId());
+		            thisCourseArgNames.add(a.getNome());
+				}	
+				
+				idsArguments.add(thisCourseArgIds);
+	            namesArguments.add(thisCourseArgNames);
+	            
+				startDates.add(c.getDataInizio());
+				sessionsNumbers.add(c.getNumeroSessioni());
+			}
+		}
+		catch(DAOException e)
+		{
+			LOGGER.log(Level.SEVERE, "Errore loadCorsi da DB", e);
+		}
+	}
+	
+	public void createCourse(MyCoursesFrame courseFrame, CreateCourseDialog currDialog, String nomeCorso, LocalDate dataInizio, int numeroSessioni, String frequenza,
 							 int limite, String descrizione, BigDecimal costo, boolean isPratico, List<Integer> idArgomenti,
 							 List<Integer> durateOnline, List<Time>  orariOnline, List<LocalDate> dateOnline,
 							 List<String> linksOnline, List<Integer> duratePratiche, List<Time> orariPratiche,
@@ -808,11 +844,28 @@ public class Controller
 				sessioni.add(new SessionePratica(duratePratiche.get(i), orariPratiche.get(i), datePratiche.get(i), indirizziPratiche.get(i),
 												 ricette.get(i)));
 			
-			getCorsoDAO().save(new Corso(nomeCorso, dataInizio, numeroSessioni, FrequenzaSessioni.valueOf(frequenza), limite, descrizione, 
-								  costo, isPratico, (Chef) getLoggedUser(), argomenti, sessioni));
-
+			Corso toSaveCorso = new Corso(nomeCorso, dataInizio, numeroSessioni, FrequenzaSessioni.valueOf(frequenza), limite, descrizione, 
+					  costo, isPratico, (Chef) getLoggedUser(), argomenti, sessioni);
 			
+			getCorsoDAO().save(toSaveCorso);
+			cacheCorsi.add(toSaveCorso);
 			
+			List<String> namesArgs = new ArrayList<>();
+	        for(Argomento a : argomenti)
+	        	namesArgs.add(a.getNome());
+			
+			CourseCardPanel newCard = new CourseCardPanel
+			(
+			        toSaveCorso.getId(),
+			        toSaveCorso.getNome(),
+			        idArgomenti,            
+			        namesArgs,           
+			        Date.valueOf(dataInizio),
+			        numeroSessioni
+			);
+			courseFrame.addCourseCard(newCard);
+			
+			JOptionPane.showMessageDialog(currDialog, "Corso " + nomeCorso + " salvato con successo");
 			LOGGER.log(Level.INFO, "Salvataggio del corso " + nomeCorso + " dello chef " + getLoggedUser().getUsername() + " effettuato ");
 			currDialog.dispose();
 		} 

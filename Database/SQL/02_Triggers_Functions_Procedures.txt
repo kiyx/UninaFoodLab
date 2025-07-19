@@ -200,7 +200,7 @@ EXECUTE FUNCTION fun_decrementa_num_corsi();
 
 -----------------------------------------------------------------------------------------------------------------------
 
--- Interrelazionale: La data dell'adesione alla sessione pratica deve essere antecedente alla data della sessione pratica/ Se la sessione pratica è già avvenuta, l'utente non puo' più aderire
+-- Interrelazionale: La data dell'adesione alla sessione pratica deve essere antecedente (3 giorni) alla data della sessione pratica/ Se la sessione pratica è già avvenuta, l'utente non puo' più aderire
 
 CREATE OR REPLACE FUNCTION fun_data_adesione()
 RETURNS TRIGGER AS
@@ -229,7 +229,7 @@ EXECUTE FUNCTION fun_data_adesione();
 
 -----------------------------------------------------------------------------------------------------------------------
 
--- Interrelazionale: Se viene inserita una partecipazione ma il limite di iscrizioni è già raggiunto, essa non viene inserita
+-- Interrelazionale: Se viene inserita una iscrizione ma il limite di iscrizioni è già raggiunto, essa non viene inserita
 
 CREATE OR REPLACE FUNCTION fun_limite_iscrizioni()
 RETURNS TRIGGER AS

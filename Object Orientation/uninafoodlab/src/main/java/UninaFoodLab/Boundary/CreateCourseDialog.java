@@ -77,14 +77,18 @@ public class CreateCourseDialog extends JDialog
     private List<String> namesArguments = new ArrayList<>();
     private List<Integer> idsSelectedArguments = new ArrayList<>();
     
-    public CreateCourseDialog(JXFrame parent)
+    private MyCoursesFrame parentFrame;
+    
+    public CreateCourseDialog(MyCoursesFrame parentFrame)
     {
-        super(parent, "UninaFoodLab - Crea nuovo corso", true);
+        super(parentFrame, "UninaFoodLab - Crea nuovo corso", true);
+        this.parentFrame = parentFrame; 
+        
         setMinimumSize(new Dimension(1670, 725));
         setPreferredSize(new Dimension(1200, 700));
-        setLocationRelativeTo(parent);
+        setLocationRelativeTo(parentFrame);
         setResizable(true);
-        setIconImage(parent.getIconImage());
+        setIconImage(parentFrame.getIconImage());
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         
         initComponents();
@@ -461,7 +465,7 @@ public class CreateCourseDialog extends JDialog
                     	if(check)
                     	{
                     		Controller.getController().createCourse
-                    		(CreateCourseDialog.this, nameField.getText().trim(), dataInizioField.getDate(),
+                    		(parentFrame, CreateCourseDialog.this, nameField.getText().trim(), dataInizioField.getDate(),
                     		(int) numeroSessioniSpinner.getValue(), frequencyList.getSelectedItem().toString(), (int) limitSpinner.getValue(),
                     		descrizioneArea.getText(), BigDecimal.valueOf((double)costSpinner.getValue()), praticoCheck.isSelected(),
                     		idsSelectedArguments, durateOnline, orariOnline, dateOnline, linksOnline, duratePratiche,
@@ -737,6 +741,7 @@ public class CreateCourseDialog extends JDialog
     private void showAddSessionsDialog()
     {
         addSessionDialog = new JDialog(this, "Seleziona numero sessioni", true);
+        addSessionDialog.setResizable(false);
         addSessionDialog.setLayout(new MigLayout("wrap 2", "[right][grow,fill]"));
 
         // Rimuovi vecchi listener se ci sono

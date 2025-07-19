@@ -64,11 +64,12 @@ public class HeaderPanel extends JXPanel
 	
 	/** Pannello di argomenti che viene mostrato al click del bottone */
 	private FilterPanel filterPanel;
-
+	private boolean filterPanelVisible = false;
+	
 	/** Listeners */
 	private DocumentListener searchListener;
 	private MouseListener logoClickListener;
-    private ActionListener profileBtnListener, hamburgerBtnListener, searchBtnListener;
+    private ActionListener profileBtnListener, hamburgerBtnListener, searchBtnListener, filterBtnClicker;
     private AWTEventListener dropdownClickListener;
     private ComponentListener componentResizeListener;
 	
@@ -122,6 +123,15 @@ public class HeaderPanel extends JXPanel
 	    this.filterCallback = filterCallback;
 
 	    initSearchFilterListeners();
+	    
+	    if(filterCallback instanceof ArgumentFilterable argumentFilterable) 
+	    {
+	        filterPanel = new FilterPanel(argumentFilterable);
+	        filterPanel.setVisible(false);
+	        layeredPane.add(filterPanel, JLayeredPane.POPUP_LAYER);
+
+	        initArgumentFilterListeners();  
+	    }
 	}
 	
 	/**
@@ -351,6 +361,8 @@ public class HeaderPanel extends JXPanel
             }
         };
         parentFrame.addComponentListener(componentResizeListener);
+        
+        
     }
 	
 	/**
@@ -405,25 +417,40 @@ public class HeaderPanel extends JXPanel
 			        		};
         searchBtn.addActionListener(searchBtnListener);      
 	}
-	
-	/**
-     * Aggiorna la visibilità dei componenti (es. search bar) 
-     * in base al frame genitore attuale.
-     */
-    public void updateVisibility()
-    {
-    	boolean isProf = parentFrame instanceof ProfileFrame;
-    	
-    	if(isProf || parentFrame instanceof MyRecipesFrame)
-    		filterBtn.setVisible(false);
-    	
-    	if(isProf)
-    	{
-    		searchField.setVisible(false);
-            searchBtn.setVisible(false);
-    	}
-    }
     
+    /**
+     * Inizializza il listener per il pulsante “Filtri”.
+     * <p>
+     * Ad ogni clic sul {@code filterBtn} alterna la visibilità del
+     * {@link FilterPanel} degli argomenti. Quando il pannello viene mostrato,
+     * ne calcola la posizione subito sotto al bottone, ne imposta la dimensione
+     * ideale e lo rende visibile.
+     * </p>
+     */
+	private void initArgumentFilterListeners()
+	{
+		filterBtnClicker = new ActionListener() 
+        {
+            @Override
+            public void actionPerformed(ActionEvent e) 
+            {
+                filterPanelVisible = !filterPanelVisible;
+
+                if(filterPanelVisible) 
+                {
+                    Point loc = SwingUtilities.convertPoint(filterBtn, 0, filterBtn.getHeight(), layeredPane);
+                    filterPanel.setSize(filterPanel.getPreferredSize());
+                    filterPanel.setLocation(loc.x, loc.y);
+                    filterPanel.setVisible(true);
+                } 
+                else
+                    filterPanel.setVisible(false);
+            }
+        };
+		filterBtn.addActionListener(filterBtnClicker);
+	}
+	
+	
     /**
      * Rimuove tutti i listener aggiunti ai componenti e al toolkit,
      * da chiamare quando il pannello non è più utilizzato per evitare memory leak.
@@ -487,9 +514,33 @@ public class HeaderPanel extends JXPanel
         		searchBtn.removeActionListener(searchBtnListener);
         		searchBtnListener = null;
         	}
+        	
+        	if(filterBtn != null && filterBtnClicker != null)
+        	{
+        		filterBtn.removeActionListener(filterBtnClicker);   		
+        		filterBtnClicker = null;
+        	}
         }
     }
 	
+	/**
+     * Aggiorna la visibilità dei componenti (es. search bar) 
+     * in base al frame genitore attuale.
+     */
+    public void updateVisibility()
+    {
+    	boolean isProf = parentFrame instanceof ProfileFrame;
+    	
+    	if(isProf || parentFrame instanceof MyRecipesFrame)
+    		filterBtn.setVisible(false);
+    	
+    	if(isProf)
+    	{
+    		searchField.setVisible(false);
+            searchBtn.setVisible(false);
+    	}
+    }
+    
 	 /**
      * Aggiorna dinamicamente la posizione e dimensione di dropdown profilo e sidebar
      * in base alla dimensione corrente del layered pane e del frame genitore.

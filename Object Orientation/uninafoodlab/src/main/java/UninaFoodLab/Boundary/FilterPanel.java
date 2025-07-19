@@ -27,7 +27,9 @@ public class FilterPanel extends JXPanel
     
     /** Bottone di applicazione filtri */
     private JXButton applyBtn;
-    
+    private JScrollPane scroll;
+    private JPanel argumentsContainer;
+    	
     /** Lista degli ID degli argomenti caricati dal Controller */
     private List<Integer> idsArgomenti = new ArrayList<>();
     
@@ -38,7 +40,7 @@ public class FilterPanel extends JXPanel
     private List<JCheckBox> checkboxes = new ArrayList<>();
     
     /** Riferimento all’oggetto che implementa TopicFilterable per applicare il filtro */
-    private TopicFilterable filterable;
+    private ArgumentFilterable filterable;
 
     /** Listener per il pulsante "Applica" */
     private ActionListener applyBtnClicker;
@@ -53,7 +55,7 @@ public class FilterPanel extends JXPanel
      * @param filterable l’oggetto che implementa {@link TopicFilterable};
      *                   riceverà la lista di ID selezionati al click
      */
-    public FilterPanel(TopicFilterable filterable) 
+    public FilterPanel(ArgumentFilterable filterable) 
     {
         super(new MigLayout("wrap 1, insets 10", "[grow,fill]", ""));
         this.filterable = filterable;
@@ -69,20 +71,34 @@ public class FilterPanel extends JXPanel
     }
     
     /**
-     * Inizializza le componenti grafiche:
-     * carica argomenti, crea le checkbox e il pulsante "Applica".
+     * Inizializza e compone le componenti del pannello di filtro:
+     * <ul>
+     *   <li>Carica gli argomenti tramite il Controller.</li>
+     *   <li>Crea dinamicamente una JCheckBox per ciascun argomento
+     *       e le aggiunge al contenitore verticale.</li>
+     *   <li>Incapsula le checkbox in uno JScrollPane con barre a scorrimento</li>
+     *   <li>Aggiunge il pulsante “Applica” per confermare la selezione.</li>
+     * </ul>
      */
     private void initComponents()
     {
-    	Controller.getController().loadArgomenti(idsArgomenti, namesArgomenti);
+        argumentsContainer = new JPanel(new MigLayout("wrap 1", "[grow,fill]"));
+        argumentsContainer.setBackground(Color.WHITE);
+        Controller.getController().loadArgomenti(idsArgomenti, namesArgomenti);
         
         for(int i = 0; i < idsArgomenti.size(); i++) 
         {
             JCheckBox cb = new JCheckBox(namesArgomenti.get(i));
             cb.setBackground(Color.WHITE);
             checkboxes.add(cb);
-            add(cb);
+            argumentsContainer.add(cb);
         }
+
+        scroll = new JScrollPane(argumentsContainer, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        scroll.getVerticalScrollBar().setUnitIncrement(20);
+        scroll.setPreferredSize(new Dimension(300, 150));
+        scroll.setBorder(BorderFactory.createEmptyBorder());
+        add(scroll, "grow, wrap");
 
         applyBtn = new JXButton("Applica");
         applyBtn.setBackground(new Color(225,126,47));
@@ -91,7 +107,8 @@ public class FilterPanel extends JXPanel
         applyBtn.setPreferredSize(new Dimension(100, 35));
         add(applyBtn, "gapy 10, align right");
     }
-    
+
+
     /**
      * Registra il listener per il pulsante "Applica", che invoca {@link #filterIds()}.
      */
@@ -120,7 +137,7 @@ public class FilterPanel extends JXPanel
    
     /**
      * Raccoglie gli ID degli argomenti selezionati e invoca
-     * {@link TopicFilterable#filterByTopicIds(List)} sull'oggetto.
+     * {@link TopicFilterable#filterByTopicIds(List)} sull'oggetto passandoglieli.
      */
     private void filterIds()
     {

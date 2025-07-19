@@ -10,7 +10,7 @@ import java.util.List;
  * può ricevere sia un filtro testuale <em>search</em> che un filtro
  * basato sulla selezione di argomenti, identificati dai loro ID.</p>
  */
-public interface TopicFilterable extends SearchFilterable
+public interface ArgumentFilterable extends SearchFilterable
 {
     /**
      * Applica un filtro basato sugli argomenti selezionati,

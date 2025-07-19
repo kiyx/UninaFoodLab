@@ -28,7 +28,7 @@ public class CorsoDAO_Postgres implements CorsoDAO
 	    Corso c = new Corso
 		    				(
 		    				  rs.getString("Nome"), 
-		    				  rs.getDate("Data").toLocalDate(), 
+		    				  rs.getDate("DataInizio").toLocalDate(), 
 		    				  rs.getInt("NumeroSessioni"), 
 		    				  FrequenzaSessioni.valueOf(rs.getString("FrequenzaSessioni")), 
 		    				  rs.getInt("Limite"), 
@@ -57,7 +57,12 @@ public class CorsoDAO_Postgres implements CorsoDAO
 	        s.setDate(2, toSaveCorso.getDataInizio());
 	        s.setInt(3, toSaveCorso.getNumeroSessioni());
 	        s.setString(4, toSaveCorso.getFrequenzaSessioni().toString());
-	        s.setInt(5, toSaveCorso.getLimite());
+	        
+	        if(toSaveCorso.getIsPratico())
+	        	s.setInt(5, toSaveCorso.getLimite());
+	        else
+	        	s.setNull(5, Types.INTEGER);
+	        
 	        s.setString(6, toSaveCorso.getDescrizione());
 	        s.setBigDecimal(7, toSaveCorso.getCosto());
 	        s.setBoolean(8, toSaveCorso.getIsPratico());
@@ -115,10 +120,12 @@ public class CorsoDAO_Postgres implements CorsoDAO
 	            } 
 	            catch(SQLException ex)
 	            {
+	            	ex.printStackTrace();
 	            	throw new DAOException("Errore durante rollback in salvataggio Corso", ex); 
 	            }
 	        }
-	        throw new DAOException("Errore durante salvataggio transazionale Corso", e);
+	        e.printStackTrace();
+	        throw new DAOException("Errore durante salvataggio transazionale Corso", e);     
 	    }
 	    finally
 	    {
@@ -131,6 +138,7 @@ public class CorsoDAO_Postgres implements CorsoDAO
 	            }
 	            catch (SQLException ex) 
 	            { 
+	            	ex.printStackTrace();
 	            	throw new DAOException("Errore durante chiusura connessione Corso", ex);
 	            }
 	        }
