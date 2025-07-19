@@ -14,7 +14,7 @@ import org.kordamp.ikonli.swing.*;
 import UninaFoodLab.Controller.Controller;
 import net.miginfocom.swing.MigLayout;
 
-public class MyCoursesFrame extends JXFrame implements SearchFilterable
+public class MyCoursesFrame extends JXFrame implements TopicFilterable
 {
     private static final long serialVersionUID = 1L;
 
@@ -27,10 +27,13 @@ public class MyCoursesFrame extends JXFrame implements SearchFilterable
     private JXButton leftArrow, rightArrow;
     private JXLabel titleLabel, addCourseLabel;
     private JScrollPane scrollPane;
+    
+    private String currentSearchText = "";
+    private List<Integer> currentSelectedArgumentsIds = new ArrayList<>();
 
     private List<JXPanel> allCourseCards = new ArrayList<>();
     private List<JXPanel> filteredCourseCards = new ArrayList<>();
-    
+
     private ActionListener leftArrowClicker, rightArrowClicker;
     private MouseAdapter addCourseClicker;
 
@@ -183,22 +186,87 @@ public class MyCoursesFrame extends JXFrame implements SearchFilterable
     	super.dispose();
     }
     
-    @Override
-    public void filter(String filter)
+    private boolean matchesText(JXPanel card, String search)
+    {
+        if (search == null || search.trim().isEmpty())
+            return true;
+
+        search = search.trim().toLowerCase();
+
+        for (Component comp : card.getComponents())
+        {
+            if (comp instanceof JLabel label)
+            {
+                if (label.getText().toLowerCase().contains(search))
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    
+    private boolean matchesTopics(JXPanel card, List<Integer> selectedTopicIds)
+    {
+        if (selectedTopicIds == null || selectedTopicIds.isEmpty())
+            return true;
+
+        int corsoId = extractCourseId(card); // Metodo che estrae ID del corso dalla card
+
+        List<Integer> argomenti = Controller.getController().getArgomentiByCorso(corsoId);
+
+        for (Integer selectedId : selectedTopicIds)
+        {
+            if (argomenti.contains(selectedId))
+                return true;
+        }
+
+        return false;
+    }
+
+    
+    private void refreshCoursesPanel()
+    {
+        coursesPanel.removeAll(); // il tuo container dei corsi
+        for (JXPanel card : filteredCourseCards)
+            coursesPanel.add(card);
+
+        coursesPanel.revalidate();
+        coursesPanel.repaint();
+    }
+
+    
+    private void applyFilters()
     {
         filteredCourseCards.clear();
 
-        for(JXPanel card : allCourseCards)
+        for (JXPanel card : allCourseCards)
         {
-            JXLabel label = (JXLabel)card.getComponent(0);
-            
-            if(label.getText().trim().toLowerCase().contains(filter))
+            boolean matchesSearch = matchesText(card, currentSearchText);
+            boolean matchesTopics = matchesTopics(card, currentSelectedArgumentsIds);
+
+            if (matchesSearch && matchesTopics)
                 filteredCourseCards.add(card);
         }
 
-        currentPage = 0;
-        caricaPagina(currentPage);
+        refreshCoursesPanel();
     }
+
+    @Override
+    public void filter(String filter)
+    {
+        currentSearchText = filter; 
+        applyFilters();
+    }
+    
+    @Override
+    public void filterByArgumentsIds(List<Integer> idsArgomenti)
+    {
+        currentSelectedTopicIds = idsArgomenti;
+        applyFilters();
+    }
+
+    
     
     private JXPanel creaCardCorso(String titolo, String descrizione)
     {
@@ -293,4 +361,6 @@ public class MyCoursesFrame extends JXFrame implements SearchFilterable
         leftArrow.setEnabled(currentPage > 0);
         rightArrow.setEnabled(currentPage < maxPage);
     }
+
+	
 }

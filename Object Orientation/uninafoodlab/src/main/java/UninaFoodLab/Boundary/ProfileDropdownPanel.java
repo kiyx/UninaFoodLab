@@ -1,35 +1,20 @@
 package UninaFoodLab.Boundary;
 
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.*;
+import java.awt.event.*;
 
-import javax.swing.BorderFactory;
-import javax.swing.JLayeredPane;
-import javax.swing.SwingUtilities;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
+import javax.swing.*;
+import javax.swing.border.*;
 
-import org.jdesktop.swingx.JXButton;
-import org.jdesktop.swingx.JXFrame;
-import org.jdesktop.swingx.JXLabel;
-import org.jdesktop.swingx.JXPanel;
-import org.kordamp.ikonli.materialdesign.MaterialDesign;
-import org.kordamp.ikonli.swing.FontIcon;
+import org.jdesktop.swingx.*;
+import org.kordamp.ikonli.materialdesign.*;
+import org.kordamp.ikonli.swing.*;
 
 import UninaFoodLab.Controller.Controller;
 import net.miginfocom.swing.MigLayout;
 
 public class ProfileDropdownPanel extends JXPanel
 {
-
 	private static final long serialVersionUID = 1L;
 	
 	/** Riferimento al frame genitore che ospita questa sidebar. */
@@ -93,18 +78,6 @@ public class ProfileDropdownPanel extends JXPanel
         add(profileItemBtn);
         add(changePwItemBtn);
         add(logoutItemBtn);
-	}
-	
-	 /**
-     * Applica lo stile grafico di base a tutti i componenti del dropdown.
-     * <p>
-     * Imposta colori, font, padding e altri attributi visivi.
-     */
-	private void styleComponents()
-	{
-		styleDropdownButton(profileItemBtn);
-		styleDropdownButton(changePwItemBtn);
-		styleDropdownButton(logoutItemBtn);
 	}
 	
 	  /**
@@ -208,6 +181,21 @@ public class ProfileDropdownPanel extends JXPanel
             hoverListener = null;
         }
 	}
+	
+	 /**
+     * Applica lo stile grafico di base a tutti i componenti del dropdown.
+     * <p>
+     * Imposta colori, font, padding e altri attributi visivi.
+     */
+	private void styleComponents()
+	{
+		if(parentFrame instanceof ProfileFrame)
+			profileItemBtn.setEnabled(false);
+		styleDropdownButton(profileItemBtn);
+		styleDropdownButton(changePwItemBtn);
+		styleDropdownButton(logoutItemBtn);
+	}
+	
 	
 	 /**
      * Applica uno stile coerente a un pulsante all'interno del menu dropdown del profilo.

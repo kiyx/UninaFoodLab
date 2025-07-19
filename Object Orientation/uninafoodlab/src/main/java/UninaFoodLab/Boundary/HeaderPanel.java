@@ -61,6 +61,9 @@ public class HeaderPanel extends JXPanel
 	
 	/** Sidebar laterale */
 	private SidebarPanel sidebar;
+	
+	/** Pannello di argomenti che viene mostrato al click del bottone */
+	private FilterPanel filterPanel;
 
 	/** Listeners */
 	private DocumentListener searchListener;
@@ -118,7 +121,7 @@ public class HeaderPanel extends JXPanel
 	    this(parentFrame, layeredPane);
 	    this.filterCallback = filterCallback;
 
-	    initFilterListeners();
+	    initSearchFilterListeners();
 	}
 	
 	/**
@@ -164,7 +167,7 @@ public class HeaderPanel extends JXPanel
         add(filterBtn, "cell 4 0, h 40!, w 95!, shrink 0"); 
 
         searchField = new JXTextField();
-        searchField.setPrompt("Cerca per nome corso...");
+        searchField.setPrompt("Cerca per nome " + ((parentFrame instanceof MyRecipesFrame) ? "Ricetta" : "Corso") +  "...");
         searchField.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         searchField.setBorder(BorderFactory.createCompoundBorder(
             new LineBorder(new Color(200, 200, 200), 1, true),
@@ -187,13 +190,6 @@ public class HeaderPanel extends JXPanel
         searchBtn.setPreferredSize(new Dimension(90, 40));
         searchBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         add(searchBtn, "cell 6 0, h 40!, w 90!, shrink 0");
-
-        if(parentFrame instanceof ProfileFrame)
-        {
-        	filterBtn.setVisible(false);
-        	searchField.setVisible(false);
-        	searchBtn.setVisible(false);
-        }
         
         profileBtn = new JXButton();
         profileBtn.setIcon(FontIcon.of(MaterialDesign.MDI_ACCOUNT_CIRCLE, 26, Color.DARK_GRAY));
@@ -309,27 +305,25 @@ public class HeaderPanel extends JXPanel
             @Override
             public void eventDispatched(AWTEvent event)
             {
-                if(!dropdownPanel.isVisible())
-                    return;
-
-                if(event instanceof MouseEvent me && me.getID() == MouseEvent.MOUSE_PRESSED)
+                if(dropdownPanel.isVisible() && dropdownPanel.isShowing())
                 {
-                    // Coordinate click in screen space
-                    Point clickPoint = me.getLocationOnScreen();
-
-                    // Bounds del dropdown in screen space
-                    Rectangle dropdownBounds = dropdownPanel.getBounds();
-                    Point dropdownLoc = dropdownPanel.getLocationOnScreen();
-                    Rectangle dropdownScreenBounds = new Rectangle(dropdownLoc, dropdownBounds.getSize());
-
-                    // Bounds del pulsante profilo in screen space
-                    Rectangle profileBtnBounds = profileBtn.getBounds();
-                    Point profileBtnLoc = profileBtn.getLocationOnScreen();
-                    Rectangle profileBtnScreenBounds = new Rectangle(profileBtnLoc, profileBtnBounds.getSize());
-
-                    if(!dropdownScreenBounds.contains(clickPoint) && !profileBtnScreenBounds.contains(clickPoint))
+                	if(event instanceof MouseEvent me && me.getID() == MouseEvent.MOUSE_PRESSED)
                     {
-                        dropdownPanel.setVisible(false);
+                        // Coordinate click in screen space
+                        Point clickPoint = me.getLocationOnScreen();
+
+                        // Bounds del dropdown in screen space
+                        Rectangle dropdownBounds = dropdownPanel.getBounds();
+                        Point dropdownLoc = dropdownPanel.getLocationOnScreen();
+                        Rectangle dropdownScreenBounds = new Rectangle(dropdownLoc, dropdownBounds.getSize());
+
+                        // Bounds del pulsante profilo in screen space
+                        Rectangle profileBtnBounds = profileBtn.getBounds();
+                        Point profileBtnLoc = profileBtn.getLocationOnScreen();
+                        Rectangle profileBtnScreenBounds = new Rectangle(profileBtnLoc, profileBtnBounds.getSize());
+
+                        if(!dropdownScreenBounds.contains(clickPoint) && !profileBtnScreenBounds.contains(clickPoint))
+                            dropdownPanel.setVisible(false);
                     }
                 }
             }
@@ -370,7 +364,7 @@ public class HeaderPanel extends JXPanel
      * <p>Questi listener richiamano il metodo
      * {@link SearchFilterable#filter(String)} con il testo corrente.</p>
      */
-	private void initFilterListeners()
+	private void initSearchFilterListeners()
 	{  
 		/**
 		 * Un {@link DocumentListener} collegato al documento
@@ -418,11 +412,16 @@ public class HeaderPanel extends JXPanel
      */
     public void updateVisibility()
     {
-        boolean isProfile = parentFrame instanceof ProfileFrame;
-        
-        filterBtn.setVisible(!isProfile);
-        searchField.setVisible(!isProfile);
-        searchBtn.setVisible(!isProfile);
+    	boolean isProf = parentFrame instanceof ProfileFrame;
+    	
+    	if(isProf || parentFrame instanceof MyRecipesFrame)
+    		filterBtn.setVisible(false);
+    	
+    	if(isProf)
+    	{
+    		searchField.setVisible(false);
+            searchBtn.setVisible(false);
+    	}
     }
     
     /**
@@ -466,9 +465,15 @@ public class HeaderPanel extends JXPanel
             componentResizeListener = null;
         }
 
-        sidebar.disposeListeners();
-        dropdownPanel.disposeListeners();
+        if(sidebar != null)
+        	sidebar.disposeListeners();
         
+        if(dropdownPanel != null)
+        	dropdownPanel.disposeListeners();
+        
+        if(filterPanel != null)
+        	filterPanel.disposeListeners();
+             
         if(filterCallback != null)
         {
         	if(searchField != null && searchListener != null)

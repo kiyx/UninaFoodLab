@@ -1,23 +1,11 @@
 package UninaFoodLab.Boundary;
 
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.border.*;
 
-import javax.swing.BorderFactory;
-import javax.swing.JLayeredPane;
-import javax.swing.SwingUtilities;
-import javax.swing.border.MatteBorder;
-
-import org.jdesktop.swingx.JXButton;
-import org.jdesktop.swingx.JXFrame;
-import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.*;
 
 import UninaFoodLab.Controller.Controller;
 import net.miginfocom.swing.MigLayout;
@@ -63,7 +51,6 @@ public class SidebarPanel extends JXPanel
 	/** Listener per effetto hover sui pulsanti. */
 	private MouseAdapter hoverListener;
 
-
 	/**
 	 * Costruisce una nuova {@code SidebarPanel} per il frame specificato.
 	 *
@@ -90,7 +77,6 @@ public class SidebarPanel extends JXPanel
 	private void initComponents()
 	{
 		homeBtn = new JXButton("  Homepage");
-		
     	coursesBtn = new JXButton((Controller.getController().isChefLogged() ? "  I miei corsi" : " Iscrizioni"));
     	
     	add(homeBtn);
