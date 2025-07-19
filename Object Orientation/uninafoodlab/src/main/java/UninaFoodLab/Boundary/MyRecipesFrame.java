@@ -2,6 +2,7 @@ package UninaFoodLab.Boundary;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -16,6 +17,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
@@ -208,6 +210,7 @@ public class MyRecipesFrame extends JXFrame implements SearchFilterable
 
      * </ul>
      */
+    
     public void resetView() 
     {
         header.resetView();
@@ -219,6 +222,7 @@ public class MyRecipesFrame extends JXFrame implements SearchFilterable
     {
 		
         JXPanel card = new JXPanel(new BorderLayout());
+        card.setName(titolo);
         card.setPreferredSize(null);
         card.setMinimumSize(new Dimension(200, 120));
         card.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
@@ -244,7 +248,11 @@ public class MyRecipesFrame extends JXFrame implements SearchFilterable
             @Override
             public void mouseClicked(MouseEvent e)
             {
-                
+            	for(int i=0; i<nomiRicette.size(); i++)
+            	{
+            		if(card.getName().equals(nomiRicette.get(i)))
+            			Controller.getController().showDetailRecipe(idRicette.get(i), MyRecipesFrame.this);
+            	}               
             }
         });
 
@@ -278,22 +286,37 @@ public class MyRecipesFrame extends JXFrame implements SearchFilterable
         if(page < 0 || page > maxPage)
             return;
 
-        currentPage = page;
-
         recipesPanel.removeAll();
 
-        int startIndex = currentPage * CARDS_PER_PAGE;
+        int startIndex = page * CARDS_PER_PAGE;
         int endIndex = Math.min(startIndex + CARDS_PER_PAGE, filteredRecipeCards.size());
 
         for(int i = startIndex; i < endIndex; i++)
+        	recipesPanel.add(filteredRecipeCards.get(i), "grow");
+
+        // Riempie i buchi per mantenere layout 3x3 pieno
+        int cardsThisPage = endIndex - startIndex;
+        for(int i = 0; i < CARDS_PER_PAGE - cardsThisPage; i++)
         {
-            JXPanel card = filteredRecipeCards.get(i);
-            recipesPanel.add(card, "grow, push");
+            JXPanel filler = new JXPanel();
+            filler.setMinimumSize(new Dimension(200, 150));
+            filler.setBackground(Color.WHITE);
+            recipesPanel.add(filler, "grow");
         }
 
-        recipesPanel.revalidate();
-        recipesPanel.repaint();
+        SwingUtilities.invokeLater(() -> 
+        {
+            int availableHeight = scrollPane.getViewport().getHeight();
 
+            for(Component comp : recipesPanel.getComponents())
+                if(comp instanceof JXPanel)
+                    comp.setPreferredSize(new Dimension(0, availableHeight));
+
+            recipesPanel.revalidate();
+            recipesPanel.repaint();
+        });
+
+        currentPage = page;
         aggiornaStatoFrecce();
     }
 

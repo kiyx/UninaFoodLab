@@ -838,7 +838,9 @@ public class Controller
 	 */
 	// CreateRecipesDialog
 				// DetailedRecipeFrame
-				
+			
+			private ArrayList<Ricetta> ricette;
+			
 			public void showCreateIngredienteDialog(CreateRecipesDialog parent)
 			{
 				new CreateIngredienteDialog(parent).setVisible(true);
@@ -849,12 +851,32 @@ public class Controller
 				new CreateRecipesDialog(parent).setVisible(true);
 			}
 	        
-			public void showChangeRecipeDialog(MyRecipesFrame parent, String nomeRicetta, String provenienzaRicetta, int calorieRicetta, int difficoltaRicetta, ArrayList<String> nomiIngredienti, ArrayList<Integer> quantitaIngredienti, ArrayList<String> udmIngredienti)
+			public void showChangeRecipeDialog(MyRecipesFrame parent, String nomeRicetta, String provenienzaRicetta, int calorieRicetta, String difficoltaRicetta, ArrayList<String> nomiIngredienti, ArrayList<Double> quantitaIngredienti, ArrayList<String> udmIngredienti)
 			{
-				new ChangeRecipeDialog(parent, nomeRicetta, provenienzaRicetta, calorieRicetta, difficoltaRicetta, nomiIngredienti, quantitaIngredienti, udmIngredienti);
+				new ChangeRecipeDialog(parent, nomeRicetta, provenienzaRicetta, calorieRicetta, difficoltaRicetta, nomiIngredienti, quantitaIngredienti, udmIngredienti).setVisible(true);
+			}
+			
+			public void showDetailRecipe(int id, MyRecipesFrame currDialog)
+			{
+				ArrayList<String> nomiIngredienti= new ArrayList<>();
+				ArrayList<Double> quantitaIngredienti= new ArrayList<>();
+				ArrayList<String> udmIngredienti= new ArrayList<>();
+				for(Ricetta r: ricette)
+				{
+					if(r.getId()==id)
+					{
+						for(Utilizzo u: r.getUtilizzi())
+						{
+							nomiIngredienti.add(u.getIngrediente().getNome());
+							quantitaIngredienti.add(u.getQuantita());
+							udmIngredienti.add(u.getUdm().toString());
+						}
+						new DetailedRecipeDialog(currDialog, r.getNome(), r.getProvenienza(), r.getCalorie(), r.getDifficolta().toString(), nomiIngredienti, quantitaIngredienti, udmIngredienti);
+					}						
+				}
 			}
 		 
-			private ArrayList<Ricetta> ricette;
+			
 			public void loadAllRicette(ArrayList<String> nomiRicette, ArrayList<String> difficoltaRicette, ArrayList<Integer> calorieRicette, ArrayList<Integer> idRicette)
 			{
 				ricette = new ArrayList<>();

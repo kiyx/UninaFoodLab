@@ -84,7 +84,7 @@ public class ChangeRecipeDialog extends JDialog {
     private ArrayList<String> udmIngredienti = new ArrayList<>();
     
     private MyRecipesFrame parent;
-	public ChangeRecipeDialog(MyRecipesFrame parent, String nomeRicetta, String provenienzaRicetta, int calorieRicetta, int difficoltaRicetta, ArrayList<String> nomiIngredienti, ArrayList<Integer> quantitaIngredienti, ArrayList<String> udmIngredienti)
+	public ChangeRecipeDialog(MyRecipesFrame parent, String nomeRicetta, String provenienzaRicetta, int calorieRicetta, String difficoltaRicetta, ArrayList<String> nomiIngredienti, ArrayList<Double> quantitaIngredienti, ArrayList<String> udmIngredienti)
 	{
         super(parent, "Cambia ricetta", true);
         setMinimumSize(new Dimension(1670, 700));

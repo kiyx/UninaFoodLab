@@ -36,12 +36,12 @@ public class DetailedRecipeDialog extends JDialog
 	private String nomeRicetta;
 	private String provenienzaRicetta;
 	private int calorieRicetta;
-	private int difficoltaRicetta;
+	private String difficoltaRicetta;
 	private ArrayList<String> nomiIngredienti;
-	private ArrayList<Integer> quantitaIngredienti;
+	private ArrayList<Double> quantitaIngredienti;
 	private ArrayList<String> udmIngredienti;
 	
-	public DetailedRecipeDialog(MyRecipesFrame parent, String nomeRicetta, String provenienzaRicetta, int calorieRicetta, int difficoltaRicetta, ArrayList<String> nomiIngredienti, ArrayList<Integer> quantitaIngredienti, ArrayList<String> udmIngredienti)
+	public DetailedRecipeDialog(MyRecipesFrame parent, String nomeRicetta, String provenienzaRicetta, int calorieRicetta, String difficoltaRicetta, ArrayList<String> nomiIngredienti, ArrayList<Double> quantitaIngredienti, ArrayList<String> udmIngredienti)
 	{
 		
 		super(parent, "Cambia Password", true);
