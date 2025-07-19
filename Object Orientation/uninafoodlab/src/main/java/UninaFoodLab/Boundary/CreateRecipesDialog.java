@@ -84,7 +84,6 @@ public class CreateRecipesDialog extends JDialog
     private ArrayList<Double> quantitaIngredienti = new ArrayList<>();
     private ArrayList<String> udmIngredienti = new ArrayList<>();
     
-    private MyRecipesFrame parent;
 	public CreateRecipesDialog(MyRecipesFrame parent)
 	{
         super(parent, "Crea nuova ricetta", true);
@@ -93,7 +92,6 @@ public class CreateRecipesDialog extends JDialog
         setLocationRelativeTo(parent);
         setResizable(true);
         setIconImage(parent.getIconImage());
-        this.parent=parent;
         ingredientiCards = new ArrayList<>();
 
         initComponents();
@@ -270,8 +268,7 @@ public class CreateRecipesDialog extends JDialog
         	 @Override
         	 public void actionPerformed(ActionEvent e)
         	 {
-        		 CreateIngredienteDialog nuovoIngrediente = new CreateIngredienteDialog(CreateRecipesDialog.this);
-        		 nuovoIngrediente.setVisible(true);
+        		 Controller.getController().showCreateIngredienteDialog(CreateRecipesDialog.this);
         		 
         	 }
         		};
@@ -314,7 +311,7 @@ public class CreateRecipesDialog extends JDialog
                 	    udmIngredienti.add(card.getUnita());         			                    
                     }
 
-            		Controller.getController().saveRicettaUtilizzi(parent, CreateRecipesDialog.this, nameField.getText(), provenienzaField.getText(), (int)tempoSpinner.getValue(), (int)calorieSpinner.getValue(),
+            		Controller.getController().saveRicettaUtilizzi(CreateRecipesDialog.this, nameField.getText(), provenienzaField.getText(), (int)tempoSpinner.getValue(), (int)calorieSpinner.getValue(),
 							(String)difficoltaList.getSelectedItem(), allergeniArea.getText(), idIngredientiRicetta, quantitaIngredienti, udmIngredienti);
 
                 }

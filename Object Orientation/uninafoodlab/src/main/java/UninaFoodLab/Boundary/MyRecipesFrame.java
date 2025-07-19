@@ -13,12 +13,9 @@ import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
@@ -26,7 +23,6 @@ import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXFrame;
 import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
-import org.jdesktop.swingx.JXTextArea;
 import org.jdesktop.swingx.border.DropShadowBorder;
 import org.kordamp.ikonli.materialdesign.MaterialDesign;
 import org.kordamp.ikonli.swing.FontIcon;
@@ -120,7 +116,7 @@ public class MyRecipesFrame extends JXFrame implements SearchFilterable
     	
     	
     	
-        recipesPanel = new JXPanel(new MigLayout("wrap 4, fillx, insets 10", "[grow, fill]", "[grow, fill]"));
+        recipesPanel = new JXPanel(new MigLayout("wrap 4, fillx, insets 10", "[grow, fill]", "[]"));
         recipesPanel.setBackground(Color.WHITE);
 
         scrollPane = new JScrollPane(recipesPanel);
@@ -152,9 +148,6 @@ public class MyRecipesFrame extends JXFrame implements SearchFilterable
      	
         Controller.getController().loadAllRicette(nomiRicette, difficoltaRicette, calorieRicette, idRicette);
 		populateRecipeCards();
-        // Esempio: apertura dialog di creazione corso
-        //CreateRecipesDialog dialog = new CreateRecipesDialog(this);
-        //SwingUtilities.invokeLater(() -> dialog.setVisible(true));
         
         
     }
@@ -190,8 +183,7 @@ public class MyRecipesFrame extends JXFrame implements SearchFilterable
     
     private void addNewRicetta()
     {
-        CreateRecipesDialog newRecipe = new CreateRecipesDialog(this);
-        newRecipe.setVisible(true);
+    	Controller.getController().showCreateRecipeDialog(this);
     }
     
     private void populateRecipeCards()
@@ -245,16 +237,7 @@ public class MyRecipesFrame extends JXFrame implements SearchFilterable
 
         card.add(new JLabel("Difficoltà: " + difficolta), BorderLayout.CENTER);
 		card.add(new JLabel("Calorie: " + calorie), BorderLayout.AFTER_LAST_LINE);
-		
-        /*JXTextArea descArea = new JXTextArea(descrizione);
-        descArea.setLineWrap(true);
-        descArea.setWrapStyleWord(true);
-        descArea.setEditable(false);
-        descArea.setOpaque(false);
-        descArea.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
-        card.add(descArea, BorderLayout.CENTER);*/
 
-        // Rende la card cliccabile
         card.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         card.addMouseListener(new MouseAdapter()
         {

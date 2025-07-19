@@ -84,7 +84,7 @@ public class ChangeRecipeDialog extends JDialog {
     private ArrayList<String> udmIngredienti = new ArrayList<>();
     
     private MyRecipesFrame parent;
-	public ChangeRecipeDialog(MyRecipesFrame parent)
+	public ChangeRecipeDialog(MyRecipesFrame parent, String nomeRicetta, String provenienzaRicetta, int calorieRicetta, int difficoltaRicetta, ArrayList<String> nomiIngredienti, ArrayList<Integer> quantitaIngredienti, ArrayList<String> udmIngredienti)
 	{
         super(parent, "Cambia ricetta", true);
         setMinimumSize(new Dimension(1670, 700));
@@ -313,8 +313,8 @@ public class ChangeRecipeDialog extends JDialog {
                 	    udmIngredienti.add(card.getUnita());         			                    
                     }
 
-            		Controller.getController().changeRicettaUtilizzi(parent, ChangeRecipeDialog.this, nameField.getText(), provenienzaField.getText(), (int)tempoSpinner.getValue(), (int)calorieSpinner.getValue(),
-							(String)difficoltaList.getSelectedItem(), allergeniArea.getText(), idIngredientiRicetta, quantitaIngredienti, udmIngredienti);
+            		//Controller.getController().changeRicettaUtilizzi(parent, ChangeRecipeDialog.this, nameField.getText(), provenienzaField.getText(), (int)tempoSpinner.getValue(), (int)calorieSpinner.getValue(),
+							//(String)difficoltaList.getSelectedItem(), allergeniArea.getText(), idIngredientiRicetta, quantitaIngredienti, udmIngredienti);
 
                 }
             }
