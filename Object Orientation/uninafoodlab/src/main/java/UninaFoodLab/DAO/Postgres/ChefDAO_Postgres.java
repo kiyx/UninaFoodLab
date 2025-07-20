@@ -12,25 +12,6 @@ import java.sql.*;
 
 public class ChefDAO_Postgres implements ChefDAO
 {
-	private Chef mapResultSetToChef(ResultSet rs) throws SQLException
-	{
-	    Chef c = new Chef(
-				        	  rs.getString("Username"),
-				        	  rs.getString("Nome"),
-				        	  rs.getString("Cognome"),
-				        	  rs.getString("CodiceFiscale"),
-				        	  rs.getDate("DataDiNascita").toLocalDate(),
-				        	  rs.getString("LuogoDiNascita"),
-				        	  rs.getString("Email"),
-				       		  rs.getString("Password"),
-				       		  rs.getString("Curriculum"),
-				       		  null,
-				       		  null
-	    			   	    );
-	    c.setId(rs.getInt("IdChef"));	    
-	    return c;
-	}
-
 	@Override
 	public void save(Chef toSaveChef)
     {
@@ -293,4 +274,23 @@ public class ChefDAO_Postgres implements ChefDAO
         	throw new DAOException("Errore DB durante eliminazione Chef", e);
         }
     }
+	
+	private Chef mapResultSetToChef(ResultSet rs) throws SQLException
+	{
+	    Chef c = new Chef(
+				        	  rs.getString("Username"),
+				        	  rs.getString("Nome"),
+				        	  rs.getString("Cognome"),
+				        	  rs.getString("CodiceFiscale"),
+				        	  rs.getDate("DataDiNascita").toLocalDate(),
+				        	  rs.getString("LuogoDiNascita"),
+				        	  rs.getString("Email"),
+				       		  rs.getString("Password"),
+				       		  rs.getString("Curriculum"),
+				       		  null,
+				       		  null
+	    			   	    );
+	    c.setId(rs.getInt("IdChef"));	    
+	    return c;
+	}
 }

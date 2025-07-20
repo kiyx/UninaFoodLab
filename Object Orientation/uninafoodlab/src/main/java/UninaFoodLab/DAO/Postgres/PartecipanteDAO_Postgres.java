@@ -10,24 +10,6 @@ import java.util.*;
 
 public class PartecipanteDAO_Postgres implements PartecipanteDAO
 {
-	private Partecipante mapResultSetToPartecipante(ResultSet rs) throws SQLException
-	{
-	    Partecipante p = new Partecipante(
-								           rs.getString("Username"),
-								           rs.getString("Nome"),
-								           rs.getString("Cognome"),
-								           rs.getString("CodiceFiscale"),
-								           rs.getDate("DataDiNascita").toLocalDate(),
-								           rs.getString("LuogoDiNascita"),
-								           rs.getString("Email"),
-								       	   rs.getString("Password"),
-								           null,
-								           null
-					    			   	 );
-	    p.setId(rs.getInt("IdPartecipante"));	    
-	    return p;
-	}
-	
 	@Override
 	public void save(Partecipante toSavePartecipante)
     {
@@ -258,4 +240,22 @@ public class PartecipanteDAO_Postgres implements PartecipanteDAO
         	throw new DAOException("Errore DB durante eliminazione Partecipante con id = " + idPartecipante, e);
         }
     }
+    
+    private Partecipante mapResultSetToPartecipante(ResultSet rs) throws SQLException
+	{
+	    Partecipante p = new Partecipante(
+								           rs.getString("Username"),
+								           rs.getString("Nome"),
+								           rs.getString("Cognome"),
+								           rs.getString("CodiceFiscale"),
+								           rs.getDate("DataDiNascita").toLocalDate(),
+								           rs.getString("LuogoDiNascita"),
+								           rs.getString("Email"),
+								       	   rs.getString("Password"),
+								           null,
+								           null
+					    			   	 );
+	    p.setId(rs.getInt("IdPartecipante"));	    
+	    return p;
+	}
 }

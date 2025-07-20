@@ -8,19 +8,6 @@ import UninaFoodLab.Exceptions.DAOException;
 
 public class ReportMensileDAO_Postgres implements ReportMensileDAO
 {
-	private ReportMensile mapResultSetToMonthlyReport(ResultSet rs) throws SQLException
-	{
-		ReportMensile rm = new ReportMensile(
-									           rs.getInt("totCorsi"),
-									           rs.getInt("totOnline"),
-									           rs.getInt("totPratiche"),
-									           rs.getInt("minRicette"),
-									           rs.getInt("maxRicette"),
-									           rs.getDouble("avgRicette")
-					    			   	 	);    
-	    return rm;
-	}	
-	
 	@Override
 	public ReportMensile getMonthlyReportByIdChef(int idChef)
 	{
@@ -106,4 +93,17 @@ public class ReportMensileDAO_Postgres implements ReportMensileDAO
 			throw new DAOException("Errore durante l'accesso al report mensile dello chef", e);
 		}
 	}
+	
+	private ReportMensile mapResultSetToMonthlyReport(ResultSet rs) throws SQLException
+	{
+		ReportMensile rm = new ReportMensile(
+									           rs.getInt("totCorsi"),
+									           rs.getInt("totOnline"),
+									           rs.getInt("totPratiche"),
+									           rs.getInt("minRicette"),
+									           rs.getInt("maxRicette"),
+									           rs.getDouble("avgRicette")
+					    			   	 	);    
+	    return rm;
+	}	
 }

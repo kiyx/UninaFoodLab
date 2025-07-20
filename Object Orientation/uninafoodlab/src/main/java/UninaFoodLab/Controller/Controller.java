@@ -271,8 +271,8 @@ public class Controller
 				currFrame.dispose();
 				new MyRecipesFrame().setVisible(true);
 			}
-			// else
-			// ((RecipesFrame) currFrame).resetView();
+			else
+				((MyRecipesFrame) currFrame).resetView();
 		});
 	}
 
@@ -317,6 +317,8 @@ public class Controller
 		
 		cacheArgomenti = null;
 		cacheRicette = null;
+		cacheIngredienti = null;
+		cacheCorsi = null;
 	}
 
 	/**

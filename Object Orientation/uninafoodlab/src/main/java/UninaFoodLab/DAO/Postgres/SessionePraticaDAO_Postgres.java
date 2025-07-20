@@ -12,21 +12,6 @@ import java.util.List;
 
 public class SessionePraticaDAO_Postgres implements SessionePraticaDAO
 {
-	private SessionePratica mapResultSetToSessionePratica(ResultSet rs) throws SQLException 
-	{    
-		SessionePratica sp = new SessionePratica
-		    				(
-		    				  rs.getInt("Durata"), 
-		    				  rs.getTime("Orario"),
-		    				  rs.getDate("Data").toLocalDate(), 
-		    				  rs.getString("Luogo"),
-		    				  new ArrayList<Ricetta>(new RicettaDAO_Postgres().getRicettaByIdSessionePratica(rs.getInt("IdSessionePratica")))
-		    			   );
-	    sp.setId(rs.getInt("IdSessionePratica"));
-	    
-	    return sp;
-	}
-	
 	private void savePreparazioni(SessionePratica sp, Connection conn) throws SQLException
 	{
 	    String sql = 
@@ -283,4 +268,19 @@ public class SessionePraticaDAO_Postgres implements SessionePraticaDAO
         	throw new DAOException("Errore DB durante delete SessionePratica", e);
         }
     }
+	
+	private SessionePratica mapResultSetToSessionePratica(ResultSet rs) throws SQLException 
+	{    
+		SessionePratica sp = new SessionePratica
+		    				(
+		    				  rs.getInt("Durata"), 
+		    				  rs.getTime("Orario"),
+		    				  rs.getDate("Data").toLocalDate(), 
+		    				  rs.getString("Luogo"),
+		    				  new ArrayList<Ricetta>(new RicettaDAO_Postgres().getRicettaByIdSessionePratica(rs.getInt("IdSessionePratica")))
+		    			   );
+	    sp.setId(rs.getInt("IdSessionePratica"));
+	    
+	    return sp;
+	}
 }

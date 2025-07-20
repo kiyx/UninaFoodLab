@@ -10,21 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SessioneOnlineDAO_Postgres implements SessioneOnlineDAO
-{
-	private SessioneOnline mapResultSetToSessioneOnline(ResultSet rs) throws SQLException 
-	{    
-	    SessioneOnline so = new SessioneOnline
-		    				(
-		    				  rs.getInt("Durata"), 
-		    				  rs.getTime("Orario"),
-		    				  rs.getDate("Data").toLocalDate(), 
-		    				  rs.getString("LinkRiunione")
-		    			   );
-	    so.setId(rs.getInt("IdSessioneOnline"));
-	    
-	    return so;
-	}
-	
+{	
 	@Override
 	public void save(SessioneOnline sessione) 
 	{
@@ -186,4 +172,18 @@ public class SessioneOnlineDAO_Postgres implements SessioneOnlineDAO
         	throw new DAOException("Errore DB durante eliminazione SessioneOnline", e);
         }
     }
+	
+	private SessioneOnline mapResultSetToSessioneOnline(ResultSet rs) throws SQLException 
+	{    
+	    SessioneOnline so = new SessioneOnline
+		    				(
+		    				  rs.getInt("Durata"), 
+		    				  rs.getTime("Orario"),
+		    				  rs.getDate("Data").toLocalDate(), 
+		    				  rs.getString("LinkRiunione")
+		    			   );
+	    so.setId(rs.getInt("IdSessioneOnline"));
+	    
+	    return so;
+	}
 }

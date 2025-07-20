@@ -12,7 +12,6 @@ import java.util.*;
 
 public class RicettaDAO_Postgres implements RicettaDAO
 {
-	
 	@Override
     public void save(Ricetta toSaveRicetta, int idChef)
     {

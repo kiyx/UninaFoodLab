@@ -11,14 +11,6 @@ import java.sql.*;
 
 public class ArgomentoDAO_Postgres implements ArgomentoDAO
 {
-	private Argomento mapResultSetToArgomento(ResultSet rs) throws SQLException
-	{
-		Argomento a = new Argomento(rs.getString("Nome"));
-		a.setId(rs.getInt("IdArgomento"));
-		
-		return a;
-	}
-	
 	@Override
 	public void saveArgomentiCorso(int idCorso, List<Argomento> argomenti, Connection conn)
 	{
@@ -159,5 +151,13 @@ public class ArgomentoDAO_Postgres implements ArgomentoDAO
 	    {
 	        throw new DAOException("Errore DB durante deleteArgomentoFromCorso", e);
 	    }
+	}
+	
+	private Argomento mapResultSetToArgomento(ResultSet rs) throws SQLException
+	{
+		Argomento a = new Argomento(rs.getString("Nome"));
+		a.setId(rs.getInt("IdArgomento"));
+		
+		return a;
 	}
 }

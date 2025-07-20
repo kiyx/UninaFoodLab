@@ -1,7 +1,6 @@
 package UninaFoodLab.DAO.Postgres;
 
 import UninaFoodLab.DAO.IngredienteDAO;
-import UninaFoodLab.DTO.Argomento;
 import UninaFoodLab.DTO.Ingrediente;
 import UninaFoodLab.DTO.NaturaIngrediente;
 import UninaFoodLab.Exceptions.DAOException;
@@ -12,16 +11,6 @@ import java.util.*;
 
 public class IngredienteDAO_Postgres implements IngredienteDAO
 {
-	private Ingrediente mapResultSetToIngrediente(ResultSet rs) throws SQLException
-	{
-		Ingrediente i = new Ingrediente(	
-				        	  			   rs.getString("Nome"),
-				        	  			   NaturaIngrediente.valueOf(rs.getString("Origine"))
-	    			   	    	 	   );
-	    i.setId(rs.getInt("IdIngrediente"));	 
-	    return i;
-	}
-	
 	@Override
 	public void save(Ingrediente toSaveIngrediente)
     {
@@ -115,4 +104,14 @@ public class IngredienteDAO_Postgres implements IngredienteDAO
         
         return ingredienti;
     }
+	
+	private Ingrediente mapResultSetToIngrediente(ResultSet rs) throws SQLException
+	{
+		Ingrediente i = new Ingrediente(	
+				        	  			   rs.getString("Nome"),
+				        	  			   NaturaIngrediente.valueOf(rs.getString("Origine"))
+	    			   	    	 	   );
+	    i.setId(rs.getInt("IdIngrediente"));	 
+	    return i;
+	}
 }

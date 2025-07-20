@@ -1,272 +1,164 @@
-Lista Trigger e Funzioni PL/pgSQL – UninaFoodLab
+&nbsp;Riepilogo dei Trigger per Tabella
 
-=============================================
 
 
+1\. Partecipante
 
-\## CHEF / PARTECIPANTE
 
 
+trg\_normalizza\_partecipante: Normalizza Username (minuscolo), CodiceFiscale (maiuscolo), Email (minuscolo), Nome e Cognome (iniziale maiuscola) prima dell'inserimento/aggiornamento.
 
-\* \[✓] Username univoco tra Chef e Partecipante
+trg\_unico\_username\_partecipante: Impedisce che un Username di un partecipante sia già usato da uno chef.
 
-&nbsp; • Funzione: fun\_username\_unique
+trg\_blocca\_aggiorna\_partecipante: Impedisce la modifica del campo CodiceFiscale dopo la creazione.
 
-&nbsp; • Trigger: trg\_unico\_username\_partecipante, trg\_unico\_username\_chef
+`NumeroCorsi` viene aggiornato dai trigger sulla tabella `Iscrizioni`.
 
 
 
-\* \[✓] Normalizzazione dei dati utente (username, codice fiscale, nome, cognome, email)
+2\. Chef
 
-&nbsp; • Funzione: fun\_normalizza\_utente
 
-&nbsp; • Trigger: trg\_normalizza\_chef, trg\_normalizza\_partecipante
 
+trg\_normalizza\_chef: Normalizza Username (minuscolo), CodiceFiscale (maiuscolo), Email (minuscolo), Nome e Cognome (iniziale maiuscola) prima dell'inserimento/aggiornamento.
 
+trg\_unico\_username\_chef: Impedisce che un Username di uno chef sia già usato da un partecipante.
 
-\* \[✓] Blocco aggiornamento del Codice Fiscale
+trg\_blocca\_aggiorna\_chef: Impedisce la modifica del campo CodiceFiscale dopo la creazione.
 
-&nbsp; • Funzione: fun\_blocca\_aggiorna\_utente
 
-&nbsp; • Trigger: trg\_blocca\_aggiorna\_\_chef, trg\_blocca\_aggiorna\_partecipante
 
+3\. Ingrediente
 
 
-\## RICETTA
 
+trg\_normalizza\_ingrediente: Normalizza il campo Nome (iniziale maiuscola) prima dell'inserimento/aggiornamento.
 
+trg\_blocca\_aggiorna\_ingrediente: Impedisce la modifica o la cancellazione di IdIngrediente, Nome e Origine.
 
-\* \[✓] Normalizzazione nome ricetta (iniziale maiuscola)
 
-&nbsp; • Funzione: fun\_normalizza\_ingr\_chef
 
-&nbsp; • Trigger: trg\_normalizza\_ricetta
+4\. Ricetta
 
 
 
-\* \[✓] Blocco aggiornamento IdRicetta e IdChef
+trg\_normalizza\_ricetta: Normalizza il campo Nome (iniziale maiuscola) prima dell'inserimento/aggiornamento.
 
-&nbsp; • Funzione: fun\_blocca\_aggiorna\_ricetta
+trg\_blocca\_aggiorna\_ricetta: Impedisce la modifica di IdRicetta e IdChef.
 
-&nbsp; • Trigger: trg\_blocca\_aggiorna\_ricetta
 
 
+5\. Corso
 
-\## INGREDIENTE
 
 
+trg\_blocca\_aggiorna\_corso: Impedisce la modifica di IdCorso, NumeroSessioni, FrequenzaSessioni, Costo o IdChef.
 
-\* \[✓] Normalizzazione nome ingrediente
 
-&nbsp; • Funzione: fun\_normalizza\_ingr\_chef
 
-&nbsp; • Trigger: trg\_normalizza\_ingrediente
+6\. SessionePratica
 
 
 
-\* \[✓] Blocco su UPDATE/DELETE di IdIngrediente, Nome, Origine
+trg\_unicita\_sessione\_pratica\_giorno: Impedisce più sessioni (pratiche o online) per lo stesso corso nello stesso giorno.
 
-&nbsp; • Funzione: fun\_blocca\_aggiorna\_ingrediente
+trg\_sovrapposizione\_orario\_sessione\_pratica: Controlla che le sessioni dello stesso chef non si sovrappongano orariamente nello stesso giorno.
 
-&nbsp; • Trigger: trg\_blocca\_aggiorna\_ingrediente
+trg\_sessione\_pratica\_dopo\_inizio\_corso: Garantisce che la data della sessione non sia precedente alla data di inizio corso e che la prima sessione coincida con la data di inizio corso.
 
+trg\_max\_sessioni\_pratica\*\*: Impedisce l'inserimento di nuove sessioni se è già raggiunto il numero massimo consentito.
 
+trg\_verifica\_frequenza\_sessioni\_pratiche: Assicura che la data della sessione rispetti la frequenza definita per il corso.
 
-\## CORSO
+trg\_ispratico\_insert\*\*: Impedisce l'inserimento di sessioni pratiche in corsi non contrassegnati come pratici.
 
+trg\_blocca\_aggiorna\_sessioni\_pratiche: Impedisce la modifica di IdSessionePratica e IdCorso.
 
+Il campo `NumeroPartecipanti` è aggiornato dai trigger su `Adesioni`.
 
-\* \[✓] Blocco aggiornamento IdCorso, Nome, NumeroSessioni, FrequenzaSessioni, Costo, IdChef
 
-&nbsp; • Funzione: fun\_blocca\_aggiorna\_corso
 
-&nbsp; • Trigger: trg\_blocca\_aggiorna\_corso
+7\. SessioneOnline
 
 
 
-\* \[✓] Incremento/Decremento numero corsi
+trg\_unicita\_sessione\_online\_giorno: Impedisce più sessioni (pratiche o online) per lo stesso corso nello stesso giorno.
 
-&nbsp; • Funzioni: fun\_incrementa\_num\_corsi, fun\_decrementa\_num\_corsi
+trg\_sovrapposizione\_orario\_sessione\_online: Controlla che le sessioni dello stesso chef non si sovrappongano orariamente nello stesso giorno.
 
-&nbsp; • Trigger: trg\_incrementa\_num\_corsi, trg\_decrementa\_num\_corsi
+trg\_sessione\_online\_dopo\_inizio\_corso: Garantisce che la data della sessione non sia precedente alla data di inizio corso e che la prima sessione coincida con la data di inizio corso.
 
+trg\_max\_sessioni\_online: Impedisce l'inserimento di nuove sessioni se è già raggiunto il numero massimo consentito.
 
+trg\_verifica\_frequenza\_sessioni\_online: Assicura che la data della sessione rispetti la frequenza definita per il corso.
 
-\## ARGOMENTO
+trg\_blocca\_aggiorna\_sessioni\_online: Impedisce la modifica di IdSessioneOnline e IdCorso.
 
 
 
-\* \[✓] Blocco modifica o eliminazione argomento
+&nbsp;8. Adesioni
 
-&nbsp; • Funzione: fun\_blocca\_aggiorna\_argomento
 
-&nbsp; • Trigger: trg\_blocca\_aggiorna\_argomento
 
+trg\_incremento\_numutenti: Incrementa `NumeroPartecipanti` in `SessionePratica` all'inserimento di una nuova adesione.
 
+trg\_decrementa\_num\_utenti: Decrementa `NumeroPartecipanti` in `SessionePratica` all'eliminazione di un'adesione.
 
-\## SESSIONI (Online/Pratiche)
+trg\_data\_adesione: Assicura che la data dell'adesione sia antecedente alla data della sessione pratica.
 
+trg\_iscrizione\_before\_adesione: Impedisce l'adesione a una sessione pratica se il partecipante non è iscritto al corso.
 
+trg\_blocca\_aggiorna\_adesioni: Impedisce la modifica di IdPartecipante, IdSessionePratica, DataAdesione.
 
-\* \[✓] Blocco aggiornamento IdSessione e IdCorso
+trg\_blocca\_cancella\_adesioni: Impedisce la cancellazione di un'adesione a meno di 3 giorni dalla sessione pratica.
 
-&nbsp; • Funzione: fun\_blocca\_aggiorna\_sessioni
 
-&nbsp; • Trigger: trg\_blocca\_aggiorna\_sessioni\_online, trg\_blocca\_aggiorna\_sessioni\_pratiche
 
+&nbsp;9. Iscrizioni
 
 
-\* \[✓] Unicità sessioni per corso nello stesso giorno
 
-&nbsp; • Funzione: fun\_unicita\_sessione\_giorno
+trg\_incrementa\_num\_corsi: Incrementa `NumeroCorsi` del partecipante all'inserimento di una nuova iscrizione.
 
-&nbsp; • Trigger: trg\_unicita\_sessione\_online\_giorno, trg\_unicita\_sessione\_pratica\_giorno
+trg\_decrementa\_num\_corsi: Decrementa `NumeroCorsi` del partecipante all'eliminazione di un'iscrizione.
 
+trg\_limite\_iscrizioni: Impedisce nuove iscrizioni se il limite di partecipanti per il corso è già raggiunto (solo per corsi pratici).
 
+trg\_blocca\_aggiorna\_iscrizioni: Impedisce la modifica di IdPartecipante e IdCorso.
 
-\* \[✓] Data sessione dopo inizio corso (o uguale alla prima)
 
-&nbsp; • Funzione: fun\_sessione\_dopo\_inizio\_corso
 
-&nbsp; • Trigger: trg\_sessione\_online\_dopo\_inizio\_corso, trg\_sessione\_pratica\_dopo\_inizio\_corso
+10\. Argomento
 
 
 
-\* \[✓] Numero massimo di sessioni rispettato
+trg\_blocca\_aggiorna\_argomento: Impedisce la modifica o la cancellazione del campo Nome.
 
-&nbsp; • Funzione: fun\_max\_sessioni\_per\_corso
 
-&nbsp; • Trigger: trg\_max\_sessioni\_online, trg\_max\_sessioni\_pratica
 
+11\. Argomenti\_Corso
 
 
-\* \[✓] Frequenza sessioni rispettata (giorni tra sessioni)
 
-&nbsp; • Funzione: fun\_verifica\_frequenza\_sessioni
+trg\_limit\_argomenti Limita a 5 il numero di argomenti per corso.
 
-&nbsp; • Trigger: trg\_verifica\_frequenza\_sessioni\_online, trg\_verifica\_frequenza\_sessioni\_pratiche
+trg\_blocca\_aggiorna\_argomenticorso: Impedisce la modifica di IdCorso e IdArgomento.
 
+trg\_blocca\_cancellazione\_argomento\_corso: Impedisce la cancellazione dell'ultimo argomento di un corso.
 
 
-\* \[✓] Blocco inserimento sessione pratica se corso non pratico
 
-&nbsp; • Funzione: fun\_ispratico\_insert
+12\. Preparazioni
 
-&nbsp; • Trigger: trg\_ispratico\_insert
 
 
+trg\_ricette\_chef\_sessione: Impedisce che uno chef usi ricette non proprie nelle sessioni pratiche.
 
-\## ISCRIZIONI
+trg\_blocca\_aggiorna\_preparazioni: Impedisce la modifica o la cancellazione di IdSessionePratica e IdRicetta.
 
 
 
-\* \[✓] Blocco aggiornamento Iscrizioni
+13\. Utilizzi
 
-&nbsp; • Funzione: fun\_blocca\_aggiorna\_iscrizioni
-
-&nbsp; • Trigger: trg\_blocca\_aggiorna\_iscrizioni
-
-
-
-\* \[✓] Vincolo limite iscrizioni corso
-
-&nbsp; • Funzione: fun\_limite\_iscrizioni
-
-&nbsp; • Trigger: trg\_limite\_iscrizioni
-
-
-
-\## ADESIONI
-
-
-
-\* \[✓] Incremento/Decremento numero partecipanti
-
-&nbsp; • Funzioni: fun\_incrementa\_num\_utenti, fun\_decrementa\_num\_utenti
-
-&nbsp; • Trigger: trg\_incremento\_numutenti, trg\_decrementa\_num\_utenti
-
-
-
-\* \[✓] Data adesione antecedente alla sessione pratica
-
-&nbsp; • Funzione: fun\_data\_adesione
-
-&nbsp; • Trigger: trg\_data\_adesione
-
-
-
-\* \[✓] Partecipante deve essere iscritto al corso
-
-&nbsp; • Funzione: fun\_iscrizione\_before\_adesione
-
-&nbsp; • Trigger: trg\_iscrizione\_before\_adesione
-
-
-
-\* \[✓] Blocco aggiornamento Adesioni
-
-&nbsp; • Funzione: fun\_blocca\_aggiorna\_adesioni
-
-&nbsp; • Trigger: trg\_blocca\_aggiorna\_adesioni
-
-
-
-\* \[✓] Blocco cancellazione adesione se meno di 3 giorni dalla sessione
-
-&nbsp; • Funzione: fun\_blocca\_cancella\_adesioni
-
-&nbsp; • Trigger: trg\_blocca\_cancella\_adesioni
-
-
-
-\## ARGOMENTI\_CORSO
-
-
-
-\* \[✓] Max 5 argomenti per corso
-
-&nbsp; • Funzione: fun\_limit\_argomenti
-
-&nbsp; • Trigger: trg\_limit\_argomenti
-
-
-
-\* \[✓] Blocco aggiornamento Argomenti\_Corso
-
-&nbsp; • Funzione: fun\_blocca\_aggiorna\_argomenticorso
-
-&nbsp; • Trigger: trg\_blocca\_aggiorna\_argomenticorso
-
-
-
-\## PREPARAZIONI
-
-
-
-\* \[✓] Lo chef può usare solo ricette sue
-
-&nbsp; • Funzione: fun\_ricette\_chef\_sessione
-
-&nbsp; • Trigger: trg\_ricette\_chef\_sessione
-
-
-
-\* \[✓] Blocco aggiornamento Preparazioni
-
-&nbsp; • Funzione: fun\_blocca\_aggiorna\_preparazioni
-
-&nbsp; • Trigger: trg\_blocca\_aggiorna\_preparazioni
-
-
-
-\## UTILIZZI
-
-
-
-\* \[✓] Blocco aggiornamento Utilizzi
-
-&nbsp; • Funzione: fun\_blocca\_aggiorna\_utilizzi
-
-&nbsp; • Trigger: trg\_blocca\_aggiorna\_utilizzi
+trg\_blocca\_aggiorna\_utilizzi: Impedisce la modifica di IdRicetta e IdIngrediente.
 
