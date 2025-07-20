@@ -255,8 +255,8 @@ public class Controller
 				currFrame.dispose();
 				new MyCoursesFrame().setVisible(true);
 			} 
-			//else
-				//((MyCoursesFrame) currFrame).resetView();
+			else
+				((MyCoursesFrame) currFrame).resetView();
 		});
 	}
 
@@ -671,6 +671,11 @@ public class Controller
 	 * -------------------------
 	 */
 
+	
+	
+	
+	
+	
 	/**
      *  -------------------------
      * 
@@ -689,6 +694,11 @@ public class Controller
 	public void callRemoveSessionCard(CreateCourseDialog parent, CreateSessionPanel panel)
 	{
 		parent.removeSessionCard(panel);
+	}
+	
+	public void clearMyCoursesCache()
+	{
+		cacheCorsi = null;
 	}
 	
 	public void clearCourseDialogCache()
@@ -712,7 +722,8 @@ public class Controller
 	{
 		try
 		{
-			cacheArgomenti = getArgomentoDAO().getAllArgomenti();
+			if(cacheArgomenti == null || cacheArgomenti.isEmpty())
+				cacheArgomenti = getArgomentoDAO().getAllArgomenti();
 
 			for(Argomento a : cacheArgomenti)
 			{
@@ -725,12 +736,15 @@ public class Controller
 			LOGGER.log(Level.SEVERE, "Errore loadArgomenti da DB", e);
 		}
 	}
-
+	
 	public void loadRicette(List<Integer> idsRicette, List<String> namesRicette)
 	{
 		try
 		{
-			cacheRicette = getRicettaDAO().getRicetteByIdChef(loggedUser.getId());
+			cacheRicette = ((Chef)loggedUser).getRicette();
+			
+			if(cacheRicette == null || cacheRicette.isEmpty())
+				cacheRicette = getRicettaDAO().getRicetteByIdChef(loggedUser.getId());
 
 			for(Ricetta r : cacheRicette)
 			{
@@ -749,8 +763,9 @@ public class Controller
 	{
 		try
 		{
-			cacheCorsi = (isChefLogged()) ? getCorsoDAO().getCorsiByIdChef(loggedUser.getId()) : 
-										    getCorsoDAO().getCorsiByIdPartecipante(loggedUser.getId());
+			if(cacheCorsi == null || cacheCorsi.isEmpty())
+				cacheCorsi = (isChefLogged()) ? getCorsoDAO().getCorsiByIdChef(loggedUser.getId()) : 
+										    	getCorsoDAO().getCorsiByIdPartecipante(loggedUser.getId());
 
 			for(Corso c : cacheCorsi)
 			{				
@@ -874,11 +889,6 @@ public class Controller
 			JOptionPane.showMessageDialog(currDialog, "Errore nel salvataggio del corso: " + e.getMessage());
 			LOGGER.log(Level.SEVERE, "Errore nel salvataggio del corso su DB", e);
 		}
-	}
-
-	public void clearMyCoursesCache()
-	{
-		cacheCorsi = null;
 	}
 	
 	/**

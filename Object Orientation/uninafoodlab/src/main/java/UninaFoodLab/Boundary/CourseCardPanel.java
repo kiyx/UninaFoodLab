@@ -40,7 +40,8 @@ public class CourseCardPanel extends JXPanel
     private final int sessionNumber;
 
     private JXPanel header, argumentsPanel;
-    private JXLabel lblSessions, lblName, tagLabel, lblDate;
+    private JXLabel lblSessions, lblName, lblDate;
+    private JTextArea tagLabel;
     private DropShadowBorder shadow; 
     
     /**
@@ -96,7 +97,7 @@ public class CourseCardPanel extends JXPanel
 
         for(String topic : namesArguments) 
         {
-        	JTextArea tagLabel = new JTextArea(topic);
+        	tagLabel = new JTextArea(topic);
         	tagLabel.setLineWrap(true);
         	tagLabel.setWrapStyleWord(true);
         	tagLabel.setRows(2);

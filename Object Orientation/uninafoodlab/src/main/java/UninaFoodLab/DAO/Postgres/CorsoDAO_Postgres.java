@@ -244,42 +244,6 @@ public class CorsoDAO_Postgres implements CorsoDAO
         
         return courses;
     }
-
-	@Override
-    public List<Corso> getCorsiByArgomenti(List<Integer> argomenti)
-    {
-		String sql = 
-					 "SELECT * "
-				   + "FROM Corso C JOIN Argomenti_Corso AC ON C.IdCorso = AC.IdCorso "
-				   + "WHERE IdArgomento IN( ";
-		
-		for(int i = 0; i < argomenti.size(); i++)
-		{
-			sql += "?";
-			if(i < argomenti.size() - 1)
-				sql += ", ";
-		}
-		sql += ")";
-		    
-		List<Corso> courses = new ArrayList<>();
-        
-        try(Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
-        {
-        	for(int i = 0; i < argomenti.size(); i++)
-        		s.setInt(i + 1, argomenti.get(i).intValue());
-        	
-            ResultSet rs = s.executeQuery();
-
-            while(rs.next())
-            	courses.add(mapResultSetToCorso(rs));
-        }
-        catch(SQLException e)
-        {
-        	throw new DAOException("Errore DB durante getCorsiByArgomenti", e);
-        }
-        
-        return courses;
-    }
 	
 	@Override
     public void update(Corso oldCorso, Corso newCorso)

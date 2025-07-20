@@ -48,7 +48,7 @@ public class MyCoursesFrame extends JXFrame implements ArgumentFilterable
         super("UninaFoodLab - " + ((Controller.getController().isChefLogged()) ? "I miei corsi" : "Le mie iscrizioni" ));
 
         setDefaultCloseOperation(JXFrame.EXIT_ON_CLOSE);
-        setMinimumSize(new Dimension(929, 739));
+        setMinimumSize(new Dimension(1230, 960));
         setExtendedState(MAXIMIZED_BOTH);
         setLocationRelativeTo(null);
 
@@ -169,7 +169,7 @@ public class MyCoursesFrame extends JXFrame implements ArgumentFilterable
     	    public void mouseClicked(MouseEvent e) 
     	    {
     	        CourseCardPanel card = (CourseCardPanel)e.getSource();
-    	        //Controller.getController().showCourseDetail(card.getId());
+    	        Controller.getController().showCourseDetail(this, card.getId());
     	    }
     	};
     }
@@ -200,9 +200,7 @@ public class MyCoursesFrame extends JXFrame implements ArgumentFilterable
       	        card.removeCourseClickListener(cardClickListener);
 
       	cardClickListener = null;
-    	}
-    	
-    	  
+    	}	  
     }
     
     @Override
@@ -313,5 +311,10 @@ public class MyCoursesFrame extends JXFrame implements ArgumentFilterable
         int maxPage = (filteredCourseCards.size() - 1) / CARDS_PER_PAGE;
         leftArrow.setEnabled(currentPage > 0);
         rightArrow.setEnabled(currentPage < maxPage);
+    }
+    
+    public void resetView()
+    {
+    	loadPage(0);
     }
 }

@@ -464,12 +464,20 @@ public class CreateCourseDialog extends JDialog
 
                     	if(check)
                     	{
-                    		Controller.getController().createCourse
-                    		(parentFrame, CreateCourseDialog.this, nameField.getText().trim(), dataInizioField.getDate(),
-                    		(int) numeroSessioniSpinner.getValue(), frequencyList.getSelectedItem().toString(), (int) limitSpinner.getValue(),
-                    		descrizioneArea.getText(), BigDecimal.valueOf((double)costSpinner.getValue()), praticoCheck.isSelected(),
-                    		idsSelectedArguments, durateOnline, orariOnline, dateOnline, linksOnline, duratePratiche,
-                    		orariPratiche, datePratiche, indirizziPratiche, ricettePratiche);
+                    		if(!praticoCheck.isSelected() || (praticoCheck.isSelected() && !duratePratiche.isEmpty()))
+                    		{
+                    			Controller.getController().createCourse
+                        		(
+    	                    		parentFrame, CreateCourseDialog.this, nameField.getText().trim(), dataInizioField.getDate(),
+    	                    		(int) numeroSessioniSpinner.getValue(), frequencyList.getSelectedItem().toString(), (int) limitSpinner.getValue(),
+    	                    		descrizioneArea.getText(), BigDecimal.valueOf((double)costSpinner.getValue()), praticoCheck.isSelected(),
+    	                    		idsSelectedArguments, durateOnline, orariOnline, dateOnline, linksOnline, duratePratiche,
+    	                    		orariPratiche, datePratiche, indirizziPratiche, ricettePratiche
+                        		);
+                    		}
+                    		else
+                    			JOptionPane.showMessageDialog(CreateCourseDialog.this, "Devi aggiungere almeno una sessione.", "Errore", 
+   				 					   JOptionPane.ERROR_MESSAGE);
                     	}
                 	}
                 	else

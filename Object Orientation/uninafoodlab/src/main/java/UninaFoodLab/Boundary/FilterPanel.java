@@ -26,8 +26,9 @@ public class FilterPanel extends JXPanel
     private static final long serialVersionUID = 1L;
     
     /** Bottone di applicazione filtri */
-    private JXButton applyBtn;
+    private JXButton applyBtn, resetBtn;;
     private JScrollPane scroll;
+    private JXPanel topPanel;
     private JPanel argumentsContainer;
     	
     /** Lista degli ID degli argomenti caricati dal Controller */
@@ -42,8 +43,8 @@ public class FilterPanel extends JXPanel
     /** Riferimento all’oggetto che implementa TopicFilterable per applicare il filtro */
     private ArgumentFilterable filterable;
 
-    /** Listener per il pulsante "Applica" */
-    private ActionListener applyBtnClicker;
+    /** Listener per il pulsante "Applica" e "Reset" */
+    private ActionListener applyBtnClicker, resetBtnClicker;
     
     /**
      * Costruisce un nuovo {@code FilterPanel}.
@@ -85,7 +86,7 @@ public class FilterPanel extends JXPanel
         argumentsContainer = new JPanel(new MigLayout("wrap 1", "[grow,fill]"));
         argumentsContainer.setBackground(Color.WHITE);
         Controller.getController().loadArgomenti(idsArgomenti, namesArgomenti);
-        
+
         for(int i = 0; i < idsArgomenti.size(); i++) 
         {
             JCheckBox cb = new JCheckBox(namesArgomenti.get(i));
@@ -98,7 +99,19 @@ public class FilterPanel extends JXPanel
         scroll.getVerticalScrollBar().setUnitIncrement(20);
         scroll.setPreferredSize(new Dimension(300, 150));
         scroll.setBorder(BorderFactory.createEmptyBorder());
-        add(scroll, "grow, wrap");
+        
+        topPanel = new JXPanel(new MigLayout("insets 0", "[grow][]", "[]"));
+        topPanel.setBackground(Color.WHITE);
+        topPanel.add(scroll, "grow"); 
+        
+        resetBtn = new JXButton("Reset filtri");
+        resetBtn.setBackground(new Color(225,126,47));
+        resetBtn.setForeground(Color.WHITE); 
+        resetBtn.setFocusPainted(false);
+        resetBtn.setPreferredSize(new Dimension(120, 35));
+        topPanel.add(resetBtn, "gapleft 10, aligny top, pushx");
+
+        add(topPanel, "grow, wrap");
 
         applyBtn = new JXButton("Applica");
         applyBtn.setBackground(new Color(225,126,47));
@@ -107,7 +120,6 @@ public class FilterPanel extends JXPanel
         applyBtn.setPreferredSize(new Dimension(100, 35));
         add(applyBtn, "gapy 10, align right");
     }
-
 
     /**
      * Registra il listener per il pulsante "Applica", che invoca {@link #filterIds()}.
@@ -120,6 +132,21 @@ public class FilterPanel extends JXPanel
 					           public void actionPerformed(ActionEvent e) { filterIds(); }
 					       };
     	applyBtn.addActionListener(applyBtnClicker);
+    	
+    	resetBtnClicker = new ActionListener()
+					      {
+					          @Override
+					          public void actionPerformed(ActionEvent e)
+					          {
+					              // Deseleziona tutte le checkbox
+					              for(JCheckBox cb : checkboxes)
+					                  cb.setSelected(false);
+					
+					              // Applica filtro vuoto (nessun argomento selezionato)
+					              filterable.filterByArgumentsIds(new ArrayList<>());
+					          }
+					      };
+        resetBtn.addActionListener(resetBtnClicker);
     }
        
     /**
@@ -128,11 +155,17 @@ public class FilterPanel extends JXPanel
      */
     public void disposeListeners()
     {
-    	if(applyBtn != null && applyBtnClicker != null)
-    	{
-    		applyBtn.removeActionListener(applyBtnClicker);
-    		applyBtnClicker = null;
-    	}	
+        if(applyBtn != null && applyBtnClicker != null)
+        {
+            applyBtn.removeActionListener(applyBtnClicker);
+            applyBtnClicker = null;
+        }
+
+        if(resetBtn != null && resetBtnClicker != null)
+        {
+            resetBtn.removeActionListener(resetBtnClicker);
+            resetBtnClicker = null;
+        }
     }
    
     /**
