@@ -111,28 +111,28 @@ INSERT INTO Ricetta (Nome, Provenienza, Tempo, Calorie, Difficolta, Allergeni, I
 
 -- SessioneOnline
 INSERT INTO SessioneOnline (Durata, Orario, Data, LinkRiunione, IdCorso) VALUES
-(120, '09:00', '2026-11-29', 'https://meet.google.com/fgh-ijkl-mnop', (SELECT IdCorso FROM Corso WHERE Nome = 'Cucina Fusion Asiatica')),
+(120, '10:00', '2026-11-12', 'https://meet.google.com/nop-qrst-uvwx', (SELECT IdCorso FROM Corso WHERE Nome = 'Cucina Fusion Asiatica')), 
+(120, '09:00', '2026-11-19', 'https://meet.google.com/fgh-ijkl-mnop', (SELECT IdCorso FROM Corso WHERE Nome = 'Cucina Fusion Asiatica')),
+(120, '15:00', '2026-11-26', 'https://meet.google.com/yza-bcde-fghi', (SELECT IdCorso FROM Corso WHERE Nome = 'Cucina Fusion Asiatica')), 
 (120, '10:00', '2025-08-17', 'https://meet.google.com/abc-defg-hij', (SELECT IdCorso FROM Corso WHERE Nome = 'Il messico in casa tua')),
 (90, '14:30', '2025-08-24', 'https://meet.google.com/klm-nopq-rst', (SELECT IdCorso FROM Corso WHERE Nome = 'Il messico in casa tua')),
-(120, '16:00', '2026-10-10', 'https://meet.google.com/xyz-uvwx-yzab', (SELECT IdCorso FROM Corso WHERE Nome = 'Panificazione Artesanale')),
-(90, '18:00', '2026-10-17', 'https://meet.google.com/cde-fghi-jklm', (SELECT IdCorso FROM Corso WHERE Nome = 'Panificazione Artesanale')),
-(120, '10:30', '2026-11-15', 'https://meet.google.com/nop-qrst-uvwx', (SELECT IdCorso FROM Corso WHERE Nome = 'Cucina Fusion Asiatica')),
-(90, '15:00', '2026-11-22', 'https://meet.google.com/yza-bcde-fghi', (SELECT IdCorso FROM Corso WHERE Nome = 'Cucina Fusion Asiatica')),
-(120, '11:00', '2026-08-25', 'https://meet.google.com/jkl-mnop-qrst', (SELECT IdCorso FROM Corso WHERE Nome = 'Cucina Molecolare Base')),
-(90, '17:30', '2026-09-08', 'https://meet.google.com/uvw-xyza-bcde', (SELECT IdCorso FROM Corso WHERE Nome = 'Cucina Molecolare Base')),
-(90, '14:00', '2026-09-22', 'https://meet.google.com/qrs-tuvw-xyza', (SELECT IdCorso FROM Corso WHERE Nome = 'Cucina Molecolare Base'));
+(120, '16:00', '2026-10-05', 'https://meet.google.com/xyz-uvwx-yzab', (SELECT IdCorso FROM Corso WHERE Nome = 'Panificazione Artesanale')), 
+(90, '18:00', '2026-10-12', 'https://meet.google.com/cde-fghi-jklm', (SELECT IdCorso FROM Corso WHERE Nome = 'Panificazione Artesanale')),
+(120, '11:00', '2025-08-20', 'https://meet.google.com/jkl-mnop-qrst', (SELECT IdCorso FROM Corso WHERE Nome = 'Cucina Molecolare Base')),
+(90, '17:30', '2025-09-03', 'https://meet.google.com/uvw-xyza-bcde', (SELECT IdCorso FROM Corso WHERE Nome = 'Cucina Molecolare Base')), 
+(90, '14:00', '2025-09-17', 'https://meet.google.com/qrs-tuvw-xyza', (SELECT IdCorso FROM Corso WHERE Nome = 'Cucina Molecolare Base')); 
 
 -- SessionePratica
 INSERT INTO SessionePratica (Durata, Orario, Data, NumeroPartecipanti, Luogo, IdCorso) VALUES
-(180, '09:00', '2026-06-20', 0, 'Laboratorio A - Piano Terra', (SELECT IdCorso FROM Corso WHERE Nome = 'In cucina con Nonna')),
-(240, '14:00', '2026-06-27', 0, 'Laboratorio B - Primo Piano', (SELECT IdCorso FROM Corso WHERE Nome = 'In cucina con Nonna')),
-(180, '10:00', '2026-05-20', 0, 'Laboratorio C - Secondo Piano', (SELECT IdCorso FROM Corso WHERE Nome = 'La tradizione giapponese')),
-(240, '15:30', '2026-06-20', 0, 'Laboratorio A - Piano Terra', (SELECT IdCorso FROM Corso WHERE Nome = 'La tradizione giapponese')),
-(160, '09:00', '2027-03-15', 0, 'Laboratorio Cucina Francese', (SELECT IdCorso FROM Corso WHERE Nome = 'Cucina Francese Classica')),
-(180, '14:30', '2027-03-29', 0, 'Laboratorio Cucina Francese', (SELECT IdCorso FROM Corso WHERE Nome = 'Cucina Francese Classica')),
+(180, '09:00', '2026-06-17', 0, 'Laboratorio A - Piano Terra', (SELECT IdCorso FROM Corso WHERE Nome = 'In cucina con Nonna')),
+(240, '14:00', '2026-06-24', 0, 'Laboratorio B - Primo Piano', (SELECT IdCorso FROM Corso WHERE Nome = 'In cucina con Nonna')),
+(180, '10:00', '2026-05-17', 0, 'Laboratorio C - Secondo Piano', (SELECT IdCorso FROM Corso WHERE Nome = 'La tradizione giapponese')), 
+(240, '15:30', '2026-06-17', 0, 'Laboratorio A - Piano Terra', (SELECT IdCorso FROM Corso WHERE Nome = 'La tradizione giapponese')), 
+(160, '09:00', '2027-03-10', 0, 'Laboratorio Cucina Francese', (SELECT IdCorso FROM Corso WHERE Nome = 'Cucina Francese Classica')), 
+(180, '14:30', '2027-03-24', 0, 'Laboratorio Cucina Francese', (SELECT IdCorso FROM Corso WHERE Nome = 'Cucina Francese Classica')), 
 (140, '11:30', '2026-01-01', 0, 'Via Scarlatti 3', (SELECT IdCorso FROM Corso WHERE Nome = 'Piatti semplici per principianti')),
-(120, '10:30', '2027-01-20', 0, 'Laboratorio Street Food', (SELECT IdCorso FROM Corso WHERE Nome = 'Street Food Internazionale')),
-(150, '16:00', '2027-01-27', 0, 'Laboratorio Street Food', (SELECT IdCorso FROM Corso WHERE Nome = 'Street Food Internazionale')),
+(120, '10:30', '2027-01-15', 0, 'Laboratorio Street Food', (SELECT IdCorso FROM Corso WHERE Nome = 'Street Food Internazionale')), 
+(150, '16:00', '2027-01-22', 0, 'Laboratorio Street Food', (SELECT IdCorso FROM Corso WHERE Nome = 'Street Food Internazionale')), 
 (140, '11:30', '2027-04-05', 0, 'Via Roma 3', (SELECT IdCorso FROM Corso WHERE Nome = 'Cucina per Bambini'));
 
 -- Iscrizioni (che aggiornerà automaticamente NumeroCorsi tramite trigger)
@@ -186,34 +186,34 @@ INSERT INTO Argomenti_Corso (IdCorso, IdArgomento) VALUES
 
 -- Adesioni (che aggiornerà automaticamente NumeroUtenti tramite trigger)
 INSERT INTO Adesioni (IdPartecipante, IdSessionePratica, DataAdesione) VALUES
-((SELECT IdPartecipante FROM Partecipante WHERE Username = 'virgi'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-06-20' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'In cucina con Nonna'))), '2026-06-15'),
-((SELECT IdPartecipante FROM Partecipante WHERE Username = 'virgi'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-06-27' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'In cucina con Nonna'))), '2026-06-16'),
-((SELECT IdPartecipante FROM Partecipante WHERE Username = 'virgi'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-05-20' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'La tradizione giapponese'))), '2026-05-15'),
-((SELECT IdPartecipante FROM Partecipante WHERE Username = 'virgi'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-06-20' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'La tradizione giapponese'))), '2026-06-15'),
-((SELECT IdPartecipante FROM Partecipante WHERE Username = 'gennarino'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-06-20' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'In cucina con Nonna'))), '2026-06-15'),
-((SELECT IdPartecipante FROM Partecipante WHERE Username = 'gennarino'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-06-27' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'In cucina con Nonna'))), '2026-06-16'),
-((SELECT IdPartecipante FROM Partecipante WHERE Username = 'gennarino'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-05-20' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'La tradizione giapponese'))), '2026-05-15'),
-((SELECT IdPartecipante FROM Partecipante WHERE Username = 'gennarino'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-06-20' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'La tradizione giapponese'))), '2026-06-15'),
-((SELECT IdPartecipante FROM Partecipante WHERE Username = 'chiaraconti'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-01-20' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Street Food Internazionale'))), '2027-01-10'),
-((SELECT IdPartecipante FROM Partecipante WHERE Username = 'chiaraconti'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-01-27' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Street Food Internazionale'))), '2027-01-10'),
-((SELECT IdPartecipante FROM Partecipante WHERE Username = 'chicolococon'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-01-20' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Street Food Internazionale'))), '2027-01-15'),
-((SELECT IdPartecipante FROM Partecipante WHERE Username = 'chicolococon'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-01-27' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Street Food Internazionale'))), '2027-01-15'),
-((SELECT IdPartecipante FROM Partecipante WHERE Username = 'chicolococon'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-04-05' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Cucina per Bambini'))), '2027-04-04'),
-((SELECT IdPartecipante FROM Partecipante WHERE Username = 'andrearizzo'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-03-15' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Cucina Francese Classica'))), '2027-01-20'),
-((SELECT IdPartecipante FROM Partecipante WHERE Username = 'andrearizzo'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-03-29' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Cucina Francese Classica'))), '2027-01-20'),
-((SELECT IdPartecipante FROM Partecipante WHERE Username = 'elenagallo'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-01-01' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Piatti semplici per principianti'))), '2025-12-31');
+((SELECT IdPartecipante FROM Partecipante WHERE Username = 'virgi'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-06-17' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'In cucina con Nonna'))), '2026-06-14'),
+((SELECT IdPartecipante FROM Partecipante WHERE Username = 'virgi'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-06-24' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'In cucina con Nonna'))), '2026-06-21'),
+((SELECT IdPartecipante FROM Partecipante WHERE Username = 'virgi'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-05-17' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'La tradizione giapponese'))), '2026-05-14'), 
+((SELECT IdPartecipante FROM Partecipante WHERE Username = 'virgi'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-06-17' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'La tradizione giapponese'))), '2026-06-14'),
+((SELECT IdPartecipante FROM Partecipante WHERE Username = 'gennarino'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-06-17' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'In cucina con Nonna'))), '2026-06-14'),
+((SELECT IdPartecipante FROM Partecipante WHERE Username = 'gennarino'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-06-24' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'In cucina con Nonna'))), '2026-06-21'), 
+((SELECT IdPartecipante FROM Partecipante WHERE Username = 'gennarino'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-05-17' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'La tradizione giapponese'))), '2026-05-14'),
+((SELECT IdPartecipante FROM Partecipante WHERE Username = 'gennarino'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-06-17' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'La tradizione giapponese'))), '2026-06-14'), 
+((SELECT IdPartecipante FROM Partecipante WHERE Username = 'chiaraconti'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-01-15' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Street Food Internazionale'))), '2027-01-10'), 
+((SELECT IdPartecipante FROM Partecipante WHERE Username = 'chiaraconti'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-01-22' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Street Food Internazionale'))), '2027-01-19'), 
+((SELECT IdPartecipante FROM Partecipante WHERE Username = 'chicolococon'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-01-15' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Street Food Internazionale'))), '2027-01-10'), 
+((SELECT IdPartecipante FROM Partecipante WHERE Username = 'chicolococon'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-01-22' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Street Food Internazionale'))), '2027-01-19'), 
+((SELECT IdPartecipante FROM Partecipante WHERE Username = 'chicolococon'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-04-05' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Cucina per Bambini'))), '2027-04-02'),
+((SELECT IdPartecipante FROM Partecipante WHERE Username = 'andrearizzo'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-03-10' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Cucina Francese Classica'))), '2027-03-07'), 
+((SELECT IdPartecipante FROM Partecipante WHERE Username = 'andrearizzo'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-03-24' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Cucina Francese Classica'))), '2027-03-21'),
+((SELECT IdPartecipante FROM Partecipante WHERE Username = 'elenagallo'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-01-01' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Piatti semplici per principianti'))), '2025-12-29'); 
 
 -- Preparazioni
 INSERT INTO Preparazioni (IdSessionePratica, IdRicetta) VALUES
-((SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-06-20' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'In cucina con Nonna'))), (SELECT IdRicetta FROM Ricetta WHERE Nome = 'Pizza Margherita')),
-((SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-06-27' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'In cucina con Nonna'))), (SELECT IdRicetta FROM Ricetta WHERE Nome = 'Risotto Ai Funghi Porcini')),
-((SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-05-20' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'La tradizione giapponese'))), (SELECT IdRicetta FROM Ricetta WHERE Nome = 'Sushi Misto')),
-((SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-06-20' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'La tradizione giapponese'))), (SELECT IdRicetta FROM Ricetta WHERE Nome = 'Ramen Tradizionale')),
+((SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-06-17' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'In cucina con Nonna'))), (SELECT IdRicetta FROM Ricetta WHERE Nome = 'Pizza Margherita')),
+((SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-06-24' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'In cucina con Nonna'))), (SELECT IdRicetta FROM Ricetta WHERE Nome = 'Risotto Ai Funghi Porcini')),
+((SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-05-17' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'La tradizione giapponese'))), (SELECT IdRicetta FROM Ricetta WHERE Nome = 'Sushi Misto')),
+((SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-06-17' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'La tradizione giapponese'))), (SELECT IdRicetta FROM Ricetta WHERE Nome = 'Ramen Tradizionale')),
 ((SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-01-01' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Piatti semplici per principianti'))), (SELECT IdRicetta FROM Ricetta WHERE Nome = 'Carbonara')),
-((SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-03-15' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Cucina Francese Classica'))), (SELECT IdRicetta FROM Ricetta WHERE Nome = 'Coq Au Vin')),
-((SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-03-29' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Cucina Francese Classica'))), (SELECT IdRicetta FROM Ricetta WHERE Nome = 'Croissant')),
-((SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-01-20' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Street Food Internazionale'))), (SELECT IdRicetta FROM Ricetta WHERE Nome = 'Arancini Di Riso')),
-((SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-01-27' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Street Food Internazionale'))), (SELECT IdRicetta FROM Ricetta WHERE Nome = 'Hot Dog')),
+((SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-03-10' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Cucina Francese Classica'))), (SELECT IdRicetta FROM Ricetta WHERE Nome = 'Coq Au Vin')),
+((SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-03-24' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Cucina Francese Classica'))), (SELECT IdRicetta FROM Ricetta WHERE Nome = 'Croissant')),
+((SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-01-15' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Street Food Internazionale'))), (SELECT IdRicetta FROM Ricetta WHERE Nome = 'Arancini Di Riso')),
+((SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-01-22' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Street Food Internazionale'))), (SELECT IdRicetta FROM Ricetta WHERE Nome = 'Hot Dog')),
 ((SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-04-05' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Cucina per Bambini'))), (SELECT IdRicetta FROM Ricetta WHERE Nome = 'Tiramisù'));
 
 -- Ingredienti
