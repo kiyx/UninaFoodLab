@@ -133,7 +133,7 @@ CREATE TABLE Ricetta																												-- Rilassamento vincolo implemen
 	CONSTRAINT check_empty_ricetta_provenienza CHECK (LENGTH(Provenienza) > 0),				
 	CONSTRAINT check_tempo_positivo CHECK (Tempo > 0),
 	CONSTRAINT check_calorie_positive CHECK (Calorie > 0),
-	CONSTRAINT fk_chef_ricetta FOREIGN KEY(IdChef) REFERENCES Chef(IdChef) ON DELETE CASCADE,
+	CONSTRAINT fk_chef_ricetta FOREIGN KEY(IdChef) REFERENCES Chef(IdChef) ON DELETE CASCADE
 );
 
 -- Enum per l'origine dell'ingrediente

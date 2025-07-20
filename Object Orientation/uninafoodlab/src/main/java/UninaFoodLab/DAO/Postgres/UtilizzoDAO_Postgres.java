@@ -12,22 +12,6 @@ import java.util.*;
 
 public class UtilizzoDAO_Postgres implements UtilizzoDAO
 {
-	private Utilizzo mapResultSetToUtilizzo(ResultSet rs) throws SQLException
-	{
-		Ingrediente i = new Ingrediente(rs.getString("Nome"), NaturaIngrediente.valueOf(rs.getString("Origine")));
-		i.setId(rs.getInt("IdIngrediente"));
-		
-	    Utilizzo u = new Utilizzo(	
-				        	  		rs.getDouble("Quantita"),
-				        	  		UnitaDiMisura.valueOf(rs.getString("UDM")),
-				        	  		i
-	    			   	    	 );
-	    
-	    u.setIdRicetta(rs.getInt("IdRicetta"));	 
-	    u.setIdIngrediente(rs.getInt("IdIngrediente"));	 
-	    return u;
-	}
-	
 	@Override
     public void save(Utilizzo toSaveUtilizzo, Connection conn)
     {
@@ -133,4 +117,20 @@ public class UtilizzoDAO_Postgres implements UtilizzoDAO
         	throw new DAOException("Errore DB durante delete di Utilizzo", e);
         }
     }
+    
+    private Utilizzo mapResultSetToUtilizzo(ResultSet rs) throws SQLException
+	{
+		Ingrediente i = new Ingrediente(rs.getString("Nome"), NaturaIngrediente.valueOf(rs.getString("Origine")));
+		i.setId(rs.getInt("IdIngrediente"));
+		
+	    Utilizzo u = new Utilizzo(	
+				        	  		rs.getDouble("Quantita"),
+				        	  		UnitaDiMisura.valueOf(rs.getString("UDM")),
+				        	  		i
+	    			   	    	 );
+	    
+	    u.setIdRicetta(rs.getInt("IdRicetta"));	 
+	    u.setIdIngrediente(rs.getInt("IdIngrediente"));	 
+	    return u;
+	}
 }

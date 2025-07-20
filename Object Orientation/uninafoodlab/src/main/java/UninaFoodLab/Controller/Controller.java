@@ -686,6 +686,11 @@ public class Controller
      *  -------------------------
 	*/
 	
+	public void showCourseDetail(MyCoursesFrame myCoursesFrame, int idCorso)
+	   {
+		
+	   }
+	
 	public void showCreateCourseDialog(MyCoursesFrame parentFrame)
 	{
 		 new CreateCourseDialog(parentFrame).setVisible(true);	
@@ -1440,6 +1445,8 @@ public class Controller
    {
    	return (Chef)getLoggedUser();
    }
+
+   
 
   
 }

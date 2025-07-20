@@ -169,7 +169,7 @@ public class MyCoursesFrame extends JXFrame implements ArgumentFilterable
     	    public void mouseClicked(MouseEvent e) 
     	    {
     	        CourseCardPanel card = (CourseCardPanel)e.getSource();
-    	        Controller.getController().showCourseDetail(this, card.getId());
+    	        Controller.getController().showCourseDetail(MyCoursesFrame.this, card.getId());
     	    }
     	};
     }
@@ -206,7 +206,7 @@ public class MyCoursesFrame extends JXFrame implements ArgumentFilterable
     @Override
     public void dispose()
     {
-    	Controller.getController().clearMyCoursesCache();
+    	//Controller.getController().clearMyCoursesCache();
     	disposeListeners();
     	super.dispose();
     }

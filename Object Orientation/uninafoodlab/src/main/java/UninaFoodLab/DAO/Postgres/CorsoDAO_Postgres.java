@@ -1,5 +1,8 @@
 package UninaFoodLab.DAO.Postgres;
 
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import UninaFoodLab.DAO.CorsoDAO;
 import UninaFoodLab.DTO.Argomento;
 import UninaFoodLab.DTO.Corso;
@@ -10,40 +13,8 @@ import UninaFoodLab.DTO.FrequenzaSessioni;
 import UninaFoodLab.Exceptions.CorsoNotFoundException;
 import UninaFoodLab.Exceptions.DAOException;
 
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-
 public class CorsoDAO_Postgres implements CorsoDAO
-{
-	private Corso mapResultSetToCorso(ResultSet rs) throws SQLException 
-	{
-	    int idCorso = rs.getInt("IdCorso");
-	    
-	    ArrayList<Sessione> sessioni = new ArrayList<>();
-	    
-	    sessioni.addAll(new SessioneOnlineDAO_Postgres().getSessioniOnlineByIdCorso(idCorso));
-	    sessioni.addAll(new SessionePraticaDAO_Postgres().getSessioniPraticheByIdCorso(idCorso));
-	    
-	    Corso c = new Corso
-		    				(
-		    				  rs.getString("Nome"), 
-		    				  rs.getDate("DataInizio").toLocalDate(), 
-		    				  rs.getInt("NumeroSessioni"), 
-		    				  FrequenzaSessioni.valueOf(rs.getString("FrequenzaSessioni")), 
-		    				  rs.getInt("Limite"), 
-		    				  rs.getString("Descrizione"), 
-		    				  rs.getBigDecimal("Costo"), 
-		    				  rs.getBoolean("isPratico"), 
-		    				  new ChefDAO_Postgres().getChefById(rs.getInt("IdChef")), 
-		    				  new ArrayList<Argomento>(new ArgomentoDAO_Postgres().getArgomentiByIdCorso(idCorso)), 
-		    				  sessioni
-		    			   );
-	    c.setId(rs.getInt("IdCorso"));
-	    
-	    return c;
-	}
-	
+{	
 	@Override
 	public void save(Corso toSaveCorso, Connection conn)
 	{
@@ -302,4 +273,32 @@ public class CorsoDAO_Postgres implements CorsoDAO
         	throw new DAOException("Errore DB durante eliminazione Corso", e);
         }
     }
+	
+	private Corso mapResultSetToCorso(ResultSet rs) throws SQLException 
+	{
+	    int idCorso = rs.getInt("IdCorso");
+	    
+	    ArrayList<Sessione> sessioni = new ArrayList<>();
+	    
+	    sessioni.addAll(new SessioneOnlineDAO_Postgres().getSessioniOnlineByIdCorso(idCorso));
+	    sessioni.addAll(new SessionePraticaDAO_Postgres().getSessioniPraticheByIdCorso(idCorso));
+	    
+	    Corso c = new Corso
+		    				(
+		    				  rs.getString("Nome"), 
+		    				  rs.getDate("DataInizio").toLocalDate(), 
+		    				  rs.getInt("NumeroSessioni"), 
+		    				  FrequenzaSessioni.valueOf(rs.getString("FrequenzaSessioni")), 
+		    				  rs.getInt("Limite"), 
+		    				  rs.getString("Descrizione"), 
+		    				  rs.getBigDecimal("Costo"), 
+		    				  rs.getBoolean("isPratico"), 
+		    				  new ChefDAO_Postgres().getChefById(rs.getInt("IdChef")), 
+		    				  new ArrayList<Argomento>(new ArgomentoDAO_Postgres().getArgomentiByIdCorso(idCorso)), 
+		    				  sessioni
+		    			   );
+	    c.setId(rs.getInt("IdCorso"));
+	    
+	    return c;
+	}
 }

@@ -28,8 +28,8 @@ public class Corso
     private ArrayList<Partecipante> partecipanti = new ArrayList<>();
     
     
-    public Corso(String nome, LocalDate dataInizio, int numeroSessioni, FrequenzaSessioni frequenzaSessioni, int limite, String descrizione, BigDecimal costo, boolean isPratico, Chef chef,
-    		     ArrayList<Argomento> argomenti, ArrayList<Sessione> sessioni)
+    public Corso(String nome, LocalDate dataInizio, int numeroSessioni, FrequenzaSessioni frequenzaSessioni, int limite, String descrizione, 
+    		     BigDecimal costo, boolean isPratico, Chef chef, ArrayList<Argomento> argomenti, ArrayList<Sessione> sessioni)
     {
     	if(chef == null) 
     		throw new RequiredChefException();
@@ -58,8 +58,8 @@ public class Corso
         this.costo = costo;
         this.isPratico = isPratico;
     }
-    
-    public int getId()  
+
+	public int getId()  
     {
         return id;
     }

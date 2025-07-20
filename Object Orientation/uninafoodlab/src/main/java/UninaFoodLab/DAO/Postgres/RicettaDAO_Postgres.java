@@ -12,21 +12,6 @@ import java.util.*;
 
 public class RicettaDAO_Postgres implements RicettaDAO
 {
-	private Ricetta mapResultSetToRicetta(ResultSet rs) throws SQLException
-	{
-	    Ricetta r = new Ricetta(
-						    	   rs.getString("Nome"),
-					               rs.getString("Provenienza"),
-					               rs.getInt("Tempo"),
-					               rs.getInt("Calorie"),
-					               LivelloDifficolta.valueOf(rs.getString("Difficolta")),
-					               rs.getString("Allergeni"),
-					               new ChefDAO_Postgres().getChefById(rs.getInt("IdChef")),
-					               new ArrayList<Utilizzo>(new UtilizzoDAO_Postgres().getUtilizziByIdRicetta(rs.getInt("IdRicetta")))
-	    			   	    	);
-	    r.setId(rs.getInt("IdRicetta"));	    
-	    return r;
-	}
 	
 	@Override
     public void save(Ricetta toSaveRicetta, int idChef)
@@ -273,4 +258,20 @@ public class RicettaDAO_Postgres implements RicettaDAO
         	throw new DAOException("Errore DB durante eliminazione Ricetta", e);
         }
     }
+	
+	private Ricetta mapResultSetToRicetta(ResultSet rs) throws SQLException
+	{
+	    Ricetta r = new Ricetta(
+						    	   rs.getString("Nome"),
+					               rs.getString("Provenienza"),
+					               rs.getInt("Tempo"),
+					               rs.getInt("Calorie"),
+					               LivelloDifficolta.valueOf(rs.getString("Difficolta")),
+					               rs.getString("Allergeni"),
+					               new ChefDAO_Postgres().getChefById(rs.getInt("IdChef")),
+					               new ArrayList<Utilizzo>(new UtilizzoDAO_Postgres().getUtilizziByIdRicetta(rs.getInt("IdRicetta")))
+	    			   	    	);
+	    r.setId(rs.getInt("IdRicetta"));	    
+	    return r;
+	}
 }
