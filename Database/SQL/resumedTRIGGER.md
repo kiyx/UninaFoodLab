@@ -52,7 +52,7 @@ trg\_blocca\_aggiorna\_ricetta: Impedisce la modifica di IdRicetta e IdChef.
 
 
 
-trg\_blocca\_aggiorna\_corso: Impedisce la modifica di IdCorso, NumeroSessioni, FrequenzaSessioni, Costo o IdChef.
+trg\_blocca\_aggiorna\_corso: Impedisce la modifica di IdCorso, DataInizio, NumeroSessioni, FrequenzaSessioni, Costo o IdChef.
 
 
 

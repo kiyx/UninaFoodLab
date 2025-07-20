@@ -322,21 +322,6 @@ public class Controller
 	}
 
 	/**
-	 * Alterna tra modalità chiara e scura per l'interfaccia grafica.
-	 * 
-	 * @param currFrame frame attivo da aggiornare
-	 */
-	public void toggleDarkMode(JFrame currFrame)
-	{
-		if(UIManager.getLookAndFeel() instanceof FlatLightLaf)
-			FlatDarkLaf.setup();
-		else
-			FlatLightLaf.setup();
-
-		SwingUtilities.updateComponentTreeUI(currFrame);
-	}
-
-	/**
 	 * -------------------------
 	 * 
 	 * RegisterFrame
@@ -689,9 +674,9 @@ public class Controller
 	*/
 	
 	public void showCourseDetail(MyCoursesFrame myCoursesFrame, int idCorso)
-	   {
+	{
 		
-	   }
+	}
 	
 	public void showCreateCourseDialog(MyCoursesFrame parentFrame)
 	{

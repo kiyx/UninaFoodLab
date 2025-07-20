@@ -12,14 +12,14 @@ import org.kordamp.ikonli.swing.*;
 import UninaFoodLab.Controller.Controller;
 import net.miginfocom.swing.MigLayout;
 
-public class DetailedCourseFrame extends JXFrame
+public class DetailedCourseDialog extends JDialog
 {
 	private static final long serialVersionUID = 1L;
 
 	
 	
 	
-	public DetailedCourseFrame()
+	public DetailedCourseDialog()
 	{
 
 	}

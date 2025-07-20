@@ -263,6 +263,38 @@ BEFORE INSERT OR UPDATE ON Iscrizioni
 FOR EACH ROW
 EXECUTE FUNCTION fun_limite_iscrizioni();
 
+-------------------------------------------------------------------------------------------------------------------------
+ Trigger per aggiornare la FrequenzaSessioni del Corso a 'Libera'  quando una sessione associata viene cancellata.
+
+CREATE OR REPLACE FUNCTION fun_on_delete_session_update_frequency()
+RETURNS TRIGGER AS
+$$
+BEGIN
+    -- Controlla se la frequenza del corso non è già 'Libera'
+    -- per evitare aggiornamenti ridondanti
+
+    IF (SELECT FrequenzaSessioni FROM Corso WHERE IdCorso = OLD.IdCorso) <> 'Libera' THEN
+       		  UPDATE Corso
+        	  SET FrequenzaSessioni = 'Libera'
+      		  WHERE IdCorso = OLD.IdCorso;
+       		  RAISE NOTICE 'FrequenzaSessioni del corso % è stata impostata a "Libera" a causa della cancellazione di una sessione.', OLD.IdCorso;
+    END IF;
+    
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger per SessionePratica
+CREATE OR REPLACE TRIGGER trg_on_delete_session_update_frequency_pratica
+AFTER DELETE ON SessionePratica
+FOR EACH ROW
+EXECUTE FUNCTION fun_on_delete_session_update_frequency();
+
+-- Trigger per SessioneOnline
+CREATE OR REPLACE TRIGGER trg_on_delete_session_update_frequency_online
+AFTER DELETE ON SessioneOnline
+FOR EACH ROW
+EXECUTE FUNCTION fun_on_delete_session_update_frequency();
 
 -----------------------------------------------------------------------------------------------------------------------
 --- Stesso chef -> piu corsi -> controllare che le sessioni non siano nella stessa fascia oraria

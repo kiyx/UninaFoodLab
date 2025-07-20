@@ -206,7 +206,6 @@ public class MyCoursesFrame extends JXFrame implements ArgumentFilterable
     @Override
     public void dispose()
     {
-    	//Controller.getController().clearMyCoursesCache();
     	disposeListeners();
     	super.dispose();
     }
