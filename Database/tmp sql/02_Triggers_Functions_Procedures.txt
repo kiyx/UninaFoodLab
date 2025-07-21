@@ -1,0 +1,226 @@
+-------------------------------------------------------------------------------------------------------------------------
+
+ Trigger per aggiornare la FrequenzaSessioni del Corso a 'Libera'  quando una sessione associata viene cancellata.
+
+CREATE OR REPLACE FUNCTION fun_on_delete_session_update_frequency()
+RETURNS TRIGGER AS
+$$
+BEGIN
+    -- Controlla se la frequenza del corso non è già 'Libera'
+    -- per evitare aggiornamenti ridondanti
+
+    IF (SELECT FrequenzaSessioni FROM Corso WHERE IdCorso = OLD.IdCorso) <> 'Libera' THEN
+       		  UPDATE Corso
+        	  SET FrequenzaSessioni = 'Libera'
+      		  WHERE IdCorso = OLD.IdCorso;
+       		  RAISE NOTICE 'FrequenzaSessioni del corso % è stata impostata a "Libera" a causa della cancellazione di una sessione.', OLD.IdCorso;
+    END IF;
+    
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger per SessionePratica
+CREATE OR REPLACE TRIGGER trg_on_delete_session_update_frequency_pratica
+AFTER DELETE ON SessionePratica
+FOR EACH ROW
+EXECUTE FUNCTION fun_on_delete_session_update_frequency();
+
+-- Trigger per SessioneOnline
+CREATE OR REPLACE TRIGGER trg_on_delete_session_update_frequency_online
+AFTER DELETE ON SessioneOnline
+FOR EACH ROW
+EXECUTE FUNCTION fun_on_delete_session_update_frequency();
+
+
+
+-----------------------------------------------------------------------------------------------------------------------
+
+-- La data della sessione non puo essere prima della data inizio corso e se non ci sono sessioni allora deve essere inserita il giorno di inizio corso
+
+CREATE OR REPLACE FUNCTION fun_sessione_dopo_inizio_corso()
+RETURNS TRIGGER AS
+$$
+DECLARE
+	data_inizio Corso.DataInizio%TYPE;
+BEGIN
+	SELECT DataInizio INTO data_inizio FROM Corso WHERE IdCorso = NEW.IdCorso;
+	IF NEW.Data < data_inizio THEN
+		RAISE EXCEPTION 'La sessione non può essere precedente alla data di inizio del corso';
+	END IF;
+
+	IF NOT EXISTS
+				(
+				   SELECT 1 FROM SessionePratica WHERE IdCorso = NEW.IdCorso
+				   UNION
+				   SELECT 1 FROM SessioneOnline WHERE IdCorso = NEW.IdCorso
+				)
+	THEN 
+		IF NEW.Data <> data_inizio THEN
+			RAISE EXCEPTION 'La prima sessione del corso deve essere il giorno della Data di inizio del corso';
+		END IF;
+	END IF;
+
+	RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trg_sessione_pratica_dopo_inizio_corso
+BEFORE INSERT OR UPDATE OF Data ON SessionePratica
+FOR EACH ROW
+EXECUTE FUNCTION fun_sessione_dopo_inizio_corso();
+
+CREATE OR REPLACE TRIGGER trg_sessione_online_dopo_inizio_corso
+BEFORE INSERT OR UPDATE OF Data ON SessioneOnline
+FOR EACH ROW
+EXECUTE FUNCTION fun_sessione_dopo_inizio_corso();
+
+-----------------------------------------------------------------------------------------------------------------------
+-- Interrelazionale: Quando inserisco o modifico una sessione  deve rispettare l'intervallo della frequenza 
+
+CREATE OR REPLACE FUNCTION fun_verifica_frequenza_sessioni()
+RETURNS TRIGGER AS
+$$
+DECLARE
+    frequenza Corso.FrequenzaSessioni%TYPE;
+    giorniFrequenza INTEGER;
+    v_dataInizio DATE;
+    posizione INTEGER;
+    dataMin DATE;
+    dataMax DATE;
+BEGIN
+    -- 1. Recupera frequenza e dataInizio
+    SELECT FrequenzaSessioni, DataInizio
+    INTO frequenza, v_dataInizio
+    FROM Corso
+    WHERE IdCorso = NEW.IdCorso;
+
+    -- 2. Se la frequenza è libera, accetta sempre
+    IF frequenza = 'Libera' THEN
+        RETURN NEW;
+    END IF;
+
+    -- 3. Mappa frequenza → giorni
+    CASE frequenza
+        WHEN 'Giornaliera' THEN giorniFrequenza := 1;
+        WHEN 'Settimanale' THEN giorniFrequenza := 7;
+        WHEN 'Bisettimanale' THEN giorniFrequenza := 14;
+        WHEN 'Mensile' THEN giorniFrequenza := 30;
+        ELSE
+            RAISE EXCEPTION 'Frequenza non riconosciuta: %', frequenza;
+    END CASE;
+
+    -- 4. Calcola posizione (quante sessioni esistono già, escluse quella in editing/inserting)
+    IF TG_TABLE_NAME = 'sessionepratica' THEN
+        IF TG_OP = 'UPDATE' THEN
+            SELECT COUNT(*) INTO posizione
+            FROM (
+                SELECT Data FROM SessionePratica WHERE IdCorso = NEW.IdCorso AND IdSessionePratica <> OLD.IdSessionePratica
+                UNION ALL
+                SELECT Data FROM SessioneOnline WHERE IdCorso = NEW.IdCorso
+            ) AS sessioni_precedenti;
+        ELSE -- TG_OP = 'INSERT'
+            SELECT COUNT(*) INTO posizione
+            FROM (
+                SELECT Data FROM SessionePratica WHERE IdCorso = NEW.IdCorso
+                UNION ALL
+                SELECT Data FROM SessioneOnline WHERE IdCorso = NEW.IdCorso
+            ) AS sessioni_precedenti;
+        END IF;
+    ELSIF TG_TABLE_NAME = 'sessioneonline' THEN
+        IF TG_OP = 'UPDATE' THEN
+            SELECT COUNT(*) INTO posizione
+            FROM (
+                SELECT Data FROM SessionePratica WHERE IdCorso = NEW.IdCorso
+                UNION ALL
+                SELECT Data FROM SessioneOnline WHERE IdCorso = NEW.IdCorso AND IdSessioneOnline <> OLD.IdSessioneOnline
+            ) AS sessioni_precedenti;
+        ELSE -- TG_OP = 'INSERT'
+            SELECT COUNT(*) INTO posizione
+            FROM (
+                SELECT Data FROM SessionePratica WHERE IdCorso = NEW.IdCorso
+                UNION ALL
+                SELECT Data FROM SessioneOnline WHERE IdCorso = NEW.IdCorso
+            ) AS sessioni_precedenti;
+        END IF;
+    END IF;
+
+    -- 5. Calcola la finestra valida
+    dataMin := v_dataInizio + (giorniFrequenza * posizione);
+    dataMax := dataMin + giorniFrequenza - 1;
+
+    -- 6. Verifica se la data è dentro l'intervallo
+    IF NEW.Data < dataMin OR NEW.Data > dataMax THEN
+        RAISE EXCEPTION
+            'La data della sessione n.% deve essere tra % e %, secondo la frequenza % del corso',
+            posizione + 1, dataMin, dataMax, frequenza;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- I trigger rimangono invariati:
+CREATE OR REPLACE TRIGGER trg_verifica_frequenza_sessioni_pratiche
+BEFORE INSERT OR UPDATE OF Data ON SessionePratica
+FOR EACH ROW
+EXECUTE FUNCTION fun_verifica_frequenza_sessioni();
+
+CREATE OR REPLACE TRIGGER trg_verifica_frequenza_sessioni_online
+BEFORE INSERT OR UPDATE OF Data ON SessioneOnline
+FOR EACH ROW
+EXECUTE FUNCTION fun_verifica_frequenza_sessioni();
+
+--- Stesso chef -> piu corsi -> controllare che le sessioni non siano nella stessa fascia oraria
+
+CREATE OR REPLACE FUNCTION fun_controlla_sovrapposizione_orario_sessione()
+RETURNS TRIGGER AS
+$$
+DECLARE
+    chef Chef.IdChef%TYPE;
+    inizio_nuova TIME := NEW.Orario;
+    fine_nuova TIME := (NEW.Orario + (NEW.Durata || ' minutes')::interval)::time;
+    id_sessione_corrente INTEGER;
+BEGIN
+
+    IF TG_TABLE_NAME = 'sessionepratica' THEN
+        id_sessione_corrente := NEW.IdSessionePratica;
+    ELSIF TG_TABLE_NAME = 'sessioneonline' THEN
+        id_sessione_corrente := NEW.IdSessioneOnline;
+    END IF;
+
+    SELECT IdChef INTO chef FROM Corso WHERE IdCorso = NEW.IdCorso;
+
+    IF EXISTS 
+       (
+            SELECT 1 FROM 
+            (
+                SELECT SP.Data, SP.Orario, SP.Durata, C.IdChef, SP.IdSessionePratica AS IdSessione, 'sessionepratica' AS TipoSessione
+                FROM SessionePratica SP JOIN Corso C ON SP.IdCorso = C.IdCorso
+                WHERE C.IdChef = chef AND SP.Data = NEW.Data
+                UNION ALL
+                SELECT SO.Data, SO.Orario, SO.Durata, C.IdChef, SO.IdSessioneOnline AS IdSessione, 'sessioneonline' AS TipoSessione
+                FROM SessioneOnline SO JOIN Corso C ON SO.IdCorso = C.IdCorso
+                WHERE C.IdChef = chef AND SO.Data = NEW.Data
+            ) AS S
+            
+            WHERE (id_sessione_corrente IS NULL OR S.IdSessione <> id_sessione_corrente OR S.TipoSessione <> TG_TABLE_NAME)
+
+            AND NOT ((S.Orario + (S.Durata || ' minutes')::interval)::time <= inizio_nuova OR S.Orario >= fine_nuova)
+    ) THEN
+        RAISE EXCEPTION 'Sovrapposizione oraria con altra sessione dello stesso chef';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trg_sovrapposizione_orario_sessione_pratica
+BEFORE INSERT OR UPDATE OF Data, Orario, Durata ON SessionePratica
+FOR EACH ROW
+EXECUTE FUNCTION fun_controlla_sovrapposizione_orario_sessione();
+
+CREATE OR REPLACE TRIGGER trg_sovrapposizione_orario_sessione_online
+BEFORE INSERT OR UPDATE OF Data, Orario, Durata ON SessioneOnline
+FOR EACH ROW
+EXECUTE FUNCTION fun_controlla_sovrapposizione_orario_sessione();
