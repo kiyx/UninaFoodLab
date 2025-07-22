@@ -129,6 +129,7 @@ public class CreateUtilizzoPanel extends JXPanel {
 		        ingredientiChecks.add(cb);
 		        group.add(cb);
 		        ingredientiPanel.add(cb, "growx");
+
 		        if(parent instanceof CreateRecipesDialog)
 			    	((CreateRecipesDialog)parent).getIngredientiUtil(nomiIngredientiUtil, idIngredientiUtil);
 			    else
@@ -336,6 +337,22 @@ public class CreateUtilizzoPanel extends JXPanel {
     {
     	ricercaIngredientiField.setText(ricercaIngredientiField.getText());   	
     }
+  
+    public void init(int idIngrediente, String nomeIngrediente, double quantitaIngrediente, String udmIngrediente)
+    {	
+	    for(JRadioButton r: ingredientiChecks)
+	    {
+	    	if(r.getText().equals(nomeIngrediente))
+	    	{
+	    		r.setSelected(true);
+	    	}
+	    	r.setEnabled(false);
+	    }
+	    	    
+	    quantitaField.setText(String.valueOf(quantitaIngrediente));
+	    
+	    misuraList.setSelectedItem(udmIngrediente);
+    }
     
     public void disabilitaIngrediente(String oldIng, String newIng)
     {
@@ -378,6 +395,7 @@ public class CreateUtilizzoPanel extends JXPanel {
 					    	((ChangeRecipeDialog)parent).addListaUtilizzi(ingSelezionato, id, CreateUtilizzoPanel.this);
  	        		   ingSelezionato = id;
  	        	   }
+ 	        	   
  	           }
  	           
  	        });

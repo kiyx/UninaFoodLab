@@ -84,6 +84,7 @@ public class CreateRecipesDialog extends JDialog
     private ArrayList<Double> quantitaIngredienti = new ArrayList<>();
     private ArrayList<String> udmIngredienti = new ArrayList<>();
     
+    private MyRecipesFrame parent;
 	public CreateRecipesDialog(MyRecipesFrame parent)
 	{
         super(parent, "Crea nuova ricetta", true);
@@ -94,6 +95,7 @@ public class CreateRecipesDialog extends JDialog
         setIconImage(parent.getIconImage());
         ingredientiCards = new ArrayList<>();
 
+        this.parent = parent;
         initComponents();
         initListeners();
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
@@ -304,6 +306,10 @@ public class CreateRecipesDialog extends JDialog
                 }
                 else
                 {
+                	idIngredientiRicetta=new ArrayList<>();
+                	quantitaIngredienti=new ArrayList<>();
+            	    udmIngredienti=new ArrayList<>();
+            	    
                 	for(CreateUtilizzoPanel card : ingredientiCards)
                     {	 
                 	    idIngredientiRicetta.add(card.getIngrediente());                	    
@@ -311,7 +317,7 @@ public class CreateRecipesDialog extends JDialog
                 	    udmIngredienti.add(card.getUnita());         			                    
                     }
 
-            		Controller.getController().saveRicettaUtilizzi(CreateRecipesDialog.this, nameField.getText(), provenienzaField.getText(), (int)tempoSpinner.getValue(), (int)calorieSpinner.getValue(),
+            		Controller.getController().saveRicettaUtilizzi(parent, CreateRecipesDialog.this, nameField.getText(), provenienzaField.getText(), (int)tempoSpinner.getValue(), (int)calorieSpinner.getValue(),
 							(String)difficoltaList.getSelectedItem(), allergeniArea.getText(), idIngredientiRicetta, quantitaIngredienti, udmIngredienti);
 
                 }
@@ -496,19 +502,7 @@ public class CreateRecipesDialog extends JDialog
     {
     	String oldIngNome=null;
     	String newIngNome=null;
-    	if(oldIng == -1)
-    	{
-    		for(int i=0; i<idIngredienti.size(); i++)
-    		{
-    			if(idIngredienti.get(i)==newIng)
-    			{
-    				idIngredientiUtil.add(newIng); 
-    				nomiIngredientiUtil.add(newIngNome = nomiIngredienti.get(i));
-    				
-    			}
-    		}    		
-    	}    		
-    	else 
+    	if(oldIng != -1 && oldIng!=newIng)
     	{
     		for(int i=0; i<idIngredientiUtil.size(); i++)
     			if(idIngredientiUtil.get(i)==oldIng)
@@ -516,16 +510,17 @@ public class CreateRecipesDialog extends JDialog
     				idIngredientiUtil.remove(i);
     				oldIngNome = nomiIngredientiUtil.get(i);
     				nomiIngredientiUtil.remove(i);
-    			}
-    		for(int i=0; i<idIngredienti.size(); i++)
-    		{
-    			if(idIngredienti.get(i)==newIng)
-    			{
-    				idIngredientiUtil.add(newIng); 
-    				nomiIngredientiUtil.add(newIngNome = nomiIngredienti.get(i));
-    			}
-    		}   
-    	}
+    			}  		
+    	}    		
+    	
+    	for(int i=0; i<idIngredienti.size(); i++)
+		{
+			if(idIngredienti.get(i)==newIng)
+			{
+				idIngredientiUtil.add(newIng); 
+				nomiIngredientiUtil.add(newIngNome = nomiIngredienti.get(i));
+			}
+		}   
     	
     	for(CreateUtilizzoPanel card : ingredientiCards)
 		{
