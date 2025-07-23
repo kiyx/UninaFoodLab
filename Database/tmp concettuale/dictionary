@@ -1,0 +1,14 @@
+DIZIONARIO DELLE CLASSI
+Considereremo come default gli attributi come totali, nella tabella verranno indicati i casi
+in cui sono parziali.
+
+
+NOME: Partecipante
+DESCRIZIONE: Rappresenta un utente che partecipa ai corsi tenuti dagli chef
+ELENCO DEGLI ATTRIBUTI:
+                        IdPartecipante(Integer): Chiave tecnica, identifica univocamente
+                        ogni partecipante
+                        Username(String): Rappresenta l'username scelto dal partecipante
+                        Nome(String): Nome associato al partecipante
+                        Cognome(String): Cognome associato al partecipante
+                        CodiceFiscale()
