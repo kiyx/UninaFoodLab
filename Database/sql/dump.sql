@@ -175,7 +175,7 @@ CREATE TABLE Adesioni
 	IdSessionePratica INTEGER NOT NULL,
 	DataAdesione DATE NOT NULL,
     CONSTRAINT pk_adesioni PRIMARY KEY(IdPartecipante, IdSessionePratica),
-	CONSTRAINT fk_partecipante_adesioni FOREIGN KEY(IdPartecipante) REFERENCES Partecipante(IdPartecipante) ON DELETE CASCADE,
+	CONSTRAINT fk_partecipante_adesioni FOREIGN KEY(IdPartecipante) REFERENCES Partecipante(IdPartecipante),
 	CONSTRAINT fk_sessionepratica_adesioni FOREIGN KEY(IdSessionePratica) REFERENCES SessionePratica(IdSessionePratica) ON DELETE CASCADE
 );
 
@@ -204,7 +204,6 @@ CREATE TABLE Utilizzi
 	CONSTRAINT fk_ingrediente_utilizzi FOREIGN KEY(IdIngrediente) REFERENCES Ingrediente(IdIngrediente) ON DELETE RESTRICT,
 	CONSTRAINT check_quantita CHECK (Quantita > 0)
 );
-
 
 -- 01_Triggers_Functions_Procedures
 
@@ -353,11 +352,11 @@ CREATE OR REPLACE FUNCTION fun_decrementa_num_sessioni()
 RETURNS TRIGGER AS
 $$
 BEGIN
-    UPDATE Corso
-    SET NumeroSessioni = GREATEST(NumeroSessioni - 1, 0)
-    WHERE IdCorso = OLD.IdCorso;
-	RAISE NOTICE 'POORCDDIDIDIDI';
-    RETURN OLD;
+    IF EXISTS (SELECT 1 FROM Corso WHERE IdCorso = OLD.IdCorso) THEN
+        UPDATE Corso
+        SET NumeroSessioni = GREATEST(NumeroSessioni - 1, 0)
+        WHERE IdCorso = OLD.IdCorso;
+    END IF;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -475,6 +474,7 @@ AFTER DELETE ON Adesioni
 FOR EACH ROW
 EXECUTE FUNCTION fun_decrementa_num_utenti();
 
+
 -----------------------------------------------------------------------------------------------------------------------
 -- Gestione sessioni (frequenza e orari)
 
@@ -537,7 +537,7 @@ FOR EACH ROW
 EXECUTE FUNCTION fun_unicita_sessione_giorno();
 
 
--- La data della sessione non puo essere prima della data inizio corso e se non ci sono sessioni allora deve essere inserita il giorno di inizio corso
+-- La data della sessione non puo essere prima della data inizio corso e se non ci sono sessioni allora deve essere inserita il giorno di inizio corso DA TESTARE
 
 CREATE OR REPLACE FUNCTION fun_sessione_dopo_inizio_corso()
 RETURNS TRIGGER AS
@@ -681,8 +681,7 @@ $$
 BEGIN
     -- Controlla se la frequenza del corso non è già 'Libera'
     -- per evitare aggiornamenti ridondanti
-	RAISE NOTICE 'IF NON PARTITO DIOCANE';
-    IF (SELECT FrequenzaSessioni FROM Corso WHERE IdCorso = OLD.IdCorso) <> 'Libera' THEN
+    IF (	  SELECT FrequenzaSessioni FROM Corso WHERE IdCorso = OLD.IdCorso) <> 'Libera' THEN
        		  UPDATE Corso
         	  SET FrequenzaSessioni = 'Libera'
       		  WHERE IdCorso = OLD.IdCorso;
@@ -706,7 +705,7 @@ FOR EACH ROW
 EXECUTE FUNCTION fun_gestisci_frequenza_dopo_eliminazione();
 
 
---- Stesso chef -> piu corsi -> controllare che le sessioni non siano nella stessa fascia oraria
+--- Stesso chef -> piu corsi -> controllare che le sessioni non siano nella stessa fascia oraria TESTATA
 
 CREATE OR REPLACE FUNCTION fun_controlla_sovrapposizione_orario_sessione()
 RETURNS TRIGGER AS
@@ -1150,7 +1149,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trg_blocca_aggiorna_argomento
-BEFORE DELETE OR UPDATE  OF Nome ON Argomento
+BEFORE DELETE OR UPDATE OF Nome ON Argomento
 FOR EACH ROW
 EXECUTE  FUNCTION fun_blocca_aggiorna_argomento();
 
@@ -1347,7 +1346,6 @@ BEGIN
  	IF EXISTS (SELECT 1 
                FROM Adesioni A JOIN SessionePratica SP ON A.IdSessionePratica = SP.IdSessionePratica
                WHERE IdPartecipante = OLD.IdPartecipante AND (Data - CURRENT_DATE) < 3) 
-
     THEN RAISE EXCEPTION 'Non puoi disiscriverti dal corso perchè hai aderito a una sessione che dista meno di 3 giorni';
     END IF;
     RETURN OLD;
@@ -1468,7 +1466,6 @@ FOR EACH ROW
 EXECUTE FUNCTION fun_blocca_cancella_adesioni();
 
 -----------------------------------------------------------------------------------------------------------------------
-
 
 
 -- 01_Insert: Popolamento Tabelle

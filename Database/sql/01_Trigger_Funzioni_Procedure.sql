@@ -145,10 +145,12 @@ CREATE OR REPLACE FUNCTION fun_decrementa_num_sessioni()
 RETURNS TRIGGER AS
 $$
 BEGIN
-    UPDATE Corso
-    SET NumeroSessioni = GREATEST(NumeroSessioni - 1, 0)
-    WHERE IdCorso = OLD.IdCorso;
-    RETURN OLD;
+    IF EXISTS (SELECT 1 FROM Corso WHERE IdCorso = OLD.IdCorso) THEN
+        UPDATE Corso
+        SET NumeroSessioni = GREATEST(NumeroSessioni - 1, 0)
+        WHERE IdCorso = OLD.IdCorso;
+    END IF;
+	RETURN OLD;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -328,6 +330,7 @@ BEFORE INSERT OR UPDATE OF Data ON SessionePratica
 FOR EACH ROW
 EXECUTE FUNCTION fun_unicita_sessione_giorno();
 
+
 -- La data della sessione non puo essere prima della data inizio corso e se non ci sono sessioni allora deve essere inserita il giorno di inizio corso DA TESTARE
 
 CREATE OR REPLACE FUNCTION fun_sessione_dopo_inizio_corso()
@@ -472,7 +475,7 @@ $$
 BEGIN
     -- Controlla se la frequenza del corso non è già 'Libera'
     -- per evitare aggiornamenti ridondanti
-    IF (SELECT FrequenzaSessioni FROM Corso WHERE IdCorso = OLD.IdCorso) <> 'Libera' THEN
+    IF (	  SELECT FrequenzaSessioni FROM Corso WHERE IdCorso = OLD.IdCorso) <> 'Libera' THEN
        		  UPDATE Corso
         	  SET FrequenzaSessioni = 'Libera'
       		  WHERE IdCorso = OLD.IdCorso;
@@ -496,7 +499,7 @@ FOR EACH ROW
 EXECUTE FUNCTION fun_gestisci_frequenza_dopo_eliminazione();
 
 
---- Stesso chef -> piu corsi -> controllare che le sessioni non siano nella stessa fascia oraria TESTATA
+--- Stesso chef -> piu corsi -> controllare che le sessioni non siano nella stessa fascia oraria
 
 CREATE OR REPLACE FUNCTION fun_controlla_sovrapposizione_orario_sessione()
 RETURNS TRIGGER AS
@@ -506,12 +509,15 @@ DECLARE
     inizio_nuova TIME := NEW.Orario;
     fine_nuova TIME := (NEW.Orario + (NEW.Durata || ' minutes')::interval)::time;
     id_sessione_corrente INTEGER;
+	sessione_corrente TEXT;
 BEGIN
 
     IF TG_TABLE_NAME = 'sessionepratica' THEN
         id_sessione_corrente := NEW.IdSessionePratica;
+		sessione_corrente := 'sessionepratica';
     ELSIF TG_TABLE_NAME = 'sessioneonline' THEN
         id_sessione_corrente := NEW.IdSessioneOnline;
+		sessione_corrente := 'sessioneonline';
     END IF;
 
     SELECT IdChef INTO chef FROM Corso WHERE IdCorso = NEW.IdCorso;
@@ -530,8 +536,8 @@ BEGIN
                 FROM SessioneOnline SO JOIN Corso C ON SO.IdCorso = C.IdCorso
                 WHERE C.IdChef = chef AND SO.Data = NEW.Data
             ) AS S
-            
-            WHERE (S.IdSessione <> id_sessione_corrente) AND NOT ((S.Orario + (S.Durata || ' minutes')::interval)::time <= inizio_nuova OR S.Orario >= fine_nuova)
+            WHERE NOT (TG_OP = 'UPDATE' AND S.TipoSessione = sessione_corrente AND S.IdSessione = id_sessione_corrente)
+			AND NOT ((S.Orario + (S.Durata || ' minutes')::interval)::time <= inizio_nuova OR S.Orario >= fine_nuova)
     ) THEN
         RAISE EXCEPTION 'Sovrapposizione oraria con altra sessione dello stesso chef';
     END IF;
@@ -558,11 +564,9 @@ RETURNS TRIGGER AS
 $$
 DECLARE
     	num_argomenti INTEGER;
-
 BEGIN
 	
 	SELECT COUNT(*) INTO num_argomenti FROM Argomenti_Corso WHERE IdCorso = NEW.IdCorso;
-
 	IF num_argomenti >= 5 THEN
 		RAISE EXCEPTION 'E'' gia'' stato scelto il numero massimo di argomenti per questo corso'; 
     	END IF;
@@ -621,7 +625,6 @@ RETURNS TRIGGER AS
 $$
 DECLARE
     	idcorso_sessione SessionePratica.IdCorso%TYPE;
-
 BEGIN
 
     	SELECT IdCorso INTO idcorso_sessione
@@ -940,7 +943,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trg_blocca_aggiorna_argomento
-BEFORE DELETE OR UPDATE  OF Nome ON Argomento
+BEFORE DELETE OR UPDATE OF Nome ON Argomento
 FOR EACH ROW
 EXECUTE  FUNCTION fun_blocca_aggiorna_argomento();
 
@@ -1137,7 +1140,6 @@ BEGIN
  	IF EXISTS (SELECT 1 
                FROM Adesioni A JOIN SessionePratica SP ON A.IdSessionePratica = SP.IdSessionePratica
                WHERE IdPartecipante = OLD.IdPartecipante AND (Data - CURRENT_DATE) < 3) 
-
     THEN RAISE EXCEPTION 'Non puoi disiscriverti dal corso perchè hai aderito a una sessione che dista meno di 3 giorni';
     END IF;
     RETURN OLD;
@@ -1155,14 +1157,13 @@ EXECUTE FUNCTION fun_impedisci_disiscrizione();
 CREATE OR REPLACE FUNCTION fun_gestisci_disiscrizione()
 RETURNS TRIGGER AS
 $$
-BEGIN
-        DELETE FROM Adesioni
+BEGIN	
+		DELETE FROM Adesioni
 		USING SessionePratica
 		WHERE Adesioni.IdSessionePratica = SessionePratica.IdSessionePratica
 		AND Adesioni.IdPartecipante = OLD.IdPartecipante
 		AND SessionePratica.IdCorso = OLD.IdCorso
 		AND SessionePratica.Data > CURRENT_DATE;
-		
 		RETURN OLD;
 END;
 $$ LANGUAGE plpgsql;

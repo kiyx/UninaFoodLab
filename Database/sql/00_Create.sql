@@ -175,7 +175,7 @@ CREATE TABLE Adesioni
 	IdSessionePratica INTEGER NOT NULL,
 	DataAdesione DATE NOT NULL,
     CONSTRAINT pk_adesioni PRIMARY KEY(IdPartecipante, IdSessionePratica),
-	CONSTRAINT fk_partecipante_adesioni FOREIGN KEY(IdPartecipante) REFERENCES Partecipante(IdPartecipante) ON DELETE CASCADE,
+	CONSTRAINT fk_partecipante_adesioni FOREIGN KEY(IdPartecipante) REFERENCES Partecipante(IdPartecipante),
 	CONSTRAINT fk_sessionepratica_adesioni FOREIGN KEY(IdSessionePratica) REFERENCES SessionePratica(IdSessionePratica) ON DELETE CASCADE
 );
 

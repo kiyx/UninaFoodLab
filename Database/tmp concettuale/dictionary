@@ -1,3 +1,59 @@
+INTRODUZIONE - ANALISI DEL PROBLEMA:
+                                     UninaFoodLab nasce come sistema per la gestione di corsi di cucina tematici.
+                                     Attraverso questa piattaforma gli chef che desiderano 
+
+
+RISTRUTTURAZIONE:
+
+RIMOZIONE DEGLI ATTRIBUTI STRUTTURATI
+- Utente: Luogo di nascita che era diviso in città e provincia viene trattato come stringa unica
+- SessionePratica: Indirizzo che era diviso in via, numero, città, stato viene trattato come stringa unica
+
+RIMOZIONE DEGLI ATTRIBUTI MULTIVALORE
+- Corso: Argomento viene trattato come classe individuale perchè, dal momento che potremmo avere fino a 5 argomenti, esso costituirebbe una stringa molto lunga da parsare e, siccome gli argomenti che possono essere scelti per un corso
+  sono comuni a più corsi, evitiamo ridondanza creando una classe a parte.
+
+RIMOZIONE DELLE GENERALIZZAZIONI
+- Utente in Partecipazione e Chef: essendo una generalizzazione totale e disgiunta decido di accorpare la classe generale nelle sue sottoclassi, aggiungendo gli attributi di Utente agli attributi delle rispettive sottoclassi.
+- Sessione in SessionePratica e SessioneOnline: essendo una generalizzazione totale e disgiunta decido di accorpare la classe generale nelle sue sottoclassi, aggiungendo gli attributi di Sessione agli attributi delle rispettive sottoclassi.
+
+SCELTA DEGLI IDENTIFICATORI PRIMARI
+- Partecipante: IdPartecipante,  viene aggiunta come chiave surrogata poiché nonostante username, email e codice fiscale siano ciascuno attributi identificanti, sono tutte stringhe che potrebbero essere abbastanza lunghe e risulterebbero difficili
+                                 da cercare e indicizzare.
+- Chef: IdChef,  viene aggiunta come chiave surrogata poiché nonostante username, email e codice fiscale siano ciascuno attributi identificanti, sono tutte stringhe che potrebbero essere abbastanza lunghe e risulterebbero difficili
+                                 da cercare e indicizzare.
+- Corso: IdCorso, viene aggiunta come chiave surrogata poiché nonostante nome e dataInizio in relazione allo chef sono attributi identificanti, il nome del corso potrebbe essere una stringa abbastanza lunga e risulterebbe difficile
+                                 da cercare e indicizzare.
+- SessionePratica: IdSessionePratica, viene aggiunta come chiave surrogata, poiché nonostante data e orario in relazione al corso sono attributi identificanti, tener conto di più attributi risulterebbe costoso per ricerca e indicizzazione
+- SessioneOnline: IdSessioneOnline, viene aggiunta come chiave surrogata, poiché nonostante data e orario in relazione al corso e il link della riunione siano attributi identificanti, tener conto di più attributi risulterebbe costoso per ricerca e indicizzazione 
+                  e il link potrebbe potenzialmente essere una stringa molto lunga.
+- Argomento: IdArgomento, viene aggiunta come chiave surrogata, poiché nonostante il nome sia un attributo identificante, potrebbe essere una stringa potenzialmente molto lunga e risulterebbe difficile
+                                 da cercare e indicizzare.
+- Ricetta: IdRicetta, viene aggiunta come chiave surrogata, poiché nonostante il nome in relazione allo chef sia un attributo identificante, il nome potrebbe essere una stringa potenzialmente molto lunga e risulterebbe difficile
+                                 da cercare e indicizzare.
+- Ingrediente: IdIngrediente, viene aggiunta come chiave surrogata, poiché nonostante il nome sia un attributo identificante, il nome potrebbe essere una stringa potenzialmente molto lunga e risulterebbe difficile
+                                 da cercare e indicizzare.
+
+Analisi delle ridondanze: 
+                         Sono presenti due cicli nel modello concettuale:
+                          1) Chef -> Corso -> SessionePratica -> Ricetta -> Chef:       In questo ciclo è presente una ridondanza parziale perchè, tramite la relazione Si_Preparano,
+                                                                                        avremmo già le informazioni sulle ricette dello chef che sono presenti nella sessione pratica. 
+                                                                                        Non avremmo però informazione sulle ricette che sono state create dallo chef e che non sono state 
+                                                                                        assegnate a una sessione pratica. Quindi, nonostante questa ridondanza, la relazione Crea è necessaria 
+                                                                                        al fine di tracciare tutte le ricette dello chef.                                                                                                                                                                           
+                          2) Partecipante -> Corso -> SessionePratica -> Partecipante: 
+                                                                                        Per questo ciclo non sono presenti ridondanze perchè la relazione Si_Iscrive da informazioni
+                                                                                        solo sulla iscrizione al corso (che è composizione di sessioni) ma non sulla eventuale adesione
+                                                                                        del partecipante alle sessioni pratiche. È quindi una relazione che esprime una informazione
+                                                                                        diversa e che è necessaria al fine di tracciare le adesioni alle sessioni pratiche. 
+
+                          Per quanto riguarda l'attributo NumeroSessioni in Corso, esso potrebbe essere derivabile dal conteggio delle occorrenze nella SessionePratica e SessioneOnline con lo
+                          stesso IdCorso. Esso però rappresenta un'informazione concettualmente rilevante per l'entità Corso, che viene consultata frequentemente dagli utenti e utilizzata in varie operazioni, inoltre
+                          per calcolare questo valore sarebbe necessario contare le istanze su due entità distinte e per corsi con molte sessioni questo diventa inefficiente. Lo teniamo quindi memorizzato e aggiornato 
+                          tramite operazioni automatiche. Lo stesso discorso vale per l'attributo NumeroPartecipanti in SessionePratica che potrebbe essere derivabile dal conteggio delle istanze nella relazione Adesione.
+PARTIZIONAMENTO/ACCORPAMENTO DI ENTITÀ ED ASSOCIAZIONI:  Non sono presenti accorpamenti o partizionamenti di entità o associazioni.
+
+
 DIZIONARIO DELLE CLASSI
 Considereremo come default gli attributi come totali, nella tabella verranno indicati i casi
 in cui sono parziali.
