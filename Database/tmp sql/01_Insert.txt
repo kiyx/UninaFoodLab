@@ -1,19 +1,19 @@
 -- 01_Insert: Popolamento Tabelle
 
 -- Partecipante
-INSERT INTO Partecipante (Username, Nome, Cognome, CodiceFiscale, DataDiNascita, LuogoDiNascita, Email, Password, NumeroCorsi) VALUES
-('kiyo', 'Giuseppe Paolo', 'Esposito', 'SPSGPP03H17F839U', '2003-06-17', 'Napoli', 'giuseppep.esposito@studenti.unina.it', '$2a$11$YDepwIlVMHeru34z47crB.QsrpEc5CppCIV97XiIGPPHCBrCarjIm', 0),
-('virgi', 'Virginia Antonia', 'Esposito', 'SPSVGN04M61G964D', '2004-08-21', 'Pozzuoli', 'virginiaa.esposito@studenti.unina.it', '$2a$11$V6d/Gymya1BzSmrPP/cZdepkOhmjf9uLgE.dyF6TQNFaOXlqskyPm', 0),
-('gennarino', 'Gennaro', 'Iacuaniello', 'CNLGNR04B09F839J', '2004-02-09', 'Napoli', 'gennaro.iacuaniello@studenti.unina.it', '$2a$11$n4s8ouFWZBdDMa3YEmZpHO4ayn4tjIZ51u7Ih2u8gVcrReNDipQNa', 0),
-('chicolococon', 'Luca', 'Fiorentino Heredia', 'FRTLCA03H31F839C', '2003-05-31', 'Lima', 'luca.fiorentinoh@studenti.unina.it', '$2a$11$YfEJqbB/fS54uOyMjQUkme1e.nOWY2DlmDRwLpF3.oJLzHbWrcT/G', 0),
-('mariorossi', 'Mario', 'Rossi', 'RSSMRA75B01L219D', '1975-05-15', 'Milano', 'mario.rossi@example.com', '$2a$11$aZLcelUJOmXHchJrtP.vh.ncwE9jVTDpqZOdvkpbjEwzBoOpGJlvy', 0),
-('laurabianchi', 'Laura', 'Bianchi', 'BNCLRA80C01H501E', '1980-11-20', 'Torino', 'laura.bianchi@example.com', '$2a$11$N5Jdvrmk2SICJQ7quO0yh.d4wmRi5RMTiF35H7toSZGGx.k9X0dCu', 0),
-('francescoverdi', 'Francesco', 'Verdi', 'VRDFRC92A01F839F', '1992-03-08', 'Firenze', 'francesco.verdi@example.com', '$2a$11$Cbci8Yov.rBousvTBhTTUOFO90c2OxIwNy/0.XT3JR4DTSQpYQJvS', 0),
-('elenagallo', 'Elena', 'Gallo', 'GLLLEN88D01A123G', '1988-07-25', 'Bologna', 'elena.gallo@example.com', '$2a$11$JZN2itw4SFjxiqsJTBTg3.gUO.ZtV99X1ThEcG/BAVhIH9Y6ckqEe', 0),
-('andrearizzo', 'Andrea', 'Rizzo', 'RZZNDR70E01L789H', '1970-09-10', 'Palermo', 'andrea.rizzo@example.com', '$2a$11$HTJU4J9RLOQ4F4dzt/sOr.N9ezjSQLS.4l4W47mP.8O9R6M/9utSi', 0),
-('sofianeri', 'Sofia', 'Neri', 'NRESFO95F01F839I', '1995-01-30', 'Genova', 'sofia.neri@example.com', '$2a$11$zNMrIG.VpPVywSBwaUxinONsAMb0oNUU671NOalkoDgHThHxsm7Ba', 0),
-('giacomobruno', 'Giacomo', 'Bruno', 'BRNGCM85G01C345J', '1985-04-03', 'Bari', 'giacomo.bruno@example.com', '$2a$11$a45u.8KLUr1CkbzHSEJTBObOr97iXDwUNh5XdizPDzP/epXKvgRKm', 0),
-('chiaraconti', 'Chiara', 'Conti', 'CNTCHR90H01B678K', '1990-08-12', 'Venezia', 'chiara.conti@example.com', '$2a$11$uvF/bqsy8N2YoT/1vVvOvuV7s7t61v4UYSTlYNnuMuf8k3DcfwlOG', 0);
+INSERT INTO Partecipante (Username, Nome, Cognome, CodiceFiscale, DataDiNascita, LuogoDiNascita, Email, Password) VALUES
+('kiyo', 'Giuseppe Paolo', 'Esposito', 'SPSGPP03H17F839U', '2003-06-17', 'Napoli', 'giuseppep.esposito@studenti.unina.it', '$2a$11$YDepwIlVMHeru34z47crB.QsrpEc5CppCIV97XiIGPPHCBrCarjIm'),
+('virgi', 'Virginia Antonia', 'Esposito', 'SPSVGN04M61G964D', '2004-08-21', 'Pozzuoli', 'virginiaa.esposito@studenti.unina.it', '$2a$11$V6d/Gymya1BzSmrPP/cZdepkOhmjf9uLgE.dyF6TQNFaOXlqskyPm'),
+('gennarino', 'Gennaro', 'Iacuaniello', 'CNLGNR04B09F839J', '2004-02-09', 'Napoli', 'gennaro.iacuaniello@studenti.unina.it', '$2a$11$n4s8ouFWZBdDMa3YEmZpHO4ayn4tjIZ51u7Ih2u8gVcrReNDipQNa'),
+('chicolococon', 'Luca', 'Fiorentino Heredia', 'FRTLCA03H31F839C', '2003-05-31', 'Lima', 'luca.fiorentinoh@studenti.unina.it', '$2a$11$YfEJqbB/fS54uOyMjQUkme1e.nOWY2DlmDRwLpF3.oJLzHbWrcT/G'),
+('mariorossi', 'Mario', 'Rossi', 'RSSMRA75B01L219D', '1975-05-15', 'Milano', 'mario.rossi@example.com', '$2a$11$aZLcelUJOmXHchJrtP.vh.ncwE9jVTDpqZOdvkpbjEwzBoOpGJlvy'),
+('laurabianchi', 'Laura', 'Bianchi', 'BNCLRA80C01H501E', '1980-11-20', 'Torino', 'laura.bianchi@example.com', '$2a$11$N5Jdvrmk2SICJQ7quO0yh.d4wmRi5RMTiF35H7toSZGGx.k9X0dCu'),
+('francescoverdi', 'Francesco', 'Verdi', 'VRDFRC92A01F839F', '1992-03-08', 'Firenze', 'francesco.verdi@example.com', '$2a$11$Cbci8Yov.rBousvTBhTTUOFO90c2OxIwNy/0.XT3JR4DTSQpYQJvS'),
+('elenagallo', 'Elena', 'Gallo', 'GLLLEN88D01A123G', '1988-07-25', 'Bologna', 'elena.gallo@example.com', '$2a$11$JZN2itw4SFjxiqsJTBTg3.gUO.ZtV99X1ThEcG/BAVhIH9Y6ckqEe'),
+('andrearizzo', 'Andrea', 'Rizzo', 'RZZNDR70E01L789H', '1970-09-10', 'Palermo', 'andrea.rizzo@example.com', '$2a$11$HTJU4J9RLOQ4F4dzt/sOr.N9ezjSQLS.4l4W47mP.8O9R6M/9utSi'),
+('sofianeri', 'Sofia', 'Neri', 'NRESFO95F01F839I', '1995-01-30', 'Genova', 'sofia.neri@example.com', '$2a$11$zNMrIG.VpPVywSBwaUxinONsAMb0oNUU671NOalkoDgHThHxsm7Ba'),
+('giacomobruno', 'Giacomo', 'Bruno', 'BRNGCM85G01C345J', '1985-04-03', 'Bari', 'giacomo.bruno@example.com', '$2a$11$a45u.8KLUr1CkbzHSEJTBObOr97iXDwUNh5XdizPDzP/epXKvgRKm'),
+('chiaraconti', 'Chiara', 'Conti', 'CNTCHR90H01B678K', '1990-08-12', 'Venezia', 'chiara.conti@example.com', '$2a$11$uvF/bqsy8N2YoT/1vVvOvuV7s7t61v4UYSTlYNnuMuf8k3DcfwlOG');
 
 -- Chef
 INSERT INTO Chef (Username, Nome, Cognome, CodiceFiscale, DataDiNascita, LuogoDiNascita, Email, Password, Curriculum) VALUES
@@ -186,22 +186,22 @@ INSERT INTO Argomenti_Corso (IdCorso, IdArgomento) VALUES
 
 -- Adesioni (che aggiornerà automaticamente NumeroUtenti tramite trigger)
 INSERT INTO Adesioni (IdPartecipante, IdSessionePratica, DataAdesione) VALUES
-((SELECT IdPartecipante FROM Partecipante WHERE Username = 'virgi'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-06-17' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'In cucina con Nonna'))), '2026-06-14'),
-((SELECT IdPartecipante FROM Partecipante WHERE Username = 'virgi'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-06-24' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'In cucina con Nonna'))), '2026-06-21'),
-((SELECT IdPartecipante FROM Partecipante WHERE Username = 'virgi'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-05-17' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'La tradizione giapponese'))), '2026-05-14'), 
-((SELECT IdPartecipante FROM Partecipante WHERE Username = 'virgi'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-06-17' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'La tradizione giapponese'))), '2026-06-14'),
-((SELECT IdPartecipante FROM Partecipante WHERE Username = 'gennarino'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-06-17' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'In cucina con Nonna'))), '2026-06-14'),
-((SELECT IdPartecipante FROM Partecipante WHERE Username = 'gennarino'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-06-24' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'In cucina con Nonna'))), '2026-06-21'), 
-((SELECT IdPartecipante FROM Partecipante WHERE Username = 'gennarino'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-05-17' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'La tradizione giapponese'))), '2026-05-14'),
-((SELECT IdPartecipante FROM Partecipante WHERE Username = 'gennarino'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-06-17' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'La tradizione giapponese'))), '2026-06-14'), 
-((SELECT IdPartecipante FROM Partecipante WHERE Username = 'chiaraconti'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-01-15' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Street Food Internazionale'))), '2027-01-10'), 
-((SELECT IdPartecipante FROM Partecipante WHERE Username = 'chiaraconti'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-01-22' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Street Food Internazionale'))), '2027-01-19'), 
-((SELECT IdPartecipante FROM Partecipante WHERE Username = 'chicolococon'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-01-15' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Street Food Internazionale'))), '2027-01-10'), 
-((SELECT IdPartecipante FROM Partecipante WHERE Username = 'chicolococon'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-01-22' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Street Food Internazionale'))), '2027-01-19'), 
-((SELECT IdPartecipante FROM Partecipante WHERE Username = 'chicolococon'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-04-05' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Cucina per Bambini'))), '2027-04-02'),
-((SELECT IdPartecipante FROM Partecipante WHERE Username = 'andrearizzo'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-03-10' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Cucina Francese Classica'))), '2027-03-07'), 
-((SELECT IdPartecipante FROM Partecipante WHERE Username = 'andrearizzo'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-03-24' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Cucina Francese Classica'))), '2027-03-21'),
-((SELECT IdPartecipante FROM Partecipante WHERE Username = 'elenagallo'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-01-01' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Piatti semplici per principianti'))), '2025-12-29'); 
+((SELECT IdPartecipante FROM Partecipante WHERE Username = 'virgi'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-06-17' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'In cucina con Nonna'))), CURRENT_DATE),
+((SELECT IdPartecipante FROM Partecipante WHERE Username = 'virgi'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-06-24' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'In cucina con Nonna'))), CURRENT_DATE),
+((SELECT IdPartecipante FROM Partecipante WHERE Username = 'virgi'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-05-17' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'La tradizione giapponese'))), CURRENT_DATE), 
+((SELECT IdPartecipante FROM Partecipante WHERE Username = 'virgi'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-06-17' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'La tradizione giapponese'))), CURRENT_DATE),
+((SELECT IdPartecipante FROM Partecipante WHERE Username = 'gennarino'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-06-17' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'In cucina con Nonna'))), CURRENT_DATE),
+((SELECT IdPartecipante FROM Partecipante WHERE Username = 'gennarino'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-06-24' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'In cucina con Nonna'))), CURRENT_DATE), 
+((SELECT IdPartecipante FROM Partecipante WHERE Username = 'gennarino'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-05-17' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'La tradizione giapponese'))), CURRENT_DATE),
+((SELECT IdPartecipante FROM Partecipante WHERE Username = 'gennarino'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-06-17' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'La tradizione giapponese'))), CURRENT_DATE), 
+((SELECT IdPartecipante FROM Partecipante WHERE Username = 'chiaraconti'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-01-15' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Street Food Internazionale'))), CURRENT_DATE), 
+((SELECT IdPartecipante FROM Partecipante WHERE Username = 'chiaraconti'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-01-22' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Street Food Internazionale'))), CURRENT_DATE), 
+((SELECT IdPartecipante FROM Partecipante WHERE Username = 'chicolococon'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-01-15' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Street Food Internazionale'))), CURRENT_DATE), 
+((SELECT IdPartecipante FROM Partecipante WHERE Username = 'chicolococon'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-01-22' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Street Food Internazionale'))), CURRENT_DATE), 
+((SELECT IdPartecipante FROM Partecipante WHERE Username = 'chicolococon'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-04-05' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Cucina per Bambini'))), CURRENT_DATE),
+((SELECT IdPartecipante FROM Partecipante WHERE Username = 'andrearizzo'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-03-10' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Cucina Francese Classica'))), CURRENT_DATE), 
+((SELECT IdPartecipante FROM Partecipante WHERE Username = 'andrearizzo'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2027-03-24' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Cucina Francese Classica'))), CURRENT_DATE),
+((SELECT IdPartecipante FROM Partecipante WHERE Username = 'elenagallo'), (SELECT IdSessionePratica FROM SessionePratica WHERE (Data='2026-01-01' AND IdCorso = (SELECT IdCorso FROM Corso WHERE Nome = 'Piatti semplici per principianti'))), CURRENT_DATE); 
 
 -- Preparazioni
 INSERT INTO Preparazioni (IdSessionePratica, IdRicetta) VALUES

@@ -3,12 +3,190 @@ Considereremo come default gli attributi come totali, nella tabella verranno ind
 in cui sono parziali.
 
 
-NOME: Partecipante
-DESCRIZIONE: Rappresenta un utente che partecipa ai corsi tenuti dagli chef
+NOME:                   Partecipante
+DESCRIZIONE:            Rappresenta un utente che partecipa ai corsi tenuti dagli chef
 ELENCO DEGLI ATTRIBUTI:
-                        IdPartecipante(Integer): Chiave tecnica, identifica univocamente
+                        IdPartecipante(Integer): Chiave virtuale, identifica univocamente
                         ogni partecipante
-                        Username(String): Rappresenta l'username scelto dal partecipante
-                        Nome(String): Nome associato al partecipante
-                        Cognome(String): Cognome associato al partecipante
-                        CodiceFiscale()
+                        Username(String): Rappresenta l'username scelto dal partecipante alla registrazione
+                        Nome(String): Nome del partecipante 
+                        Cognome(String): Cognome del partecipante
+                        CodiceFiscale(String): Codice Fiscale del partecipante
+                        DataDiNascita(Data): Data di nascita del partecipante
+                        LuogoDiNascita(String): Luogo di nascita del partecipante
+                        Email(String): Rappresenta l'email scelta dal partecipante alla registrazione
+                        Password(String): Password 
+    
+
+
+NOME:                   Chef
+DESCRIZIONE:            Rappresenta un utente che crea ricette con ingredienti, tiene i corsi e organizza le sessioni
+ELENCO DEGLI ATTRIBUTI:
+                        IdChef(Integer): Chiave virtuale, identifica univocamente
+                        ogni chef
+                        Username(String): Rappresenta l'username scelto dallo chef alla registrazione
+                        Nome(String): Nome dello chef
+                        Cognome(String): Cognome dello chef
+                        CodiceFiscale(String): Codice Fiscale dello chef
+                        DataDiNascita(Data): Data di nascita dello chef
+                        LuogoDiNascita(String): Luogo di nascita dello chef
+                        Email(String): Rappresenta l'email scelta dallo chef alla registrazione
+                        Password(String): Password scelta dallo chef alla registrazione
+                        Curriculum(String): Rappresenta il path dove viene salvato il file del curriculum 
+                        dello chef
+
+
+
+NOME:                   Ricetta
+DESCRIZIONE:            Rappresenta una ricetta creata dallo chef
+ELENCO DEGLI ATTRIBUTI: 
+                        IdRicetta(Integer): Chiave virtuale, identifica univocamente
+                        ogni ricetta
+                        Nome(String): Nome della ricetta
+                        Provenienza(String): Luogo originario della ricetta 
+                        Tempo(Integer): Minuti necessari alla preparazione della ricetta
+                        Calorie(Integer): Kilocalorie totali della ricetta
+                        Difficoltà(LivelloDifficoltà): Identifica la difficoltà corrispondente alla 
+                        ricetta(Principiante, Facile, Medio, Difficile, Esperto)
+                        Allergeni(String - Parziale): Elenca gli eventuali allergeni presenti nella ricetta
+
+
+
+NOME:                   Utilizzo
+DESCRIZIONE:            Rappresenta una quantità di ingrediente utilizzata nella ricetta di uno chef
+ELENCO DEGLI ATTRIBUTI: 
+                        Quantita(Double): Rappresenta un numero che associato alla unità di misura fornisce l'informazione sull'
+                                           utilizzo totale dell'ingrediente
+                        UDM(UnitaDiMisura): Identifica l' unita di misura(Unita, Grammi, Kilogrammi, Litri, Millilitri, Bicchiere,
+                                            Tazza, Tazzina, Cucchiaio, Cucchiaino) che associata alla quantita fornisce l' informazione sull'
+                                            utilizzo totale
+
+
+
+NOME:                   Ingrediente
+DESCRIZIONE:            Rappresenta un ingrediente utilizzato nella ricetta di uno chef
+ELENCO DEGLI ATTRIBUTI: 
+                        IdIngrediente(Integer): Chiave virtuale, identifica univocamente
+                        ogni ingrediente
+                        Nome(String): Nome dell'ingrediente
+                        Origine(NaturaIngrediente): Identifica l'origine dell'ingrediente
+                        (Vegetale, Animale, Minerale, Fungino, Sintetico, Microbico, Altro)
+
+
+
+NOME:                   Corso
+DESCRIZIONE:            Rappresenta un corso creato da uno chef 
+ATTRIBUTI:
+                        IdCorso (Integer): Chiave virtuale che identifica univocamente ciascuna istanza di corso
+                        Nome (String): Rappresenta il nome del corso
+                        DataInizio (Data): Rappresenta la data dell'inizio del corso
+                        NumeroSessioni (Integer): Rappresenta il numero delle sessioni del corso
+                        FrequenzaSessioni (Frequenza): Rappresenta la frequenza specificata dallo chef alla creazione del corso (Giornaliera, Settimanale, Bisettimanale, Mensile, Libera)
+                        Limite (Integer - Parziale): Rappresenta il limite che ha il corso nel caso in cui sia anche pratico
+                        Descrizione (String): Rappresenta la descrizione del corso
+                        Costo (Double): Rappresenta il costo del corso
+                        isPratico (Boolean): Specifica se un corso avrà anche sessioni pratiche oppure solo sessioni online
+
+
+
+NOME:                   Argomento
+DESCRIZIONE:            Rappresenta una tematica di un corso
+ATTRIBUTI:
+                        IdArgomento (Integer): Chiave virtuale che identifica univocamente ciascuna istanza di Argomento
+                        Nome (String): Rappresenta il nome dell'argomento
+
+
+
+NOME:                   SessioneOnline
+DESCRIZIONE:            Rappresenta una sessione online di un corso
+ATTRIBUTI:
+                        IdSessioneOnline (Integer): Chiave virtuale che identifica univocamente ciascuna istanza di sessione online
+                        Durata (Integer): Rappresenta la durata della sessione online
+                        Orario (Time): Rappresenta l'orario in cui è prevista la sessione online
+                        Data (Data): Rappresenta la data dell'inizio della sessione online
+                        LinkRiunione(String): Rappresenta il link in cui si terrà la sessione online
+
+
+
+NOME:                   SessionePratica
+DESCRIZIONE:            Rappresenta una sessione pratica di un corso 
+ATTRIBUTI:
+                        IdSessioneOnline (Integer): Chiave virtuale che identifica univocamente ciascuna istanza di sessione pratica
+                        Durata (Integer): Rappresenta la durata della sessione pratica
+                        Orario (Time): Rappresenta l'orario in cui è prevista la sessione pratica
+                        Data (Data): Rappresenta la data dell'inizio della sessione pratica
+                        NumeroUtenti (Integer): Rappresenta il numero di partecipanti che hanno dato adesione per la sessione pratica
+                        Luogo (String): Rappresenta il luogo in cui si terrà la sessione pratica
+
+
+
+NOME:                   Adesione
+DESCRIZIONE:            Rappresenta una adesione di un partecipante ad una sessione pratica
+ATTRIBUTI:
+                        DataAdesione (Data): Rappresenta la data in cui è stata effettuata l'adesione
+
+
+
+
+
+DIZIONARIO DELLE ASSOCIAZIONI
+
+NOME DELLA ASSOCIAZIONE: Aggiunge
+DESCRIZIONE TESTUALE DELLA ASSOCIAZIONE: Esprime l'aggiunta di un corso da parte dello chef all' applicazione
+ELENCO DELLE CLASSI ASSOCIATE, CARATTERISTICHE DI CARDINALITA', 
+DESCRIZIONE DEI RUOLI: Chef [0..*] ruolo(aggiunge) : Indica che lo chef può aggiungere più corsi
+                       Corso [1] ruolo(è aggiunto) : Indica che uno specifico corso è aggiunto da un solo chef
+
+NOME DELLA ASSOCIAZIONE: Crea
+DESCRIZIONE TESTUALE DELLA ASSOCIAZIONE: Esprime la creazione di una ricetta da parte dello chef
+ELENCO DELLE CLASSI ASSOCIATE, CARATTERISTICHE DI CARDINALITA', 
+DESCRIZIONE DEI RUOLI: Chef [0..*] ruolo(crea) : Indica che lo chef può aggiungere più ricette
+                       Ricetta [1] ruolo(è creata) : Indica che una specifica ricetta è creata da un solo chef
+
+NOME DELLA ASSOCIAZIONE: Utilizzo
+DESCRIZIONE TESTUALE DELLA ASSOCIAZIONE: Esprime la quantità utilizzata da una ricetta di uno specifico ingrediente
+ELENCO DELLE CLASSI ASSOCIATE, CARATTERISTICHE DI CARDINALITA', 
+DESCRIZIONE DEI RUOLI: Ricetta [0..*] ruolo(utilizza) : Indica che una ricetta può usare più ingredienti
+                       Ingrediente [0..*] ruolo(si utilizzano) : Indica che un ingrediente può essere utilizzato in più ricette
+RIFERIMENTO AD EVENTUALI CLASSI DI ASSOCIAZIONE COLLEGATE E LORO
+ATTRIBUTI: E' collegata la classe di associazione Utilizzo con attributi Quantita e UDM(L' unità di misura)
+
+NOME DELLA ASSOCIAZIONE: Si_Preparano
+DESCRIZIONE TESTUALE DELLA ASSOCIAZIONE: Esprime la possibilità di preparare una ricetta nella sessione pratica
+ELENCO DELLE CLASSI ASSOCIATE, CARATTERISTICHE DI CARDINALITA', 
+DESCRIZIONE DEI RUOLI: Ricetta [0..*] ruolo(è preparata) : Indica che una ricetta può essere preparata in più sessioni pratiche
+                       SessionePratica [0..*] ruolo(si preparano) : Indica che in una sessione pratica possono essere preparate più ricette
+
+NOME DELLA ASSOCIAZIONE: Tratta
+DESCRIZIONE TESTUALE DELLA ASSOCIAZIONE: Esprime una relazione tra i corso e gli argomenti
+ELENCO DELLE CLASSI ASSOCIATE, CARATTERISTICHE DI CARDINALITA', 
+DESCRIZIONE DEI RUOLI: Argomento[0,*] ruolo (È trattata): Indica gli argomenti che esprimono l'argomento di un corso
+                       Corso[0,*] ruolo (Tratta): Indica i corsi che riguardano determinati argomenti
+
+NOME DELLA ASSOCIAZIONE: Adesione
+DESCRIZIONE TESTUALE DELLA ASSOCIAZIONE: Esprime una relazione tra i partecipanti e le sessioni pratiche
+ELENCO DELLE CLASSI ASSOCIATE, CARATTERISTICHE DI CARDINALITA', 
+DESCRIZIONE DEI RUOLI: Partecipante[0,*] ruolo (Aderisce): Indica i partecipanti che aderiscono ad una sessione pratica
+                       SessionePratica[0,*] ruolo (È aderita): Indica le sessioni pratiche a cui aderiscono i partecipanti
+RIFERIMENTO AD EVENTUALI CLASSI DI ASSOCIAZIONE COLLEGATE E LORO
+ATTRIBUTI: È collegata la classe di assiociazione "Adesione" con attributi: DataAdesione
+
+NOME DELLA ASSOCIAZIONE: Si_Iscrive
+DESCRIZIONE TESTUALE DELLA ASSOCIAZIONE: Esprime una relazione tra i partecipanti e i corsi
+ELENCO DELLE CLASSI ASSOCIATE, CARATTERISTICHE DI CARDINALITA', 
+DESCRIZIONE DEI RUOLI: Partecipante[0,*] ruolo (Si iscrive): Indica che i partecipanti si iscrivono a più corsi
+                       Corso[0,*] ruolo (Ha iscrizioni): Indica che i corsi hanno iscrizioni di più partecipanti
+
+NOME DELLA ASSOCIAZIONE: Composizione: Corso - SessionePratica
+DESCRIZIONE TESTUALE DELLA ASSOCIAZIONE: Esprime una relazione di composizione tra sessione pratica e corso
+ELENCO DELLE CLASSI ASSOCIATE, CARATTERISTICHE DI CARDINALITA', 
+DESCRIZIONE DEI RUOLI: Sessione Pratica[1] ruolo (Fa parte di): Indica che ogni sessione pratica fa parte di un solo corso
+                       Corso[0,*] ruolo (Contiene): Indica che un corso può contenere sessioni pratiche
+
+NOME DELLA ASSOCIAZIONE: Composizione: Corso - SessioneOnline
+DESCRIZIONE TESTUALE DELLA ASSOCIAZIONE: Esprime una relazione di composizione tra sessione online e corso
+ELENCO DELLE CLASSI ASSOCIATE, CARATTERISTICHE DI CARDINALITA', 
+DESCRIZIONE DEI RUOLI: Sessione Online[1] ruolo (Fa parte di): Indica che ogni sessione online fa parte di un solo corso
+                       Corso[0,*] ruolo (Contiene): Indica che un corso può contenere sessioni online
+
+DIZIONARIO DEI VINCOLI

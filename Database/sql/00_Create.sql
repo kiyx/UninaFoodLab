@@ -18,7 +18,6 @@ CREATE TABLE Partecipante
 	LuogoDiNascita VARCHAR(100) NOT NULL,
 	Email TEXT UNIQUE NOT NULL, 
 	Password VARCHAR(60) NOT NULL,
-	NumeroCorsi INTEGER DEFAULT 0,
 	CONSTRAINT check_empty_part_nome CHECK (LENGTH(Nome) > 0),
 	CONSTRAINT check_empty_part_cognome CHECK (LENGTH(Cognome) > 0),
 	CONSTRAINT check_empty_part_cf CHECK (LENGTH(CodiceFiscale) > 0),

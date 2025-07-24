@@ -99,7 +99,7 @@ SessioneOnline(<pk>IdSessioneOnline</pk>, Durata, Orario, Data, LinkRiunione, <f
 
 ### Ricetta
 <div class="entity-definition">
-Ricetta(<pk>IdRicetta</pk>, Nome, Provenienza, Tempo, Calorie, Difficoltà, Allergeni, <fk>IdChef</fk>)
+Ricetta(<pk>IdRicetta</pk>, Nome, Provenienza, Tempo, Calorie, Difficolta, Allergeni, <fk>IdChef</fk>)
 </div>
 <div class="constraints">
   Chiavi esterne:
