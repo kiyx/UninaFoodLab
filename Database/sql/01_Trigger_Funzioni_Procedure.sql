@@ -266,6 +266,7 @@ AFTER DELETE ON Adesioni
 FOR EACH ROW
 EXECUTE FUNCTION fun_decrementa_num_utenti();
 
+
 -----------------------------------------------------------------------------------------------------------------------
 -- Gestione sessioni (frequenza e orari)
 
@@ -327,8 +328,7 @@ BEFORE INSERT OR UPDATE OF Data ON SessionePratica
 FOR EACH ROW
 EXECUTE FUNCTION fun_unicita_sessione_giorno();
 
-
--- La data della sessione non puo essere prima della data inizio corso e se non ci sono sessioni allora deve essere inserita il giorno di inizio corso
+-- La data della sessione non puo essere prima della data inizio corso e se non ci sono sessioni allora deve essere inserita il giorno di inizio corso DA TESTARE
 
 CREATE OR REPLACE FUNCTION fun_sessione_dopo_inizio_corso()
 RETURNS TRIGGER AS
@@ -472,7 +472,6 @@ $$
 BEGIN
     -- Controlla se la frequenza del corso non è già 'Libera'
     -- per evitare aggiornamenti ridondanti
-
     IF (SELECT FrequenzaSessioni FROM Corso WHERE IdCorso = OLD.IdCorso) <> 'Libera' THEN
        		  UPDATE Corso
         	  SET FrequenzaSessioni = 'Libera'
@@ -497,7 +496,7 @@ FOR EACH ROW
 EXECUTE FUNCTION fun_gestisci_frequenza_dopo_eliminazione();
 
 
---- Stesso chef -> piu corsi -> controllare che le sessioni non siano nella stessa fascia oraria
+--- Stesso chef -> piu corsi -> controllare che le sessioni non siano nella stessa fascia oraria TESTATA
 
 CREATE OR REPLACE FUNCTION fun_controlla_sovrapposizione_orario_sessione()
 RETURNS TRIGGER AS
@@ -893,7 +892,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trg_blocca_aggiorna_sessioni_online
-BEFORE UPDATE  OF IdSessioneOnline, IdCorso On SessioneOnline
+BEFORE UPDATE OF IdSessioneOnline, IdCorso On SessioneOnline
 FOR EACH ROW
 EXECUTE FUNCTION fun_blocca_aggiorna_sessioni();
 
@@ -1001,7 +1000,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trg_blocca_aggiorna_ricetta
-BEFORE UPDATE  OF IdRicetta, IdChef ON Ricetta
+BEFORE UPDATE OF IdRicetta, IdChef ON Ricetta
 FOR EACH ROW
 EXECUTE FUNCTION fun_blocca_aggiorna_ricetta();
 
@@ -1043,7 +1042,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trg_blocca_aggiorna_ingrediente
-BEFORE DELETE OR UPDATE  OF IdIngrediente, Nome, Origine ON Ingrediente
+BEFORE DELETE OR UPDATE OF IdIngrediente, Nome, Origine ON Ingrediente
 FOR EACH ROW
 EXECUTE  FUNCTION fun_blocca_aggiorna_ingrediente();
 
@@ -1060,7 +1059,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trg_blocca_aggiorna_utilizzi
-BEFORE UPDATE  OF IdRicetta, IdIngrediente ON Utilizzi
+BEFORE UPDATE OF IdRicetta, IdIngrediente ON Utilizzi
 FOR EACH ROW
 EXECUTE FUNCTION fun_blocca_aggiorna_utilizzi();
 
@@ -1077,9 +1076,12 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trg_blocca_aggiorna_preparazioni
-BEFORE DELETE OR UPDATE OF IdSessionePratica, IdRicetta ON Preparazioni
+BEFORE UPDATE OF IdSessionePratica, IdRicetta ON Preparazioni
 FOR EACH ROW
 EXECUTE FUNCTION fun_blocca_aggiorna_preparazioni();
+
+
+-- Non si puo eliminare una ricetta dalla sessione pratica 
 
 
 --Non si può aggiungere una ricetta alla sessione pratica se essa è già avvenuta
@@ -1210,7 +1212,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trg_blocca_update_ispratico
-BEFORE UPDATE OF isPratico ON CORSO
+BEFORE UPDATE OF IsPratico ON Corso
 FOR EACH ROW
 WHEN (OLD.IsPratico IS DISTINCT FROM NEW.IsPratico)
 EXECUTE FUNCTION fun_blocca_update_ispratico();
