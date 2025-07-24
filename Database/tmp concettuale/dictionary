@@ -251,9 +251,13 @@ ELENCO DELLE CLASSI ASSOCIATE, CARATTERISTICHE DI CARDINALITA',
 DESCRIZIONE DEI RUOLI: Sessione Online[1] ruolo (Fa parte di): Indica che ogni sessione online fa parte di un solo corso
                        Corso[0,*] ruolo (Contiene): Indica che un corso può contenere sessioni online
 
-DIZIONARIO DEI VINCOLI
 
-PARTECIPANTE
+
+
+
+
+
+
 
 NOME: unique_username_partecipante
 TIPO: Intrarelazionale
@@ -298,8 +302,7 @@ DESCRIZIONE: La lunghezza dell'username del partecipante deve essere tra 4 e 20 
 NOME: check_part_maggiorenne
 TIPO: Dominio
 DESCRIZIONE: Controlla che il partecipante sia maggiorenne
-----------------------------------------------------------------------------------------------
-CHEF
+
 NOME: unique_username_chef
 TIPO: Intrarelazionale
 DESCRIZIONE: L'username di uno chef delle essere unico tra tutti gli chef
@@ -347,14 +350,12 @@ DESCRIZIONE: La lunghezza dell'username deve essere compresa tra 4 e 20
 NOME: check_chef_maggiorenne
 TIPO: Dominio
 DESCRIZIONE: Lo chef deve essere maggiorenne
-----------------------------------------------------------------------------------------------
-ARGOMENTO 
+
 
 NOME: unique_nome_argomento
 TIPO: Intrarelazionale
 DESCRIZIONE: Il nome dell'argomento deve essere unico per evitare duplicati
-----------------------------------------------------------------------------------------------
-CORSO
+
 
 NOME: check_empty_corso_nome
 TIPO: Dominio
@@ -376,8 +377,6 @@ NOME: check_limite_pratico
 TIPO: N-Upla
 DESCRIZIONE: Il corso ha un limite solo se è pratico, altrimenti il campo limite è nullo
 
-----------------------------------------------------------------------------------------------
-SESSIONE PRATICA
 
 NOME: check_data_non_passata_sessioneprat
 TIPO: Dominio
@@ -390,8 +389,7 @@ DESCRIZIONE: La durata di una sessione deve essere maggiore di 0
 NOME: check_empty_sessioneprat_luogo
 TIPO: Dominio
 DESCRIZIONE: La lunghezza del luogo deve essere maggiore di 0
-----------------------------------------------------------------------------------------------
-SESSIONE ONLINE
+
 
 NOME: check_data_non_passata_sessioneonl
 TIPO: Dominio
@@ -404,8 +402,6 @@ DESCRIZIONE: La durata di una sessione deve essere maggiore di 0
 NOME: check_empty_sessioneonl_link
 TIPO: Dominio
 DESCRIZIONE: La lunghezza del link deve essere maggiore di 0
-----------------------------------------------------------------------------------------------
-RICETTA
 
 NOME: unique_nome_chef
 TIPO: Intrarelazionale
@@ -426,8 +422,6 @@ DESCRIZIONE: Il tempo della provenienza deve essere positivo
 NOME: check_calorie_positive
 TIPO: Dominio
 DESCRIZIONE: Le calorie della ricetta devone essere positive
-----------------------------------------------------------------------------------------------
-INGREDIENTE 
 
 NOME: check_empty_ingr_nome
 TIPO: Dominio
@@ -436,32 +430,24 @@ DESCRIZIONE: La lunghezza del nome deve essere maggiore di 0
 NOME: unique_nome_ingrediente
 TIPO: Interrelazionale
 DESCRIZIONE: Il nome dell'ingrediente deve essere unico nella tabella ingredienti
-----------------------------------------------------------------------------------------------
-ISCRIZIONI
 
 NOME: pk_iscrizioni_corso
 TIPO: Intrarelazionale
 DESCRIZIONE: Lo stesso utente non puo' partecipare più di una volta allo stesso corso allo stesso momento
-----------------------------------------------------------------------------------------------
-ARGOMENTI_CORSO 
+
 
 NOME: pk_argomenti_corso
 TIPO: Intrarelazionale
 DESCRIZIONE: Non ci possono essere argomenti ripetuti per un corso
-----------------------------------------------------------------------------------------------
-ADESIONI
 
 NOME: pk_adesioni
 TIPO: Intrarelazionale
 DESCRIZIONE: Lo stesso partecipante non può aderire più di una volta alla stessa sessione pratica allo stesso momento
-----------------------------------------------------------------------------------------------
-PREPARAZIONI
 
 NOME: pk_sessionepratica_ricetta
 TIPO: Intrarelazionale
 DESCRIZIONE: Non si può ripetere la stessa ricetta nella stessa sessione
-----------------------------------------------------------------------------------------------
-UTILIZZI 
+
 
 NOME: pk_ricetta_ingrediente
 TIPO: Intrarelazionale
@@ -471,8 +457,6 @@ NOME: check_quantita
 TIPO: Dominio 
 DESCRIZIONE: La quantità di un ingrediente deve essere positiva
 
------------------------------------------------------------------------------------------------
-COSE DEI trigger
 
 NOME: uniqueUsernamePartChef
 TIPO: Interrelazionale
@@ -542,9 +526,9 @@ NOME: bloccaUpdateOnDataCorso
 TIPO: Interrelazionale
 DESCRIZIONE: Non è possibile modificare la data di inizio del corso se ci sono sessioni associate
 
-NOME: bloccaCancellaCorsoAttivoConIscritti
+NOME: bloccaCancellaCorsoAttivo
 TIPO: Interrelazionale
-DESCRIZIONE: Non è possibile cancellare un corso attivo che ha iscritti 
+DESCRIZIONE: Non è possibile cancellare un corso attivo
 
 NOME: bloccaAggiornamentoCorsoSessione
 TIPO: Intrarelazionale
@@ -572,7 +556,7 @@ DESCRIZIONE: Non è possibile aggiornare lo chef associato a una ricetta
 
 NOME: bloccaDeleteRicettaInUtilizzo
 TIPO: Interrelazionale
-DESCRIZIONE: Non è possibile cancellare una ricetta se è in uso in una sessione pratica
+DESCRIZIONE: Non è possibile cancellare una ricetta se è in uso in una sessione pratica di un corso attivo
 
 NOME: bloccaCancellazioneAggiornamentoIngredienti
 TIPO: Intrarelazionale
@@ -608,26 +592,46 @@ NOME: cancellaAdesioniSeDisiscritto
 TIPO: Interrelazionale
 DESCRIZIONE: Se è possibile disiscriversi dal corso vengono tolte le adesioni effettuate da oggi in poi alle sessioni pratiche di quel corso
 
-NOME: 
-TIPO:
-DESCRIZIONE:
+NOME: onCascadeCorsoFromChef
+TIPO: Interrelazionale
+DESCRIZIONE: Il corso viene eliminato se viene eliminato lo chef che lo organizza (succede solo se non ha corsi attivi)
+ 
+NOME: onCascadeSessionePraticaFromCorso 
+TIPO: Interrelazionale
+DESCRIZIONE: Una sessione Pratica viene eliminata se viene eliminato il corso che la contiene
 
-NOME: 
-TIPO:
-DESCRIZIONE:
+NOME: onCascadeSessioneOnlineFromCorso 
+TIPO: Interrelazionale
+DESCRIZIONE: Una sessione online viene eliminata se viene eliminato il corso che la contiene
 
-NOME: 
-TIPO:
-DESCRIZIONE:
+NOME: onCascadeRicettaFromChef
+TIPO: Interrelazionale
+DESCRIZIONE: Una ricetta viene eliminata se viene eliminato lo chef che l'ha creata
 
-NOME: 
-TIPO:
-DESCRIZIONE:
+NOME: onCascadeIscrizioniFromPartecipante
+TIPO: Interrelazionale
+DESCRIZIONE: Se viene cancellato un partecipante, allora vengono eliminate tutte le sue iscrizioni ai corsi
 
-NOME: 
-TIPO:
-DESCRIZIONE:
+NOME: onCascadeIscrizioniFromCorso
+TIPO: Interrelazionale
+DESCRIZIONE: Se viene cancellato un corso, allora vengono eliminate tutte le iscrizioni a quel corso
 
-NOME: 
-TIPO:
-DESCRIZIONE:
+NOME: onCascadeArgomentiCorsoFromCorso
+TIPO: Interrelazionale
+DESCRIZIONE: Se viene cancellato un corso, allora vengono anche cancellati i suoi argomenti
+
+NOME: onCascadeUtilizziFromRicetta
+TIPO: Interrelazionale
+DESCRIZIONE: Se viene cancellata una ricetta, allora vengono cancellati anche i suoi utilizzi
+
+NOME: onCascadePreparazioniFromRicetta
+TIPO: Interrelazionale
+DESCRIZIONE: Se viene cancellata una ricetta, allora vengono cancellate anche tutte le sue preparazioni nelle sessioni pratiche
+
+NOME: onCascadePreparazioniFromSessionePratica
+TIPO: Interrelazionale
+DESCRIZIONE: Se viene cancellata una sessione pratica, vengono cancellate anche tutte le sue preparazioni
+
+NOME: onCascadeAdesioniFromSessionePratica
+TIPO: Interrelazionale
+DESCRIZIONE: Se viene cancellata una sessione pratica, vengono cancellate anche le sue adesioni

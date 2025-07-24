@@ -2,7 +2,10 @@
 
 -- Normalizzazione basica dei dati di Partecipante/Chef/Ricetta/Ingrediente
 
--- Normalizza Partecipante/Chef con Username minuscolo, CodiceFiscale Maiuscolo, Email minuscolo, Nome, Cognome e Luogo con l'iniziale Maiuscola
+-- Funzione che normalizza i campi testuale dell'utente:
+-- Username, Email -> Minuscolo
+-- CodiceFiscale -> Maiuscolo
+-- Nome, Cognome, Luogo -> iniziale maiuscola
 
 CREATE OR REPLACE FUNCTION fun_normalizza_utente()
 RETURNS TRIGGER AS
@@ -20,18 +23,20 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Applica la normalizzazione prima di INSERT o UPDATE su Partecipante
 CREATE TRIGGER trg_normalizza_partecipante
 BEFORE INSERT OR UPDATE ON Partecipante
 FOR EACH ROW
 EXECUTE FUNCTION fun_normalizza_utente();
 
+-- Applica la normalizzazione prima di INSERT o UPDATE su Chef
 CREATE TRIGGER trg_normalizza_chef
 BEFORE INSERT OR UPDATE ON Chef
 FOR EACH ROW
 EXECUTE FUNCTION fun_normalizza_utente();
 
 
--- Normalizzo Ingrediente e Ricetta con l'iniziale del nome maiuscola
+-- Normalizzo Ingrediente e Ricetta con la prima lettera maiuscola
 
 CREATE OR REPLACE FUNCTION fun_normalizza_ricetta_ingr_chef()
 RETURNS TRIGGER AS
@@ -43,11 +48,13 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Applica INITCAP al Nome di Ingrediente
 CREATE TRIGGER trg_normalizza_ingrediente
 BEFORE INSERT OR UPDATE ON Ingrediente
 FOR EACH ROW
 EXECUTE FUNCTION fun_normalizza_ricetta_ingr_chef();
 
+-- Applica INITCAP al Nome di Ricetta
 CREATE TRIGGER trg_normalizza_ricetta
 BEFORE INSERT OR UPDATE ON Ricetta
 FOR EACH ROW
@@ -62,16 +69,19 @@ CREATE OR REPLACE FUNCTION fun_username_unique()
 RETURNS TRIGGER AS
 $$
 BEGIN
-	IF TG_OP = 'UPDATE' AND NEW.Username = OLD.Username THEN			-- Ottimizzazione se è una update e lo username non cambia
+	-- Se è un UPDATE e l' username non cambia, salto il controllo
+	IF TG_OP = 'UPDATE' AND NEW.Username = OLD.Username THEN			
     		RETURN NEW;
 	END IF;
 
+	-- Se stiamo inserendo o modificando un Partecipante, controlla che l'username non sia già usato da uno CHEF
 	IF TG_TABLE_NAME = 'partecipante' THEN
     		IF EXISTS (SELECT 1 FROM Chef WHERE Username = NEW.Username) THEN
     			RAISE EXCEPTION 'Username già usato in Chef';
 		END IF;
 	END IF;
 	
+	-- Se stiamo inserendo o modificando uno Chef, controlla che l'username non sia già usato da un Partecipante
 	IF TG_TABLE_NAME = 'chef' THEN
 		IF EXISTS (SELECT 1 FROM Partecipante WHERE Username = NEW.Username) THEN
     			RAISE EXCEPTION 'Username già usato in Partecipante';
@@ -82,6 +92,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Trigger che garantiscono unicità dello username tra le due tabelle (vincolo nato dalla ristrutturazione)
 CREATE TRIGGER trg_unico_username_partecipante
 BEFORE INSERT OR UPDATE ON Partecipante 
 FOR EACH ROW
@@ -96,7 +107,7 @@ EXECUTE FUNCTION fun_username_unique();
 
 -- Gestione numero sessioni del corso automatica
 
--- Se viene inserita un corso con un numero sessioni diverso da 0, lanciamo una eccezione perchè è gestita automaticamente dal db
+-- Blocca l'inserimento di un corso con NumeroSessioni diverso da 0, il numero è gestito dal db automaticamente
 
 CREATE OR REPLACE FUNCTION fun_setta_numero_sessioni_corsi_iniziali()
 RETURNS TRIGGER AS 
@@ -115,7 +126,7 @@ FOR EACH ROW
 EXECUTE FUNCTION fun_setta_numero_sessioni_corsi_iniziali();
 
 
--- Aggiornamento numero sessioni (increment)
+-- Aggiornamento numero sessioni (incremento quando viene creata una nuova sessione di qualsiasi tipo)
 
 CREATE OR REPLACE FUNCTION fun_incrementa_num_sessioni()
 RETURNS TRIGGER AS
@@ -139,7 +150,7 @@ FOR EACH ROW
 EXECUTE FUNCTION fun_incrementa_num_sessioni();
 
 
--- Aggiornamento numero sessioni (decrement)
+-- Aggiornamento numero sessioni (decremento quando viene eliminata una nuova sessione di qualsiasi tipo)
 
 CREATE OR REPLACE FUNCTION fun_decrementa_num_sessioni()
 RETURNS TRIGGER AS
@@ -759,7 +770,7 @@ EXECUTE FUNCTION fun_delete_partecipante_con_adesione();
 
 -----------------------------------------------------------------------------------------------------------------------
 
--- Utility per checkare se un corso è ancora attivo
+-- Utility per checkare se un corso è ancora attivo ( Ha iscritti e o la Data di oggi è compresa tra inizio e fine o la data di oggi è minore della data di inizio)
 
 CREATE OR REPLACE FUNCTION corso_attivo(id_corso_in INTEGER)
 RETURNS BOOLEAN AS
@@ -767,6 +778,7 @@ $$
 DECLARE
 	data_inizio_corso Corso.DataInizio%TYPE;
 	data_fine_corso Corso.DataInizio%TYPE;
+	num_iscritti INT;
 BEGIN
 	SELECT DataInizio INTO data_inizio_corso FROM Corso WHERE IdCorso = id_corso_in;
 
@@ -778,8 +790,15 @@ BEGIN
             SELECT Data FROM SessioneOnline WHERE IdCorso = id_corso_in
         );
 
-	IF data_fine_corso >= CURRENT_DATE AND data_inizio_corso <= CURRENT_DATE THEN
-		RETURN TRUE;
+	SELECT COUNT(*) 
+    INTO num_iscritti 
+    FROM Iscrizioni 
+    WHERE IdCorso = id_corso_in;
+
+	IF(num_iscritti > 0) THEN
+		IF (data_fine_corso >= CURRENT_DATE AND data_inizio_corso <= CURRENT_DATE) OR (CURRENT_DATE < data_inizio_corso)
+			THEN RETURN TRUE;
+		END IF;
 	ELSE
 		RETURN FALSE;
 	END IF;
@@ -852,22 +871,14 @@ FOR EACH ROW
 EXECUTE FUNCTION fun_blocca_aggiornamento_data_se_iniziato();
 
 
--- Non si puo cancellare un corso attivo che ha iscritti 
+-- Non si puo cancellare un corso attivo
 
 CREATE OR REPLACE FUNCTION fun_blocca_delete_corso()
 RETURNS TRIGGER AS 
 $$
-DECLARE 
-	num_iscritti INT;
 BEGIN
-
-	SELECT COUNT(*) 
-    INTO num_iscritti 
-    FROM Iscrizioni 
-    WHERE IdCorso = OLD.IdCorso;
-
-	IF corso_attivo(OLD.IdCorso) AND num_iscritti > 0 THEN
-		RAISE EXCEPTION 'Non puoi cancellare un corso ancora in svolgimento!!';
+	IF corso_attivo(OLD.IdCorso) THEN
+		RAISE EXCEPTION 'Non puoi cancellare un corso attivo!!';
     END IF;
 
 	RETURN OLD;
@@ -951,15 +962,8 @@ EXECUTE  FUNCTION fun_blocca_aggiorna_argomento();
 CREATE OR REPLACE FUNCTION fun_blocca_aggiorna_argomenticorso()
 RETURNS TRIGGER AS
 $$
-DECLARE 
-	num_iscritti INT;
 BEGIN
-	SELECT COUNT(*) 
-    INTO num_iscritti 
-    FROM Iscrizioni 
-    WHERE IdCorso = OLD.IdCorso;
-
-	IF corso_attivo(OLD.IdCorso) OR num_iscritti > 0 THEN
+	IF corso_attivo(OLD.IdCorso) THEN
  		RAISE EXCEPTION 'Non puoi modificare i campi IdCorso, IdArgomento.';
 END;
 $$ LANGUAGE plpgsql;
@@ -968,7 +972,6 @@ CREATE TRIGGER trg_blocca_aggiorna_argomenticorso
 BEFORE UPDATE OF IdCorso, IdArgomento ON Argomenti_Corso
 FOR EACH ROW
 EXECUTE FUNCTION fun_blocca_aggiorna_argomenticorso();
-
 
 -- Bloccare la cancellazione dell'ultimo argomento di un corso
 
@@ -1013,8 +1016,7 @@ FOR EACH ROW
 EXECUTE FUNCTION fun_blocca_aggiorna_ricetta();
 
 
--- Non puoi cancellare una ricetta se è in uso in una sessione pratica
-
+-- Non puoi cancellare una ricetta se è in uso in una sessione pratica di un corso considerato attivo
 CREATE OR REPLACE FUNCTION fun_blocca_delete_ricetta_utilizzata()
 RETURNS TRIGGER AS
 $$
@@ -1022,9 +1024,9 @@ BEGIN
 	IF EXISTS (
 				SELECT 1
 				FROM Preparazioni P JOIN SessionePratica SP ON P.IdSessionePratica = SP.IdSessionePratica
-				WHERE P.IdRicetta = OLD.IdRicetta AND SP.Data > CURRENT_DATE
+				WHERE P.IdRicetta = OLD.IdRicetta AND corso_attivo(SP.IdCorso)
 			  )
-	THEN RAISE EXCEPTION 'Non puoi cancellare una ricetta che è in uso in una sessione pratica non ancora iniziata';
+	THEN RAISE EXCEPTION 'Non puoi cancellare una ricetta che è in uso in una sessione pratica di un corso considerato attivo';
 	END IF;
 
 	RETURN OLD;
@@ -1035,7 +1037,6 @@ CREATE TRIGGER trg_blocca_delete_ricetta_utilizzata
 BEFORE DELETE ON Ricetta
 FOR EACH ROW
 EXECUTE FUNCTION fun_blocca_delete_ricetta_utilizzata();
-
 
 -----------------------------------------------------------------------------------------------------------------------
 
