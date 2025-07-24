@@ -331,7 +331,8 @@ FOR EACH ROW
 EXECUTE FUNCTION fun_unicita_sessione_giorno();
 
 
--- La data della sessione non puo essere prima della data inizio corso e se non ci sono sessioni allora deve essere inserita il giorno di inizio corso DA TESTARE
+-- La data della sessione non puo essere prima della data inizio corso e 
+--se non ci sono sessioni allora deve essere inserita il giorno di inizio corso
 
 CREATE OR REPLACE FUNCTION fun_sessione_dopo_inizio_corso()
 RETURNS TRIGGER AS
@@ -851,7 +852,7 @@ FOR EACH ROW
 EXECUTE FUNCTION fun_blocca_aggiornamento_data_se_iniziato();
 
 
--- Non si puo cancellare un corso che è attivo o che ha iscritti
+-- Non si puo cancellare un corso attivo che ha iscritti 
 
 CREATE OR REPLACE FUNCTION fun_blocca_delete_corso()
 RETURNS TRIGGER AS 
@@ -860,18 +861,14 @@ DECLARE
 	num_iscritti INT;
 BEGIN
 
-	IF corso_attivo(OLD.IdCorso) THEN
-		RAISE EXCEPTION 'Non puoi cancellare un corso ancora in svolgimento!!';
-    END IF;
-
-    SELECT COUNT(*) 
+	SELECT COUNT(*) 
     INTO num_iscritti 
     FROM Iscrizioni 
     WHERE IdCorso = OLD.IdCorso;
 
-    IF num_iscritti > 0 THEN
-        RAISE EXCEPTION 'Non puoi cancellare un corso che ha già iscritti!';
-	END IF;
+	IF corso_attivo(OLD.IdCorso) AND num_iscritti > 0 THEN
+		RAISE EXCEPTION 'Non puoi cancellare un corso ancora in svolgimento!!';
+    END IF;
 
 	RETURN OLD;
 END;
@@ -949,18 +946,26 @@ EXECUTE  FUNCTION fun_blocca_aggiorna_argomento();
 
 -----------------------------------------------------------------------------------------------------------------------
 
--- Non deve essere possibile aggiornare gli argomenti_corso
+-- E' possibile aggiornare gli argomenti del corso solo se non è ancora iniziato e non ha iscrizioni
 
 CREATE OR REPLACE FUNCTION fun_blocca_aggiorna_argomenticorso()
 RETURNS TRIGGER AS
 $$
+DECLARE 
+	num_iscritti INT;
 BEGIN
- 	RAISE EXCEPTION 'Non puoi modificare i campi IdCorso, IdArgomento.';
+	SELECT COUNT(*) 
+    INTO num_iscritti 
+    FROM Iscrizioni 
+    WHERE IdCorso = OLD.IdCorso;
+
+	IF corso_attivo(OLD.IdCorso) OR num_iscritti > 0 THEN
+ 		RAISE EXCEPTION 'Non puoi modificare i campi IdCorso, IdArgomento.';
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trg_blocca_aggiorna_argomenticorso
-BEFORE UPDATE  OF IdCorso, IdArgomento ON Argomenti_Corso
+BEFORE UPDATE OF IdCorso, IdArgomento ON Argomenti_Corso
 FOR EACH ROW
 EXECUTE FUNCTION fun_blocca_aggiorna_argomenticorso();
 
@@ -1051,23 +1056,6 @@ EXECUTE  FUNCTION fun_blocca_aggiorna_ingrediente();
 
 -----------------------------------------------------------------------------------------------------------------------
 
--- Non deve essere possibile aggiornare gli utilizzi
-
-CREATE OR REPLACE FUNCTION fun_blocca_aggiorna_utilizzi()
-RETURNS TRIGGER AS
-$$
-BEGIN
- 	RAISE EXCEPTION 'Non puoi modificare i campi IdRicetta, IdIngrediente.';
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_blocca_aggiorna_utilizzi
-BEFORE UPDATE OF IdRicetta, IdIngrediente ON Utilizzi
-FOR EACH ROW
-EXECUTE FUNCTION fun_blocca_aggiorna_utilizzi();
-
------------------------------------------------------------------------------------------------------------------------
-
 -- Non deve essere possibile aggiornare le preparazioni
 
 CREATE OR REPLACE FUNCTION fun_blocca_aggiorna_preparazioni()
@@ -1104,7 +1092,6 @@ BEGIN
         	RAISE EXCEPTION 'Non si può aggiungere una ricetta ad una sessione già avvenuta';
     	END IF;
     	RETURN NEW;
-
 END;
 $$ LANGUAGE plpgsql;
 
@@ -1152,7 +1139,7 @@ FOR EACH ROW
 EXECUTE FUNCTION fun_impedisci_disiscrizione();
 
 
--- Se è possibile disiscriversi dal corso vengono tolte le adesioni effettuate da oggi in poi alle sessioni pratiche di quel corso potrei averne altre i giorni subito successivi
+-- Se è possibile disiscriversi dal corso vengono tolte le adesioni effettuate da oggi in poi alle sessioni pratiche di quel corso
 
 CREATE OR REPLACE FUNCTION fun_gestisci_disiscrizione()
 RETURNS TRIGGER AS

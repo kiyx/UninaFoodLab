@@ -1,7 +1,13 @@
 INTRODUZIONE - ANALISI DEL PROBLEMA:
-                                     UninaFoodLab nasce come sistema per la gestione di corsi di cucina tematici.
-                                     Attraverso questa piattaforma gli chef che desiderano 
-
+UninaFoodLab nasce come sistema per la gestione di corsi di cucina tematici.
+Attraverso questa piattaforma ci si potrà registrare come partecipante o chef, i quali potranno rispettivamente partecipare ai corsi di cucina proposti oppure aggiungerne di nuovi.
+Gli chef per registrarsi avranno bisogno di inserire un curriculum, così da poter dimostrare di essere chef con esperienza e garantire corsi ben strutturati ai partecipanti.
+Gli Chef avranno la possibilità di gestire i propri corsi come desiderano, scegliendone la modalità di erogazione, tra online e pratico, il numero e la frequenza delle sessioni, il costo, la data, il luogo e nel caso di un corso che presenta anche sessioni pratiche, per ciascuna di queste, scegliere tra le proprie ricette quali preparare.
+Le ricette possono essere create consultando l'elenco di ingredienti già disponibili globalmente a tutti gli chef oppure, nell'eventualità questi non siano presenti, il sistema permette la creazione di nuovi ingredienti che poi verranno aggiunti.
+Per la creazione dei corsi potranno essere scelti fino a 5 argomenti, anche questi presenti globalmente per tutti gli chef, rappresentato sotto forma di keyword in modo tale da descriverli al meglio possibile.
+I partecipanti potranno, se sono iscritti ad un corso che presenta sessioni pratiche e sono sicuri di partecipare, mandare un'adesione, la quale sarà utile allo chef per calcolare esattamente la quantità di ingredienti necessari.
+Il sistema garantisce proprio a questo scopo una gestione coerente della adesioni in modo tale da evitare sprechi per adesioni revocate con poco preavviso.
+Anche i partecipanti vengono tutelati garantendo il regolare svolgimento dei corsi ai quali sono iscritti, a meno di esigenze particolari dello chef.
 
 RISTRUTTURAZIONE:
 
@@ -246,3 +252,382 @@ DESCRIZIONE DEI RUOLI: Sessione Online[1] ruolo (Fa parte di): Indica che ogni s
                        Corso[0,*] ruolo (Contiene): Indica che un corso può contenere sessioni online
 
 DIZIONARIO DEI VINCOLI
+
+PARTECIPANTE
+
+NOME: unique_username_partecipante
+TIPO: Intrarelazionale
+DESCRIZIONE: L'username di un partecipante deve essere unico
+
+NOME: unique_codicefiscale_partecipante
+TIPO: Intrarelazionale
+DESCRIZIONE: Il codice fiscale di un partecipante deve essere unico
+
+NOME: unique_email_partecipante
+TIPO: Intrarelazionale
+DESCRIZIONE: L'email di un partecipante deve essere unica
+
+NOME: check_empty_part_nome
+TIPO: Dominio
+DESCRIZIONE: Il nome del partecipante non può essere vuoto
+
+NOME: check_empty_part_cognome
+TIPO: Dominio
+DESCRIZIONE: Il cognome del partecipante non può essere vuoto
+
+NOME: check_correct_part_cf
+TIPO: Dominio
+DESCRIZIONE: Il codice fiscale del partecipante deve avere lunghezza 16
+
+NOME: check_empty_part_luogonascita
+TIPO: Dominio
+DESCRIZIONE: Il luogo di nascita del partecipante non può essere vuoto
+
+NOME: check_empty_part_email
+TIPO: Dominio
+DESCRIZIONE: L'email del partecipante non può essere vuota
+
+NOME: check_empty_part_pass 
+TIPO: Dominio
+DESCRIZIONE: La password del partecipante non può essere vuota 
+
+NOME: check_part_length
+TIPO: Dominio
+DESCRIZIONE: La lunghezza dell'username del partecipante deve essere tra 4 e 20 caratteri
+
+NOME: check_part_maggiorenne
+TIPO: Dominio
+DESCRIZIONE: Controlla che il partecipante sia maggiorenne
+----------------------------------------------------------------------------------------------
+CHEF
+NOME: unique_username_chef
+TIPO: Intrarelazionale
+DESCRIZIONE: L'username di uno chef delle essere unico tra tutti gli chef
+
+NOME: unique_codicefscale_chef
+TIPO: Intrarelazionale
+DESCRIZIONE: Il codice fiscale deve essere unico tra gli chef
+
+NOME: unique_email_chef
+TIPO: Intrarelazionale
+DESCRIZIONE: L'email deve essere unica tra gli chef
+
+NOME: check_empty_chef_nome
+TIPO: Dominio
+DESCRIZIONE: Il nome deve aver una lunghezza maggiore di 0
+
+NOME: check_empty_chef_cognome
+TIPO: Dominio
+DESCRIZIONE: Il cognome deve avere una lunghezza maggiore di 0
+
+NOME: check_correct_chef_cf
+TIPO: Dominio
+DESCRIZIONE: Il codice fiscale deve avere una lunghezza pari a 16
+
+NOME: check_empty_chef_luogonascita
+TIPO: Dominio
+DESCRIZIONE: Il luogo di nascita deve avere una lunghezza maggiore di 0
+
+NOME: check_empty_chef_email
+TIPO: Dominio
+DESCRIZIONE: L'email deve avere una lunghezza maggiore di 0
+
+NOME: check_empty_chef_pass
+TIPO: Dominio
+DESCRIZIONE: La password deve avere lunghezza maggiore di 0
+
+NOME: check_empty_chef_curriculum
+TIPO: Dominio
+DESCRIZIONE: Il path del curriculum deve avere una lunghezza maggiore di 0
+
+NOME: check_chef_length
+TIPO: Dominio
+DESCRIZIONE: La lunghezza dell'username deve essere compresa tra 4 e 20
+
+NOME: check_chef_maggiorenne
+TIPO: Dominio
+DESCRIZIONE: Lo chef deve essere maggiorenne
+----------------------------------------------------------------------------------------------
+ARGOMENTO 
+
+NOME: unique_nome_argomento
+TIPO: Intrarelazionale
+DESCRIZIONE: Il nome dell'argomento deve essere unico per evitare duplicati
+----------------------------------------------------------------------------------------------
+CORSO
+
+NOME: check_empty_corso_nome
+TIPO: Dominio
+DESCRIZIONE: Il nome del corso non può essere vuoto
+
+NOME: check_data_non_passata_corso
+TIPO: Dominio
+DESCRIZIONE: Il corso non può avere una data di inizio nel passato
+
+NOME: check_empty_corso_descr
+TIPO: Dominio
+DESCRIZIONE: La descrizione del corso non può essere vuoto
+
+NOME: check_costo_non_negativo
+TIPO: Dominio
+DESCRIZIONE: Il costo del corso non può essere negativo
+
+NOME: check_limite_pratico
+TIPO: N-Upla
+DESCRIZIONE: Il corso ha un limite solo se è pratico, altrimenti il campo limite è nullo
+
+----------------------------------------------------------------------------------------------
+SESSIONE PRATICA
+
+NOME: check_data_non_passata_sessioneprat
+TIPO: Dominio
+DESCRIZIONE: La data della sessione deve essere maggiore della data corrente
+
+NOME: check_data_non_passata_sessioneprat
+TIPO: Dominio
+DESCRIZIONE: La durata di una sessione deve essere maggiore di 0
+
+NOME: check_empty_sessioneprat_luogo
+TIPO: Dominio
+DESCRIZIONE: La lunghezza del luogo deve essere maggiore di 0
+----------------------------------------------------------------------------------------------
+SESSIONE ONLINE
+
+NOME: check_data_non_passata_sessioneonl
+TIPO: Dominio
+DESCRIZIONE: La data della sessione deve essere maggiore della data corrente
+
+NOME: check_data_non_passata_sessioneonl
+TIPO: Dominio
+DESCRIZIONE: La durata di una sessione deve essere maggiore di 0
+
+NOME: check_empty_sessioneonl_link
+TIPO: Dominio
+DESCRIZIONE: La lunghezza del link deve essere maggiore di 0
+----------------------------------------------------------------------------------------------
+RICETTA
+
+NOME: unique_nome_chef
+TIPO: Intrarelazionale
+DESCRIZIONE: Una ricetta dello stesso chef non può avere lo stesso nome
+
+NOME: check_empty_ricetta_nome
+TIPO: Dominio
+DESCRIZIONE: Il nome della ricetta non può essere vuoto
+
+NOME: check_empty_ricetta_provenienza
+TIPO: Dominio
+DESCRIZIONE: La provenienza della ricetta non può essere vuota
+
+NOME: check_tempo_positivo
+TIPO: Dominio
+DESCRIZIONE: Il tempo della provenienza deve essere positivo
+
+NOME: check_calorie_positive
+TIPO: Dominio
+DESCRIZIONE: Le calorie della ricetta devone essere positive
+----------------------------------------------------------------------------------------------
+INGREDIENTE 
+
+NOME: check_empty_ingr_nome
+TIPO: Dominio
+DESCRIZIONE: La lunghezza del nome deve essere maggiore di 0
+
+NOME: unique_nome_ingrediente
+TIPO: Interrelazionale
+DESCRIZIONE: Il nome dell'ingrediente deve essere unico nella tabella ingredienti
+----------------------------------------------------------------------------------------------
+ISCRIZIONI
+
+NOME: pk_iscrizioni_corso
+TIPO: Intrarelazionale
+DESCRIZIONE: Lo stesso utente non puo' partecipare più di una volta allo stesso corso allo stesso momento
+----------------------------------------------------------------------------------------------
+ARGOMENTI_CORSO 
+
+NOME: pk_argomenti_corso
+TIPO: Intrarelazionale
+DESCRIZIONE: Non ci possono essere argomenti ripetuti per un corso
+----------------------------------------------------------------------------------------------
+ADESIONI
+
+NOME: pk_adesioni
+TIPO: Intrarelazionale
+DESCRIZIONE: Lo stesso partecipante non può aderire più di una volta alla stessa sessione pratica allo stesso momento
+----------------------------------------------------------------------------------------------
+PREPARAZIONI
+
+NOME: pk_sessionepratica_ricetta
+TIPO: Intrarelazionale
+DESCRIZIONE: Non si può ripetere la stessa ricetta nella stessa sessione
+----------------------------------------------------------------------------------------------
+UTILIZZI 
+
+NOME: pk_ricetta_ingrediente
+TIPO: Intrarelazionale
+DESCRIZIONE: Gli ingredienti non devono essere ripetuti per la stessa ricetta
+
+NOME: check_quantita
+TIPO: Dominio 
+DESCRIZIONE: La quantità di un ingrediente deve essere positiva
+
+-----------------------------------------------------------------------------------------------
+COSE DEI trigger
+
+NOME: uniqueUsernamePartChef
+TIPO: Interrelazionale
+DESCRIZIONE: Impedire che due utenti – uno Chef e uno Partecipante – abbiano lo stesso Username, anche se sono in due tabelle diverse.
+
+NOME: isPraticoCheck
+TIPO: Interrelazionale
+DESCRIZIONE: Non posso inserire una sessione pratica se IsPratico = false
+
+NOME: unicitàSessioneGiorno
+TIPO: Interrelazionale
+DESCRIZIONE: Non ci possono essere più sessioni per lo stesso corso nello stesso giorno
+
+NOME: dataSessioneDopoDataCorso
+TIPO: Interrelazionale
+DESCRIZIONE: La data della sessione non può essere messa prima della data inizio corso
+
+NOME: dataPrimaSessione
+TIPO: Interrelazionale
+DESCRIZIONE: Se non ci sono sessioni per quel corso allora la data della prima sessione inserita deve essere inserita il giorno di inizio corso
+
+NOME: verificaFrequenzaCorso
+TIPO: Interrelazionale 
+DESCRIZIONE: Quando inserisco o modifico una sessione essa deve rispettare l'intervallo della frequenza del corso a cui appartiene
+
+NOME: controllaSovrapposizioniOrariSessioni
+TIPO: Interrelazionale
+DESCRIZIONE: Quando si inserisce una sessione per un corso, essa non può avvenire nella stessa fascia oraria di un'altra sessione dello chef per quel giorno
+
+NOME: checkNumArgomentiCorso
+TIPO: Intrarelazionale
+DESCRIZIONE: Gli argomenti associati ad un corso non possono essere più di 5
+
+NOME: checkLimiteCorso
+TIPO: Interrelazionale
+DESCRIZIONE: Se il corso è pratico, bisogna controllare che non venga raggiunto il limite di iscrizioni
+
+NOME: checkIscrizioneBeforeAdesione
+TIPO: Interrelazionale
+DESCRIZIONE: Un partecipante non puo' aderire a una sessione pratica se non iscritto al corso che la organizza
+
+NOME: checkAdesioneOnTime
+TIPO: Interrelazionale
+DESCRIZIONE: La data dell'adesione alla sessione pratica deve essere antecedente (massimo 3 giorni prima) alla data della sessione pratica
+
+NOME: checkChefRicettaCorso
+TIPO: Interrelazionale
+DESCRIZIONE: Controllare che lo chef della ricetta aggiunta alla sessione pratica sia lo stesso dello chef che organizza il corso
+
+NOME: immutableCodiceFiscale
+TIPO: Intrarelazionale
+DESCRIZIONE: Il codice fiscale di un utente non può essere modificato una volta inserito
+
+NOME: checkDeletePartecipanteConAdesione
+TIPO: Interrelazionale
+DESCRIZIONE: Non è possibile eliminare un partecipante se ha aderito a una sessione pratica e siamo a meno di 3 giorni dalla sua data
+
+NOME: checkCorsiAttiviBeforeDeleteChef
+TIPO: Interrelazionale
+DESCRIZIONE: Non è possibile eliminare uno chef se ha dei corsi ancora attivi
+
+NOME: updatePermessiCorso
+TIPO: Intrarelazionale
+DESCRIZIONE: Di un corso è possibile aggiornare solo il Nome, la Descrizione, La Frequenza e il Numero Sessioni
+
+NOME: bloccaUpdateOnDataCorso
+TIPO: Interrelazionale
+DESCRIZIONE: Non è possibile modificare la data di inizio del corso se ci sono sessioni associate
+
+NOME: bloccaCancellaCorsoAttivoConIscritti
+TIPO: Interrelazionale
+DESCRIZIONE: Non è possibile cancellare un corso attivo che ha iscritti 
+
+NOME: bloccaAggiornamentoCorsoSessione
+TIPO: Intrarelazionale
+DESCRIZIONE: Non è possibile modificare il corso associato a una sessione già esistente
+
+NOME: bloccaCancellaSessioneCorsoAttivo
+TIPO: Interrelazionale
+DESCRIZIONE: Non puoi cancellare una sessione passata se il suo corso è ancora attivo
+
+NOME: bloccaCancellazioneAggiornamentoArgomento
+TIPO: Intrarelazionale
+DESCRIZIONE: Non si possono eliminare o aggiornare gli argomenti (Tabella globale)
+
+NOME: bloccaCancellazioneUltimoArgomento
+TIPO: Intrarelazionale
+DESCRIZIONE: Non deve essere possibile cancellare l'ultimo argomento di un corso
+
+NOME: bloccaUpdateArgomentiCorso
+TIPO: Interrelazionale
+DESCRIZIONE: E' possibile aggiornare gli argomenti del corso solo se non è ancora iniziato e non ha iscrizioni
+
+NOME: bloccaUpdateChefInRicetta
+TIPO: Intrarelazionale
+DESCRIZIONE: Non è possibile aggiornare lo chef associato a una ricetta
+
+NOME: bloccaDeleteRicettaInUtilizzo
+TIPO: Interrelazionale
+DESCRIZIONE: Non è possibile cancellare una ricetta se è in uso in una sessione pratica
+
+NOME: bloccaCancellazioneAggiornamentoIngredienti
+TIPO: Intrarelazionale
+DESCRIZIONE: Non è possibile aggiornare o modificare ingredienti (Tabella globale)
+
+NOME: bloccaAggiuntaRicetteSessioniFinite
+TIPO: Interrelazionale
+DESCRIZIONE: Non è possibile aggiungere una ricetta alla sessione pratica se essa è già avvenuta
+
+NOME: bloccaDisiscrizioneCorsoSeAderito
+TIPO: Interrelazionale
+DESCRIZIONE: Non è possibile disiscriversi dal corso se si è aderito a una sessione pratica e mancano meno di 3 giorni dal suo avvenimento
+
+NOME: bloccaIscrizioneSeCorsoIniziato
+TIPO: Interrelazionale
+DESCRIZIONE: Non è possibile iscriversi a un corso se è già iniziato
+
+NOME: bloccaUpdatePratico
+TIPO: Interrelazionale
+DESCRIZIONE: Se ci sono sessioni pratiche, non è possibile cambiare il tipo del corso da pratico a non pratico
+
+NOME: bloccaCancellaAdesioneDopo3Giorni
+TIPO: Interrelazionale
+DESCRIZIONE: Non è possibile eliminare una adesione a una sessione pratica a meno di 3 giorni dalla data in cui essa avviene
+
+NOME: bloccaAggiornaDataAdesione
+TIPO: IntraRelazionale
+DESCRIZIONE: Non è possibile modificare la data di adesione dopo aver aderito
+
+ON CASCADE
+
+NOME: cancellaAdesioniSeDisiscritto
+TIPO: Interrelazionale
+DESCRIZIONE: Se è possibile disiscriversi dal corso vengono tolte le adesioni effettuate da oggi in poi alle sessioni pratiche di quel corso
+
+NOME: 
+TIPO:
+DESCRIZIONE:
+
+NOME: 
+TIPO:
+DESCRIZIONE:
+
+NOME: 
+TIPO:
+DESCRIZIONE:
+
+NOME: 
+TIPO:
+DESCRIZIONE:
+
+NOME: 
+TIPO:
+DESCRIZIONE:
+
+NOME: 
+TIPO:
+DESCRIZIONE:

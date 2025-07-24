@@ -13,14 +13,14 @@ CREATE TABLE Partecipante
 	Username TEXT UNIQUE NOT NULL,
 	Nome VARCHAR(100) NOT NULL,
 	Cognome VARCHAR(100) NOT NULL,
-	CodiceFiscale CHAR(17) UNIQUE NOT NULL, 
+	CodiceFiscale CHAR(16) UNIQUE NOT NULL, 
 	DataDiNascita DATE NOT NULL,
 	LuogoDiNascita VARCHAR(100) NOT NULL,
 	Email TEXT UNIQUE NOT NULL, 
 	Password VARCHAR(60) NOT NULL,
 	CONSTRAINT check_empty_part_nome CHECK (LENGTH(Nome) > 0),
 	CONSTRAINT check_empty_part_cognome CHECK (LENGTH(Cognome) > 0),
-	CONSTRAINT check_empty_part_cf CHECK (LENGTH(CodiceFiscale) > 0),
+	CONSTRAINT check_empty_part_cf CHECK (LENGTH(CodiceFiscale) = 16),
 	CONSTRAINT check_empty_part_luogonascita CHECK (LENGTH(LuogoDiNascita) > 0),
 	CONSTRAINT check_empty_part_email CHECK (LENGTH(Email) > 0),
 	CONSTRAINT check_empty_part_pass CHECK (LENGTH(Password) > 0),
@@ -35,7 +35,7 @@ CREATE TABLE Chef
 	Username TEXT UNIQUE NOT NULL,
 	Nome VARCHAR(100) NOT NULL,
 	Cognome VARCHAR(100) NOT NULL,
-	CodiceFiscale CHAR(17) UNIQUE NOT NULL, 
+	CodiceFiscale CHAR(16) UNIQUE NOT NULL, 
 	DataDiNascita DATE NOT NULL,
 	LuogoDiNascita VARCHAR(100) NOT NULL,
 	Email TEXT UNIQUE NOT NULL, 
@@ -43,7 +43,7 @@ CREATE TABLE Chef
 	Curriculum TEXT NOT NULL,
 	CONSTRAINT check_empty_chef_nome CHECK (LENGTH(Nome) > 0),
 	CONSTRAINT check_empty_chef_cognome CHECK (LENGTH(Cognome) > 0),
-	CONSTRAINT check_empty_chef_cf CHECK (LENGTH(CodiceFiscale) > 0),
+	CONSTRAINT check_correct_chef_cf CHECK (LENGTH(CodiceFiscale) = 16),
 	CONSTRAINT check_empty_chef_luogonascita CHECK (LENGTH(LuogoDiNascita) > 0),
 	CONSTRAINT check_empty_chef_email CHECK (LENGTH(Email) > 0),
 	CONSTRAINT check_empty_chef_pass CHECK (LENGTH(Password) > 0),
@@ -78,9 +78,9 @@ CREATE TABLE Corso
 	CONSTRAINT check_empty_corso_nome CHECK (LENGTH(Nome) > 0),
     CONSTRAINT check_data_non_passata_corso CHECK (DataInizio > CURRENT_DATE),		
 	CONSTRAINT check_empty_corso_descr CHECK (LENGTH(Descrizione) > 0),														
-	CONSTRAINT fk_chef_corso FOREIGN KEY(IdChef) REFERENCES Chef(IdChef) ON DELETE CASCADE,
 	CONSTRAINT check_costo_non_negativo CHECK (Costo >= 0.0),
-	CONSTRAINT check_limite_pratico CHECK ((NOT isPratico AND LIMITE IS NULL) OR (isPratico AND Limite IS NOT NULL))	 -- Il corso ha limite solo se è pratico		
+	CONSTRAINT check_limite_pratico CHECK ((NOT isPratico AND LIMITE IS NULL) OR (isPratico AND Limite IS NOT NULL)),	 -- Il corso ha limite solo se è pratico		
+	CONSTRAINT fk_chef_corso FOREIGN KEY(IdChef) REFERENCES Chef(IdChef) ON DELETE CASCADE
 );
 
 -- SessionePratica
@@ -153,7 +153,7 @@ CREATE TABLE Iscrizioni
 (
 	IdPartecipante INTEGER NOT NULL,
 	IdCorso INTEGER NOT NULL,
-	CONSTRAINT pk_iscrizioni_corso PRIMARY KEY(IdPartecipante, IdCorso),					      	 -- Lo stesso utente non puo' partecipare due volte allo stesso corso allo stesso momento
+	CONSTRAINT pk_iscrizioni_corso PRIMARY KEY(IdPartecipante, IdCorso),					  
 	CONSTRAINT fk_partecipante_iscrizioni FOREIGN KEY(IdPartecipante) REFERENCES Partecipante(IdPartecipante) ON DELETE CASCADE,
 	CONSTRAINT fk_corso_iscrizioni FOREIGN KEY(IdCorso) REFERENCES Corso(IdCorso) ON DELETE CASCADE
 );
@@ -163,7 +163,7 @@ CREATE TABLE Argomenti_Corso
 (
 	IdCorso INTEGER NOT NULL,
 	IdArgomento INTEGER NOT NULL,
-	CONSTRAINT pk_argomenti_corso PRIMARY KEY(IdCorso, IdArgomento),						        -- Minimo un argomento e niente argomenti ripetuti per corso
+	CONSTRAINT pk_argomenti_corso PRIMARY KEY(IdCorso, IdArgomento),						        
 	CONSTRAINT fk_corso_argomenticorso FOREIGN KEY(IdCorso) REFERENCES Corso(IdCorso) ON DELETE CASCADE,
 	CONSTRAINT fk_argomenti_argomenticorso FOREIGN KEY(IdArgomento) REFERENCES Argomento(IdArgomento) ON DELETE RESTRICT
 );
@@ -184,7 +184,7 @@ CREATE TABLE Preparazioni
 (
 	IdSessionePratica INTEGER NOT NULL,
 	IdRicetta INTEGER NOT NULL,
-	CONSTRAINT pk_sessionepratica_ricetta PRIMARY KEY (IdSessionePratica, IdRicetta),						-- Non si può ripetere la stessa ricetta nella stessa sessione
+	CONSTRAINT pk_sessionepratica_ricetta PRIMARY KEY (IdSessionePratica, IdRicetta),						
 	CONSTRAINT fk_sessionepratica_preparazioni FOREIGN KEY(IdSessionePratica) REFERENCES SessionePratica(IdSessionePratica) ON DELETE CASCADE,
 	CONSTRAINT fk_ricetta_preparazioni FOREIGN KEY(IdRicetta) REFERENCES Ricetta(IdRicetta) ON DELETE CASCADE
 );
@@ -199,7 +199,7 @@ CREATE TABLE Utilizzi
 	IdIngrediente INTEGER NOT NULL,
 	Quantita FLOAT8 NOT NULL,										            -- Per una porzione!
 	UDM	UnitaDiMisura NOT NULL,																	
-	CONSTRAINT pk_ricetta_ingrediente PRIMARY KEY(IdRicetta, IdIngrediente),	-- Gli ingredienti non devono essere ripetuti per la stessa ricetta e ce ne deve essere almeno 1
+	CONSTRAINT pk_ricetta_ingrediente PRIMARY KEY(IdRicetta, IdIngrediente),	
 	CONSTRAINT fk_ricetta_utilizzi FOREIGN KEY(IdRicetta) REFERENCES Ricetta(IdRicetta) ON DELETE CASCADE,
 	CONSTRAINT fk_ingrediente_utilizzi FOREIGN KEY(IdIngrediente) REFERENCES Ingrediente(IdIngrediente) ON DELETE RESTRICT,
 	CONSTRAINT check_quantita CHECK (Quantita > 0)
