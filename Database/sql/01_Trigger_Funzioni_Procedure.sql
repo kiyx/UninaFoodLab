@@ -807,7 +807,7 @@ EXECUTE FUNCTION fun_delete_partecipante_con_adesione();
 -----------------------------------------------------------------------------------------------------------------------
 
 -- Restituisce TRUE se un corso è considerato "attivo":
---   1 Ha almeno un iscritto
+--   1. Ha almeno un iscritto
 --   2. La data odierna è tra DataInizio e la data dell'ultima sessione (o prima della DataInizio)
 
 CREATE OR REPLACE FUNCTION corso_attivo(id_corso_in INTEGER)

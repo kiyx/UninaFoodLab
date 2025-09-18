@@ -529,12 +529,12 @@ public class HeaderPanel extends JXPanel
      */
     public void updateVisibility()
     {
-    	boolean isProf = parentFrame instanceof ProfileFrame;
+    	boolean isProfile = parentFrame instanceof ProfileFrame;
     	
-    	if(isProf || parentFrame instanceof MyRecipesFrame)
+    	if(isProfile || parentFrame instanceof MyRecipesFrame)
     		filterBtn.setVisible(false);
     	
-    	if(isProf)
+    	if(isProfile)
     	{
     		searchField.setVisible(false);
             searchBtn.setVisible(false);

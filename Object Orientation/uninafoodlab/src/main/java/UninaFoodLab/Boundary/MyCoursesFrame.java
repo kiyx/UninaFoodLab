@@ -199,7 +199,7 @@ public class MyCoursesFrame extends JXFrame implements ArgumentFilterable
     		for(CourseCardPanel card : allCourseCards)
       	        card.removeCourseClickListener(cardClickListener);
 
-      	cardClickListener = null;
+    		cardClickListener = null;
     	}	  
     }
     

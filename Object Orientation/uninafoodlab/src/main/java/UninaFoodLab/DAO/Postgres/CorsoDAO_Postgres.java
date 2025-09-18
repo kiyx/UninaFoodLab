@@ -20,13 +20,13 @@ public class CorsoDAO_Postgres implements CorsoDAO
 	{
 	    String sql =
 	            "INSERT INTO Corso(Nome, DataInizio, NumeroSessioni, FrequenzaSessioni, Limite, Descrizione, Costo, isPratico, IdChef) " +
-	            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	            "VALUES (?, ?, ?, ?::frequenza, ?, ?, ?, ?, ?)";
 
 	    try(PreparedStatement s = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
 	    {
 	        s.setString(1, toSaveCorso.getNome());
 	        s.setDate(2, toSaveCorso.getDataInizio());
-	        s.setInt(3, toSaveCorso.getNumeroSessioni());
+	        s.setInt(3, 0);
 	        s.setString(4, toSaveCorso.getFrequenzaSessioni().toString());
 	        
 	        if(toSaveCorso.getIsPratico())

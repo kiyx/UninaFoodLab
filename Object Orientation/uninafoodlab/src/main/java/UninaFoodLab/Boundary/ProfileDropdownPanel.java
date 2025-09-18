@@ -105,7 +105,6 @@ public class ProfileDropdownPanel extends JXPanel
 									 {
 										 Controller.getController().showChangePasswordDialog(parentFrame);					 
 									 }
-	
 								  };
 		changePwItemBtn.addActionListener(changePwItemBtnListener);		
 
@@ -195,7 +194,6 @@ public class ProfileDropdownPanel extends JXPanel
 		styleDropdownButton(changePwItemBtn);
 		styleDropdownButton(logoutItemBtn);
 	}
-	
 	
 	 /**
      * Applica uno stile coerente a un pulsante all'interno del menu dropdown del profilo.

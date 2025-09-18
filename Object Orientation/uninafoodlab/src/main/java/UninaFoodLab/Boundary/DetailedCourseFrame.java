@@ -229,9 +229,4 @@ public class DetailedCourseFrame extends JDialog
         JOptionPane.showMessageDialog(this, "Iscritto al corso " + courseId);
         // TODO: chiamare controller iscrizione
     }
-    
-    public static void main(String[] args)
-    {
-    	new DetailedCourseFrame(this).setVisible(true);
-    }
 }

@@ -240,7 +240,7 @@ public class Controller
 				new HomepageFrame().setVisible(true);
 			}
 			else
-			((HomepageFrame) currFrame).resetView();
+				((HomepageFrame) currFrame).resetView();
 		});
 	}
 
@@ -324,7 +324,7 @@ public class Controller
 	/**
 	 * -------------------------
 	 * 
-	 * RegisterFrame
+	 * 		RegisterFrame
 	 * 
 	 * -------------------------
 	 */
@@ -659,10 +659,6 @@ public class Controller
 	 */
 
 	
-	
-	
-	
-	
 	/**
      *  -------------------------
      * 
@@ -764,7 +760,7 @@ public class Controller
 				idsCorsi.add(c.getId());
 				namesCorsi.add(c.getNome());
 
-	            List<Integer> thisCourseArgIds   = new ArrayList<>();
+	            List<Integer> thisCourseArgIds = new ArrayList<>();
 	            List<String> thisCourseArgNames = new ArrayList<>();
 	            
 				for(Argomento a : c.getArgomenti())	
