@@ -59,7 +59,7 @@ public class AdesioneDAO_Postgres implements AdesioneDAO
 	{
 		String sql = 
 					 "SELECT *"
-					 + "FROM Adesioni A JOIN"
+					 + "FROM Adesioni A JOIN";
 	}
 	
 	@Override

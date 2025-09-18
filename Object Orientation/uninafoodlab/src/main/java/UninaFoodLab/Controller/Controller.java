@@ -1578,7 +1578,7 @@ public class Controller
    
    public Chef getLoggedChef()
    {
-   	return (Chef)getLoggedUser();
+   		return (Chef)getLoggedUser();
    }
 
    
