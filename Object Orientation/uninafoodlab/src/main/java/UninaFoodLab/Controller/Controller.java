@@ -239,8 +239,8 @@ public class Controller
 				currFrame.dispose();
 				new HomepageFrame().setVisible(true);
 			}
-			// else
-			// ((HomepageFrame) currFrame).resetView();
+			else
+			((HomepageFrame) currFrame).resetView();
 		});
 	}
 
