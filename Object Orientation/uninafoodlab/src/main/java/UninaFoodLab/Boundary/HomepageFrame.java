@@ -136,6 +136,8 @@ public class HomepageFrame extends JXFrame implements ArgumentFilterable
      	navPanel.add(Box.createHorizontalGlue(), "growx");
      	navPanel.add(rightArrow, "aligny center");
      	contentPanel.add(navPanel, "gaptop 10, center");
+     	
+     	Controller.getController().loadAllCorsiHomepage(idsCorsi, namesCorsi, idsArguments, namesArguments, startDates, sessionsNumbers); 
     }
 
     private void initListeners()
@@ -166,7 +168,7 @@ public class HomepageFrame extends JXFrame implements ArgumentFilterable
     	    public void mouseClicked(MouseEvent e) 
     	    {
     	        CourseCardPanel card = (CourseCardPanel)e.getSource();
-    	        //Controller.getController().showCourseDetail(HomepageFrame.this, card.getId());
+    	        Controller.getController().showCourseDetail(HomepageFrame.this, card.getId());
     	    }
     	};
     }
@@ -229,9 +231,7 @@ public class HomepageFrame extends JXFrame implements ArgumentFilterable
     
     private void loadInitialCards()
     {
-    	allCourseCards.clear();
-
-    	//Controller.getController().loadCorsiForHomepage(idsCorsi, namesCorsi, idsArguments, namesArguments, startDates, sessionsNumbers);    	
+    	allCourseCards.clear();	
     	
         for(int i = 0; i < idsCorsi.size(); i++)
         {

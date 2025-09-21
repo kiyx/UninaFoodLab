@@ -658,7 +658,70 @@ public class Controller
 	 * -------------------------
 	 */
 
+	public void loadAllCorsiHomepage(List<Integer> idsCorsi, List<String> namesCorsi, List<List<Integer>> idsArguments,
+			  List<List<String>> namesArguments, List<Date> startDates, List<Integer> sessionsNumbers)
+	{
+		try
+		{
+			if(cacheCorsi == null || cacheCorsi.isEmpty())
+				cacheCorsi = getCorsoDAO().getAllCorsi();
+
+			if(isChefLogged())
+			{
+				for(Corso c : cacheCorsi)
+				{			
+					if(c.getChef()==getLoggedUser())
+					{
+						idsCorsi.add(c.getId());
+						namesCorsi.add(c.getNome());
+
+			            List<Integer> thisCourseArgIds = new ArrayList<>();
+			            List<String> thisCourseArgNames = new ArrayList<>();
+			            
+						for(Argomento a : c.getArgomenti())	
+						{
+							thisCourseArgIds.add(a.getId());
+				            thisCourseArgNames.add(a.getNome());
+						}	
+						
+						idsArguments.add(thisCourseArgIds);
+			            namesArguments.add(thisCourseArgNames);
+			            
+						startDates.add(c.getDataInizio());
+						sessionsNumbers.add(c.getNumeroSessioni());
+					}					
+				}
+			}
+			else
+			{
+				for(Corso c : cacheCorsi)
+				{				
+					idsCorsi.add(c.getId());
+					namesCorsi.add(c.getNome());
 	
+		            List<Integer> thisCourseArgIds = new ArrayList<>();
+		            List<String> thisCourseArgNames = new ArrayList<>();
+		            
+					for(Argomento a : c.getArgomenti())	
+					{
+						thisCourseArgIds.add(a.getId());
+			            thisCourseArgNames.add(a.getNome());
+					}	
+					
+					idsArguments.add(thisCourseArgIds);
+		            namesArguments.add(thisCourseArgNames);
+		            
+					startDates.add(c.getDataInizio());
+					sessionsNumbers.add(c.getNumeroSessioni());
+				}
+			}
+		}
+		catch(DAOException e)
+		{
+			LOGGER.log(Level.SEVERE, "Errore loadCorsi da DB", e);
+		}
+	}
+
 	/**
      *  -------------------------
      * 
