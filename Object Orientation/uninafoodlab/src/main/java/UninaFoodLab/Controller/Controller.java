@@ -55,7 +55,6 @@ public class Controller
 	 */
 	private List<Argomento> cacheArgomenti = new ArrayList<>();
 	private List<Ricetta> cacheRicette = new ArrayList<>();
-	private List<Ingrediente> cacheIngredienti = new ArrayList<>();
 	private List<Corso> cacheCorsi = new ArrayList<>();
 	
 	/** Costruttore privato per pattern Singleton */
@@ -317,7 +316,6 @@ public class Controller
 		
 		cacheArgomenti = null;
 		cacheRicette = null;
-		cacheIngredienti = null;
 		cacheCorsi = null;
 	}
 
@@ -732,9 +730,33 @@ public class Controller
      *  -------------------------
 	*/
 	
-	public void showCourseDetail(MyCoursesFrame myCoursesFrame, int idCorso)
+	public int getNumeroIscritti(int idCourse)
 	{
+		return getCorsoDAO().getNumeroIscrittiById(idCourse);
+	}
+	
+	public void showCourseDetail(JFrame parentFrame, int idCorso)
+	{
+		if(cacheCorsi == null || cacheCorsi.isEmpty())
+			cacheCorsi = getCorsoDAO().getAllCorsi();
 		
+		DetailedCourseFrame corso = new DetailedCourseFrame(parentFrame);
+		
+		for(Corso c : cacheCorsi)
+		{
+			if(c.getId() == idCorso)
+				corso.setCourseData(c.getId(), c.getNome(), c.getDescrizione(), c.getDataInizio().toLocalDate(), c.getNumeroSessioni(), 
+									c.getFrequenzaSessioni().toString(), (c.getIsPratico()) ? c.getLimite() : null, c.getCosto(), 
+									c.getChef().getNome(), c.getChef().getCognome(), 
+									(parentFrame instanceof HomepageFrame) ? "Homepage": "MyCourses");
+		}
+		
+		List<Sessione> sessioni = new ArrayList<>();
+		sessioni.addAll(getSessionePraticaDAO().getSessioniPraticheByIdCorso(idCorso));
+		sessioni.addAll(getSessioneOnlineDAO().getSessioniOnlineByIdCorso(idCorso));
+		
+		corso.setSessions(sessioni);
+		corso.setVisible(true);
 	}
 	
 	public void showCreateCourseDialog(MyCoursesFrame parentFrame)
@@ -747,15 +769,15 @@ public class Controller
 		parent.removeSessionCard(panel);
 	}
 	
-	public void clearMyCoursesCache()
+	public void registerIscrizione(int idCourse)
 	{
-		cacheCorsi = null;
+		getCorsoDAO().saveIscrizione(idCourse, getLoggedUser().getId());
 	}
 	
-	public void clearCourseDialogCache()
+	public void disiscriviCorso(Window owner, DetailedCourseFrame card, int courseId)
 	{
-		cacheArgomenti = null;
-		cacheRicette = null;
+		card.dispose();
+		((MyCoursesFrame)owner).removeCourseCard(courseId);
 	}
 	
 	public String[] loadFrequenza()
@@ -950,8 +972,6 @@ public class Controller
 	 * DetailedRecipeFrame
 	 * -------------------------
 	 */
-	// CreateRecipesDialog
-				// DetailedRecipeFrame
 			
 	private ArrayList<Ricetta> ricette;
 	private ArrayList<Ingrediente> ingredienti ;
@@ -1005,11 +1025,6 @@ public class Controller
 			}						
 		}
 	}
-	
-	/*public void checkRicetta(int id)
-	{
-		getRicettaDAO
-	}*/
 	
 	public void deleteRicetta(MyRecipesFrame parent,DetailedRecipeDialog currDialog, int id)
 	{
@@ -1305,6 +1320,7 @@ public class Controller
 		{
 			ricette = null;
 		}
+		
 	/**
 	 * -------------------------
 	 * 
@@ -1646,5 +1662,4 @@ public class Controller
 
    
 
-  
 }

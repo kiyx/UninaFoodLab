@@ -20,8 +20,8 @@ public class SessionInfoPanel extends JPanel
     private JXPanel btnPanel;
     private JXButton btnAdesione;
     private JXLabel titleLbl, dataLbl, orarioLabel, durataLabel, ricetteLabel, luogoLabel, partecipantiLabel, linkLabel;
-    
-    private final int id, durata, numeroPartecipanti;
+    private final int id, durata;
+    private final Integer numeroPartecipanti;
     private final boolean pratica;
     private final LocalDate dataStr;
     private final LocalTime orarioStr;
@@ -31,7 +31,7 @@ public class SessionInfoPanel extends JPanel
     private ActionListener adesioneListener;
 
     public SessionInfoPanel(int id, boolean pratica, LocalDate dataStr, LocalTime orarioStr, int durata, List<String> ricette, String luogo,
-    						int numeroPartecipanti, String linkRiunione, String userContext)
+    						Integer numeroPartecipanti, String linkRiunione, String userContext)
     {
         this.id = id;
         this.pratica = pratica;
@@ -107,7 +107,7 @@ public class SessionInfoPanel extends JPanel
         btnAdesione.setForeground(Color.WHITE);
 
         boolean canAdesione = pratica && !Controller.getController().isChefLogged() && userContext.equals("MyCourses") &&
-            !dataStr.isBefore(LocalDate.now())  && ChronoUnit.DAYS.between(LocalDate.now(), dataStr) <= 3;
+            !dataStr.isBefore(LocalDate.now()) && !(ChronoUnit.DAYS.between(LocalDate.now(), dataStr) <= 3);
 
         btnAdesione.setEnabled(canAdesione);
 

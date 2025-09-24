@@ -578,7 +578,6 @@ public class CreateCourseDialog extends JDialog
     @Override
     public void dispose()
     {
-    	Controller.getController().clearCourseDialogCache();
         disposeListeners();
         super.dispose();
     } 

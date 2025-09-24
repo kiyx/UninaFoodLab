@@ -117,6 +117,24 @@ public class CorsoDAO_Postgres implements CorsoDAO
 	}
 	
 	@Override
+	public void saveIscrizione(int idCorso, int idPartecipante)
+	{
+		String sql = "INSERT INTO Iscrizioni(IdCorso, IdPartecipante)"
+				   + "VALUES(?, ?)";
+		
+		try(Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
+	    {
+			s.setInt(1, idCorso);
+			s.setInt(2, idPartecipante);
+		    s.executeQuery();
+	    }
+		catch(SQLException e)
+		{
+		   	throw new DAOException("Errore DB durante subscribe", e);
+		}
+	}
+	
+	@Override
     public Corso getCorsoById(int idCorso)
     {
         String sql = 
@@ -139,7 +157,7 @@ public class CorsoDAO_Postgres implements CorsoDAO
         	throw new DAOException("Errore DB durante getCorsoById", e);
         }
     }
-
+	
 	@Override
     public List<Corso> getCorsiByIdChef(int idChef)
     {
@@ -215,6 +233,30 @@ public class CorsoDAO_Postgres implements CorsoDAO
         
         return courses;
     }
+
+	@Override
+	public Integer getNumeroIscrittiById(int idCorso)
+	{
+		String sql = 
+		    			"SELECT COUNT(*) "
+		    		  + "FROM Iscrizioni "
+		    		  + "WHERE IdCorso = ?";
+    
+	    try(Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
+	    {
+	        s.setInt(1, idCorso);
+	        ResultSet rs = s.executeQuery();
+	
+	        if(rs.next())
+	            return rs.getInt(1);
+	        else
+	        	throw new CorsoNotFoundException("Corso con id " + idCorso + " non trovato");
+	    }
+	    catch(SQLException e)
+	    {
+	    	throw new DAOException("Errore DB durante getNumeroIscrittiById", e);
+	    }
+	}
 	
 	@Override
     public void update(Corso oldCorso, Corso newCorso)

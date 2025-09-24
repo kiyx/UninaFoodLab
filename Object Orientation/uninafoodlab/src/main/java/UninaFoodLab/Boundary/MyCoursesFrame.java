@@ -267,6 +267,20 @@ public class MyCoursesFrame extends JXFrame implements ArgumentFilterable
         loadPage(currentPage);
     }
 
+    public void removeCourseCard(int idCorso) 
+    {
+    	for(CourseCardPanel c : allCourseCards)
+    	{
+    		if(c.getId() == idCorso)
+    		{
+    			allCourseCards.remove(c);
+    			filteredCourseCards.remove(c);
+    		}
+    	}
+        loadPage(currentPage);
+    }
+    
+    
     private void loadPage(int page)
     {
         int maxPage = (filteredCourseCards.size() - 1) / CARDS_PER_PAGE;
