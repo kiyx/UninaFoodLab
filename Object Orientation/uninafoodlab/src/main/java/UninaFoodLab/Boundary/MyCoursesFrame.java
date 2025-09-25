@@ -269,17 +269,19 @@ public class MyCoursesFrame extends JXFrame implements ArgumentFilterable
 
     public void removeCourseCard(int idCorso) 
     {
+    	CourseCardPanel toRemove = null;
     	for(CourseCardPanel c : allCourseCards)
     	{
     		if(c.getId() == idCorso)
-    		{
-    			allCourseCards.remove(c);
+    		{		
     			filteredCourseCards.remove(c);
+    			toRemove = c;
     		}
     	}
+    	
+    	allCourseCards.remove(toRemove);
         loadPage(currentPage);
     }
-    
     
     private void loadPage(int page)
     {

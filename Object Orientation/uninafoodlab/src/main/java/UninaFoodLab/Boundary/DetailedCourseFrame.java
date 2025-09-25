@@ -24,7 +24,7 @@ public class DetailedCourseFrame extends JDialog
     private static final long serialVersionUID = 1L;
 
     Window owner;
-    private int courseId;
+    private int idCorso;
     private LocalDate courseStartDate;
     private Integer courseLimitePartecipanti;
     private String userContext; // "Homepage" | "MyCourses"
@@ -160,7 +160,7 @@ public class DetailedCourseFrame extends JDialog
     public void setCourseData(int courseId, String nome, String descrizione, LocalDate dataInizio, int numeroSessioni,
                               String frequenza, Integer limitePartecipanti, BigDecimal costo, String nomeChef, String cognomeChef, String userContext)
     {
-        this.courseId = courseId;
+        this.idCorso = courseId;
         this.courseStartDate = dataInizio;
         this.courseLimitePartecipanti = limitePartecipanti;
         this.userContext = userContext;
@@ -177,8 +177,8 @@ public class DetailedCourseFrame extends JDialog
     }
 
     private void updateButtonsVisibility()
-    {
-        boolean corsoIniziato = courseStartDate != null && courseStartDate.isBefore(today);
+    {       
+    	boolean corsoIniziato = courseStartDate != null && courseStartDate.isBefore(today);
         boolean editDelete = Controller.getController().isChefLogged() && userContext.equals("MyCourses") && !corsoIniziato;
         
         btnEditCourse.setVisible(editDelete);
@@ -186,11 +186,22 @@ public class DetailedCourseFrame extends JDialog
 
         if(owner instanceof HomepageFrame)
         {
-        	boolean canIscriviti = userContext.equals("Homepage") && !corsoIniziato &&
-                    (courseLimitePartecipanti == null || Controller.getController().getNumeroIscritti(courseId) < courseLimitePartecipanti);
+        	boolean canIscriviti = !corsoIniziato &&
+                    (courseLimitePartecipanti == null || Controller.getController().getNumeroIscritti(idCorso) < courseLimitePartecipanti);
 
-            btnIscrivitiCorso.setVisible(canIscriviti);
-            btnIscrivitiCorso.setEnabled(canIscriviti);
+        	boolean checkIscr = Controller.getController().checkIscritto(idCorso);
+        			
+        	if(checkIscr)
+        	{
+        		btnIscrivitiCorso.setText("Iscritto");
+        		btnIscrivitiCorso.setVisible(true);
+                btnIscrivitiCorso.setEnabled(false);
+        	}
+        	else
+        	{
+        		btnIscrivitiCorso.setVisible(canIscriviti);
+                btnIscrivitiCorso.setEnabled(canIscriviti);
+        	}          
         }
     }
 
@@ -224,9 +235,14 @@ public class DetailedCourseFrame extends JDialog
         sessionsPanel.repaint();
     }
 
+    public void showMessage(String msg)
+    {
+    	JOptionPane.showMessageDialog(this, msg);
+    }
+    
     private void onIscrivitiCorso()
     {
-    	Controller.getController().registerIscrizione(courseId);
+    	Controller.getController().registerIscrizione(idCorso);
         JOptionPane.showMessageDialog(this, "Iscritto al corso: " + lblNome.getText());
         btnIscrivitiCorso.setEnabled(false);
     	btnIscrivitiCorso.setText("Iscritto");
@@ -234,8 +250,7 @@ public class DetailedCourseFrame extends JDialog
     
     private void onDisiscrivitiCorso()
     {
-    	Controller.getController().disiscriviCorso(owner, DetailedCourseFrame.this, courseId);
-        JOptionPane.showMessageDialog(this, "Disiscritto dal corso: " + lblNome.getText());
+    	Controller.getController().disiscriviCorso(owner, DetailedCourseFrame.this, idCorso);
     }
     
     private void onEditCourse()
@@ -249,7 +264,7 @@ public class DetailedCourseFrame extends JDialog
         int result = JOptionPane.showConfirmDialog(this, "Sei sicuro di voler eliminare questo corso?", "Elimina Corso", JOptionPane.YES_NO_OPTION);
         if(result == JOptionPane.YES_OPTION)
         {
-            JOptionPane.showMessageDialog(this, "Corso eliminato: " + courseId);
+            JOptionPane.showMessageDialog(this, "Corso eliminato: " + idCorso);
             dispose();
             // TODO: chiamare controller per eliminazione
         }

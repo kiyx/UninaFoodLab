@@ -12,6 +12,7 @@ import UninaFoodLab.DTO.SessionePratica;
 import UninaFoodLab.DTO.FrequenzaSessioni;
 import UninaFoodLab.Exceptions.CorsoNotFoundException;
 import UninaFoodLab.Exceptions.DAOException;
+import UninaFoodLab.Exceptions.IscrizioneNotFoundException;
 
 public class CorsoDAO_Postgres implements CorsoDAO
 {	
@@ -126,7 +127,7 @@ public class CorsoDAO_Postgres implements CorsoDAO
 	    {
 			s.setInt(1, idCorso);
 			s.setInt(2, idPartecipante);
-		    s.executeQuery();
+		    s.executeUpdate();
 	    }
 		catch(SQLException e)
 		{
@@ -233,7 +234,29 @@ public class CorsoDAO_Postgres implements CorsoDAO
         
         return courses;
     }
+	
+	@Override
+	public boolean checkIscrizione(int idCorso, int idPartecipante)
+	{
+		String sql = "SELECT EXISTS (SELECT 1 FROM Iscrizioni WHERE IdCorso = ? AND IdPartecipante = ?)";
 
+		try(Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
+		{
+		    s.setInt(1, idCorso);
+		    s.setInt(2, idPartecipante);
+		    ResultSet rs = s.executeQuery();
+		
+		    if(rs.next())
+		        return rs.getBoolean(1);
+		    else
+		    	throw new IscrizioneNotFoundException("Iscrizione con idCorso: " + idCorso + "e idPartecipante: " + idPartecipante + " non trovato");
+		}
+		catch(SQLException e)
+		{
+			throw new DAOException("Errore DB durante checkIscrizione", e);
+		}
+	}
+	
 	@Override
 	public Integer getNumeroIscrittiById(int idCorso)
 	{
@@ -299,7 +322,26 @@ public class CorsoDAO_Postgres implements CorsoDAO
     }
 	
 	@Override
-    public void delete(int IdCorso)
+	public void deleteIscrizione(int idCorso, int idPartecipante)
+	{
+		String sql = "DELETE "
+				   + "FROM Iscrizioni "
+				   + "WHERE IdCorso = ? AND IdPartecipante = ?";
+		
+		try(Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
+        {
+            s.setInt(1, idCorso);
+            s.setInt(2, idPartecipante);
+            s.executeUpdate();
+        }
+        catch(SQLException e)
+        {
+        	throw new DAOException("Errore DB durante eliminazione Iscrizione", e);
+        }
+	}
+	
+	@Override
+    public void delete(int idCorso)
     {
         String sql = "DELETE "
         		   + "FROM Corso "
@@ -307,7 +349,7 @@ public class CorsoDAO_Postgres implements CorsoDAO
         
         try(Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
         {
-            s.setInt(1, IdCorso);
+            s.setInt(1, idCorso);
             s.executeUpdate();
         }
         catch(SQLException e)

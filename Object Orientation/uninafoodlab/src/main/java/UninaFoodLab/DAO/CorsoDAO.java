@@ -14,7 +14,9 @@ public interface CorsoDAO
     List<Corso> getCorsiByIdChef(int idChef);
     List<Corso> getCorsiByIdPartecipante(int idPartecipante);
     List<Corso> getAllCorsi();
+    boolean checkIscrizione(int idCorso, int idPartecipante);
     Integer getNumeroIscrittiById(int idCorso);
     void update(Corso oldCorso, Corso newCorso);
+    void deleteIscrizione(int idCorso, int idPartecipante);
     void delete(int idCorso);
 }

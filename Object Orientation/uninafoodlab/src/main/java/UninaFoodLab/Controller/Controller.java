@@ -730,9 +730,17 @@ public class Controller
      *  -------------------------
 	*/
 	
-	public int getNumeroIscritti(int idCourse)
+	public Integer getNumeroIscritti(int idCourse)
 	{
-		return getCorsoDAO().getNumeroIscrittiById(idCourse);
+		try
+		{
+			return getCorsoDAO().getNumeroIscrittiById(idCourse);
+		}
+		catch(DAOException e)
+		{
+			LOGGER.log(Level.SEVERE, "Errore getNumeroIscritti da DB", e);
+			return null;
+		}
 	}
 	
 	public void showCourseDetail(JFrame parentFrame, int idCorso)
@@ -769,15 +777,44 @@ public class Controller
 		parent.removeSessionCard(panel);
 	}
 	
-	public void registerIscrizione(int idCourse)
+	public void registerIscrizione(int idCorso)
 	{
-		getCorsoDAO().saveIscrizione(idCourse, getLoggedUser().getId());
+		try
+		{
+			getCorsoDAO().saveIscrizione(idCorso, getLoggedUser().getId());
+		}
+		catch(DAOException e)
+		{		
+			LOGGER.log(Level.SEVERE, "Errore registerIscrizione da DB", e);
+		}
 	}
 	
-	public void disiscriviCorso(Window owner, DetailedCourseFrame card, int courseId)
+	public Boolean checkIscritto(int idCorso)
 	{
-		card.dispose();
-		((MyCoursesFrame)owner).removeCourseCard(courseId);
+		try
+		{
+			return getCorsoDAO().checkIscrizione(idCorso, getLoggedUser().getId());
+		}
+		catch(DAOException e)
+		{
+			LOGGER.log(Level.SEVERE, "Errore checkIscritto da DB", e);
+			return null;
+		}
+	}
+	
+	public void disiscriviCorso(Window owner, DetailedCourseFrame card, int idCorso)
+	{
+		try
+		{
+			getCorsoDAO().deleteIscrizione(idCorso, getLoggedUser().getId());
+			card.dispose();
+			((MyCoursesFrame)owner).removeCourseCard(idCorso);
+		}
+		catch(DAOException e)
+		{
+			card.showMessage("Impossibile disiscriversi dal corso!! ");
+			LOGGER.log(Level.SEVERE, "Errore disiscriviCorso da DB", e);
+		}
 	}
 	
 	public String[] loadFrequenza()
