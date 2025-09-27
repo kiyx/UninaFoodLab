@@ -668,7 +668,7 @@ public class Controller
 			{
 				for(Corso c : cacheCorsi)
 				{			
-					if(c.getChef()==getLoggedUser())
+					if(c.getChef().getId()!=getLoggedUser().getId())
 					{
 						idsCorsi.add(c.getId());
 						namesCorsi.add(c.getNome());
