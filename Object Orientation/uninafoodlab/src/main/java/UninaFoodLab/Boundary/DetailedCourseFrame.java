@@ -1,6 +1,7 @@
 package UninaFoodLab.Boundary;
 
 import java.awt.*;
+import java.awt.event.MouseAdapter;
 import java.math.BigDecimal;
 import java.time.*;
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ public class DetailedCourseFrame extends JDialog
 {
     private static final long serialVersionUID = 1L;
 
-    Window owner;
+    private Window owner;
     private int idCorso;
     private LocalDate courseStartDate;
     private Integer courseLimitePartecipanti;
@@ -42,7 +43,7 @@ public class DetailedCourseFrame extends JDialog
     {
         super(owner, "Dettaglio Corso", ModalityType.APPLICATION_MODAL);
         this.owner = owner;
-        
+
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setMinimumSize(new Dimension(900, 650));
         setLayout(new MigLayout("fill, insets 15", "[grow]", "[][grow][pref!]"));
@@ -53,6 +54,7 @@ public class DetailedCourseFrame extends JDialog
 
     private void initComponents()
     {
+        // ---------- INFO CORSO ----------
         courseInfoPanel = new JPanel(new MigLayout("wrap 2, ins 15", "[][grow]", "[][][][][][][][][grow][pref!]"));
         courseInfoPanel.setBackground(new Color(255, 249, 240));
         courseInfoPanel.setBorder(new TitledBorder(BorderFactory.createLineBorder(new Color(255, 152, 0), 2),
@@ -98,6 +100,7 @@ public class DetailedCourseFrame extends JDialog
         lblCosto = new JLabel();
         courseInfoPanel.add(lblCosto);
 
+        // ---------- BOTTONI ----------
         buttonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         buttonsPanel.setOpaque(false);
 
@@ -109,27 +112,23 @@ public class DetailedCourseFrame extends JDialog
         btnDeleteCourse.setBackground(new Color(244, 67, 54));
         btnDeleteCourse.setForeground(Color.WHITE);
 
-        if(owner instanceof HomepageFrame)
-        {
-        	btnIscrivitiCorso = new JXButton("Iscriviti", FontIcon.of(MaterialDesign.MDI_ACCOUNT_PLUS, 16));
-            btnIscrivitiCorso.setBackground(new Color(255, 152, 0));
-            btnIscrivitiCorso.setForeground(Color.WHITE);
-            buttonsPanel.add(btnIscrivitiCorso);
-        }
-        else
-        {
-        	btnDisiscrivitiCorso = new JXButton("Disiscriviti", FontIcon.of(MaterialDesign.MDI_DELETE_SWEEP, 16));
-            btnDisiscrivitiCorso.setBackground(new Color(244, 67, 54));
-            btnDisiscrivitiCorso.setForeground(Color.WHITE);
-            buttonsPanel.add(btnDisiscrivitiCorso);
-        }
+        btnIscrivitiCorso = new JXButton("Iscriviti", FontIcon.of(MaterialDesign.MDI_ACCOUNT_PLUS, 16));
+        btnIscrivitiCorso.setBackground(new Color(255, 152, 0));
+        btnIscrivitiCorso.setForeground(Color.WHITE);
 
+        btnDisiscrivitiCorso = new JXButton("Disiscriviti", FontIcon.of(MaterialDesign.MDI_DELETE_SWEEP, 16));
+        btnDisiscrivitiCorso.setBackground(new Color(244, 67, 54));
+        btnDisiscrivitiCorso.setForeground(Color.WHITE);
+
+        buttonsPanel.add(btnIscrivitiCorso);
+        buttonsPanel.add(btnDisiscrivitiCorso);
         buttonsPanel.add(btnEditCourse);
         buttonsPanel.add(btnDeleteCourse);
-        courseInfoPanel.add(buttonsPanel, "span, growx, align right");
 
+        courseInfoPanel.add(buttonsPanel, "span, growx, align right");
         add(courseInfoPanel, "growx, wrap");
 
+        // ---------- SESSIONI ----------
         sessionsPanel = new JPanel(new MigLayout("wrap 1, insets 5, gapy 10", "[grow]"));
         sessionsPanel.setBackground(Color.WHITE);
         sessionsPanel.setBorder(new TitledBorder(BorderFactory.createLineBorder(new Color(255, 152, 0)),
@@ -151,12 +150,40 @@ public class DetailedCourseFrame extends JDialog
     {
         btnEditCourse.addActionListener(e -> onEditCourse());
         btnDeleteCourse.addActionListener(e -> onDeleteCourse());
-        if(owner instanceof HomepageFrame) 
-        	btnIscrivitiCorso.addActionListener(e -> onIscrivitiCorso());
-        else	
-        	btnDisiscrivitiCorso.addActionListener(e -> onDisiscrivitiCorso());
+        btnIscrivitiCorso.addActionListener(e -> onIscrivitiCorso());
+        btnDisiscrivitiCorso.addActionListener(e -> onDisiscrivitiCorso());
+
+        // Hover: da Iscritto → mostra Disiscriviti
+        btnIscrivitiCorso.addMouseListener(new MouseAdapter()
+									       {
+									           @Override
+									           public void mouseEntered(java.awt.event.MouseEvent e)
+									           {
+									               if(!btnIscrivitiCorso.isEnabled() || "Iscritto".equals(btnIscrivitiCorso.getText()))
+									               {
+									                   btnIscrivitiCorso.setVisible(false);
+									                   btnDisiscrivitiCorso.setVisible(true);
+									               }
+									           }
+									       });
+
+        btnDisiscrivitiCorso.addMouseListener(new MouseAdapter()
+										      {
+										          @Override
+										          public void mouseExited(java.awt.event.MouseEvent e)
+										          {
+										              if(!btnIscrivitiCorso.isEnabled() || "Iscritto".equals(btnIscrivitiCorso.getText()))
+										              {
+										                  btnDisiscrivitiCorso.setVisible(false);
+										                  btnIscrivitiCorso.setVisible(true);
+										              }
+										          }
+										      });
     }
 
+    public void showMessage(String msg) { JOptionPane.showMessageDialog(this, msg); }
+    
+    // ---------- SET DATA ----------
     public void setCourseData(int courseId, String nome, String descrizione, LocalDate dataInizio, int numeroSessioni,
                               String frequenza, Integer limitePartecipanti, BigDecimal costo, String nomeChef, String cognomeChef, String userContext)
     {
@@ -170,64 +197,82 @@ public class DetailedCourseFrame extends JDialog
         lblDataInizio.setText(dataInizio.toString());
         lblNumeroSessioni.setText(String.valueOf(numeroSessioni));
         lblFrequenza.setText(frequenza);
-        lblLimitePartecipanti.setText( (limitePartecipanti != null) ? String.valueOf(limitePartecipanti) : "Nessuno");
+        lblLimitePartecipanti.setText((limitePartecipanti != null) ? String.valueOf(limitePartecipanti) : "Nessuno");
         lblCosto.setText(String.format("€ %.2f", costo));
 
         updateButtonsVisibility();
     }
 
     private void updateButtonsVisibility()
-    {       
-    	boolean corsoIniziato = courseStartDate != null && courseStartDate.isBefore(today);
-        boolean editDelete = Controller.getController().isChefLogged() && userContext.equals("MyCourses") && !corsoIniziato;
-        
-        btnEditCourse.setVisible(editDelete);
-        btnDeleteCourse.setVisible(editDelete);
+    {
+        boolean corsoIniziato = courseStartDate != null && courseStartDate.isBefore(today);
+        boolean isChef = Controller.getController().isChefLogged();
 
-        if(owner instanceof HomepageFrame)
+        // Default nascondo tutto
+        btnIscrivitiCorso.setVisible(false);
+        btnDisiscrivitiCorso.setVisible(false);
+        btnEditCourse.setVisible(false);
+        btnDeleteCourse.setVisible(false);
+
+        if(isChef && userContext.equals("MyCourses"))
         {
-        	boolean canIscriviti = !corsoIniziato &&
-                    (courseLimitePartecipanti == null || Controller.getController().getNumeroIscritti(idCorso) < courseLimitePartecipanti);
+            // Chef → solo modifica/elimina
+            btnEditCourse.setVisible(!corsoIniziato);
+            btnDeleteCourse.setVisible(!corsoIniziato);
+        }
+        else
+        {
+            // Utente
+            if("Homepage".equals(userContext))
+            {
+                boolean canIscriviti = !corsoIniziato &&
+                        (courseLimitePartecipanti == null || Controller.getController().getNumeroIscritti(idCorso) < courseLimitePartecipanti);
 
-        	boolean checkIscr = Controller.getController().checkIscritto(idCorso);
-        			
-        	if(checkIscr)
-        	{
-        		btnIscrivitiCorso.setText("Iscritto");
-        		btnIscrivitiCorso.setVisible(true);
-                btnIscrivitiCorso.setEnabled(false);
-        	}
-        	else
-        	{
-        		btnIscrivitiCorso.setVisible(canIscriviti);
-                btnIscrivitiCorso.setEnabled(canIscriviti);
-        	}          
+                boolean checkIscr = Controller.getController().checkIscritto(idCorso);
+
+                if(checkIscr)
+                {
+                    btnIscrivitiCorso.setText("Iscritto");
+                    btnIscrivitiCorso.setEnabled(false);
+                    btnIscrivitiCorso.setVisible(true);
+                }
+                else
+                {
+                    btnIscrivitiCorso.setText("Iscriviti");
+                    btnIscrivitiCorso.setEnabled(canIscriviti);
+                    btnIscrivitiCorso.setVisible(canIscriviti);
+                }
+            }
+            else if ("MyCourses".equals(userContext))
+            {
+                btnDisiscrivitiCorso.setVisible(true);
+            }
         }
     }
 
+    // ---------- SESSIONI ----------
     public void setSessions(List<Sessione> sessioni)
     {
         sessionsPanel.removeAll();
-        
-        if(sessioni != null)
+
+        if (sessioni != null)
         {
-        	int conta = 1;
+            int conta = 1;
             for(Sessione s : sessioni)
             {
-            	boolean pratica = s instanceof SessionePratica;
-            	List<String> recipes = new ArrayList<>();
-            	
-            	if(pratica)
-            	{
-            		for(Ricetta r : ((SessionePratica)s).getRicette())
-            			recipes.add(r.getNome());
-            	}
-            	
-            	
+                boolean pratica = s instanceof SessionePratica;
+                List<String> recipes = new ArrayList<>();
+
+                if(pratica)
+                {
+                    for (Ricetta r : ((SessionePratica) s).getRicette())
+                        recipes.add(r.getNome());
+                }
+
                 sessionsPanel.add(new SessionInfoPanel(conta++, pratica, s.getData().toLocalDate(), s.getOrario().toLocalTime(), s.getDurata(), recipes,
-                				  (pratica) ? ((SessionePratica)s).getIndirizzo() : null, 
-                				  (pratica) ? ((SessionePratica)s).getNumeroPartecipanti() : null, 
-                				  (!pratica) ? ((SessioneOnline)s).getLinkRiunione() : null, userContext) , "growx");          
+                        (pratica) ? ((SessionePratica) s).getIndirizzo() : null,
+                        (pratica) ? ((SessionePratica) s).getNumeroPartecipanti() : null,
+                        (!pratica) ? ((SessioneOnline) s).getLinkRiunione() : null, userContext), "growx");
             }
         }
 
@@ -235,24 +280,20 @@ public class DetailedCourseFrame extends JDialog
         sessionsPanel.repaint();
     }
 
-    public void showMessage(String msg)
-    {
-    	JOptionPane.showMessageDialog(this, msg);
-    }
-    
+    // ---------- ACTIONS ----------
     private void onIscrivitiCorso()
     {
-    	Controller.getController().registerIscrizione(idCorso);
+        Controller.getController().registerIscrizione(idCorso);
         JOptionPane.showMessageDialog(this, "Iscritto al corso: " + lblNome.getText());
         btnIscrivitiCorso.setEnabled(false);
-    	btnIscrivitiCorso.setText("Iscritto");
+        btnIscrivitiCorso.setText("Iscritto");
     }
-    
+
     private void onDisiscrivitiCorso()
     {
-    	Controller.getController().disiscriviCorso(owner, DetailedCourseFrame.this, idCorso);
+        Controller.getController().disiscriviCorso(owner, DetailedCourseFrame.this, idCorso);
     }
-    
+
     private void onEditCourse()
     {
         JOptionPane.showMessageDialog(this, "Modifica corso " + lblNome.getText());
@@ -262,7 +303,7 @@ public class DetailedCourseFrame extends JDialog
     private void onDeleteCourse()
     {
         int result = JOptionPane.showConfirmDialog(this, "Sei sicuro di voler eliminare questo corso?", "Elimina Corso", JOptionPane.YES_NO_OPTION);
-        if(result == JOptionPane.YES_OPTION)
+        if (result == JOptionPane.YES_OPTION)
         {
             JOptionPane.showMessageDialog(this, "Corso eliminato: " + idCorso);
             dispose();

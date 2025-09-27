@@ -808,7 +808,7 @@ public class Controller
 		{
 			getCorsoDAO().deleteIscrizione(idCorso, getLoggedUser().getId());
 			card.dispose();
-			((MyCoursesFrame)owner).removeCourseCard(idCorso);
+			if(owner instanceof MyCoursesFrame) ((MyCoursesFrame)owner).removeCourseCard(idCorso);
 		}
 		catch(DAOException e)
 		{
