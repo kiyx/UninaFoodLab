@@ -354,7 +354,7 @@ public class CorsoDAO_Postgres implements CorsoDAO
         }
         catch(SQLException e)
         {
-        	throw new DAOException("Errore DB durante eliminazione Corso", e);
+        	throw new DAOException("Non puoi cancellare un corso che è attivo (con un numero di iscritti maggiore di 0 non ancora terminato)", e);
         }
     }
 	

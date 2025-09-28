@@ -20,7 +20,7 @@ public class SessionInfoPanel extends JPanel
     private JXPanel btnPanel;
     private JXButton btnAdesione;
     private JXLabel titleLbl, dataLbl, orarioLabel, durataLabel, ricetteLabel, luogoLabel, partecipantiLabel, linkLabel;
-    private final int id, durata;
+    private final int idSession, number, durata;
     private final Integer numeroPartecipanti;
     private final boolean pratica;
     private final LocalDate dataStr;
@@ -30,10 +30,11 @@ public class SessionInfoPanel extends JPanel
     
     private ActionListener adesioneListener;
 
-    public SessionInfoPanel(int id, boolean pratica, LocalDate dataStr, LocalTime orarioStr, int durata, List<String> ricette, String luogo,
+    public SessionInfoPanel(int idSession, int number, boolean pratica, LocalDate dataStr, LocalTime orarioStr, int durata, List<String> ricette, String luogo,
     						Integer numeroPartecipanti, String linkRiunione, String userContext)
     {
-        this.id = id;
+    	this.idSession = idSession;
+        this.number = number;
         this.pratica = pratica;
         this.dataStr = dataStr;
         this.orarioStr = orarioStr;
@@ -57,7 +58,7 @@ public class SessionInfoPanel extends JPanel
     private void initComponents()
     {
     
-    	titleLbl = new JXLabel(String.format("Sessione %d - %s", id, pratica ? "Pratica" : "Online"));
+    	titleLbl = new JXLabel(String.format("Sessione %d - %s", number, pratica ? "Pratica" : "Online"));
     	titleLbl.setFont(new Font("Segoe UI", Font.BOLD, 16));
         
     	titleLbl.setForeground(dataStr.isAfter(LocalDate.now()) ? Color.GRAY : new Color(255, 87, 34));
@@ -124,7 +125,8 @@ public class SessionInfoPanel extends JPanel
         {
             public void actionPerformed(ActionEvent e)
             {
-                JOptionPane.showMessageDialog(SessionInfoPanel.this, "Adesione alla sessione " + id);
+               JOptionPane.showMessageDialog(SessionInfoPanel.this, "Adesione alla sessione " + number);
+               Controller.getController().saveAdesione(idSession); 
             }
         };
         btnAdesione.addActionListener(adesioneListener);

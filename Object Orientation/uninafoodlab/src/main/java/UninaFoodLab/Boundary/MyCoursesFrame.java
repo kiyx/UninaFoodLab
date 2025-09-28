@@ -259,8 +259,9 @@ public class MyCoursesFrame extends JXFrame implements ArgumentFilterable
      */
     public void addCourseCard(CourseCardPanel card) 
     {
+    	card.addCourseClickListener(cardClickListener);
         allCourseCards.add(card);
-
+        
         if(card.matchesText(currentSearchText) && card.matchesArguments(currentSelectedArgumentsIds))
             filteredCourseCards.add(card);
 

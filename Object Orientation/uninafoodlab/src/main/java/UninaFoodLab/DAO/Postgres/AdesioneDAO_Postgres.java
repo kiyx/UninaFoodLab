@@ -4,36 +4,16 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
 import UninaFoodLab.DAO.AdesioneDAO;
 import UninaFoodLab.DTO.Adesione;
-import UninaFoodLab.DTO.Partecipante;
-import UninaFoodLab.DTO.SessionePratica;
 import UninaFoodLab.Exceptions.DAOException;
 
 public class AdesioneDAO_Postgres implements AdesioneDAO
 {
-	private Adesione mapResultSetToAdesione(ResultSet rs) throws SQLException
-	{
-		Partecipante p = new Partecipante();
-		p.setId(rs.getInt("IdPartecipante"));
-		
-		SessionePratica s = new SessionePratica();
-		s.setId(rs.getInt("IdSessionePratica"));
-		
-		Adesione a = new Adesione(
-									rs.getDate("DataAdesione").toLocalDate(),
-									p,
-									s
-								 );
-		
-		a.setIdPartecipante(rs.getInt("IdPartecipante"));		
-		a.setIdSessionePratica(rs.getInt("IdSessionePratica"));
-		
-		return a;
-	}
-	
 	@Override
 	public void save(Adesione toSaveAdesione)
 	{
@@ -43,8 +23,8 @@ public class AdesioneDAO_Postgres implements AdesioneDAO
 
 	  try(Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
 	  {
-	      s.setInt(1, toSaveAdesione.getIdPartecipante());
-	      s.setInt(2, toSaveAdesione.getIdSessionePratica());
+	      s.setInt(1, toSaveAdesione.getPartecipante().getId());
+	      s.setInt(2, toSaveAdesione.getSessione().getId());
 	      s.setDate(3, toSaveAdesione.getDataAdesione());
 	      s.executeUpdate();
 	  }
@@ -55,11 +35,28 @@ public class AdesioneDAO_Postgres implements AdesioneDAO
 	}
 	
 	@Override
-	public List<Adesione> getAdesioniByIdSessionePratica(int idSessionePratica)
+	public List<Integer> getAdesioniByIdSessionePratica(int idSessionePratica)
 	{
 		String sql = 
-					 "SELECT *"
-					 + "FROM Adesioni A JOIN";
+					 "SELECT * "
+				   + "FROM Adesioni "
+				   + "WHERE IdSessionePratica = ?";
+		
+		List<Integer> adesioni = new ArrayList<>();
+        
+        try(Connection conn = ConnectionManager.getConnection(); Statement s = conn.createStatement())
+        {
+            ResultSet rs = s.executeQuery(sql);
+
+            while(rs.next())
+            	 adesioni.add(rs.getInt("IdPartecipante"));
+        }
+        catch(SQLException e)
+        {
+        	throw new DAOException("Errore DB durante getAdesioniByIdSessionePratica", e);
+        }
+        
+        return adesioni;
 	}
 	
 	@Override

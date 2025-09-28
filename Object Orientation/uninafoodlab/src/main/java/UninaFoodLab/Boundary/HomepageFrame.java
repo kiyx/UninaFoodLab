@@ -16,12 +16,9 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.border.EmptyBorder;
 
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXFrame;
@@ -228,6 +225,7 @@ public class HomepageFrame extends JXFrame implements ArgumentFilterable
         currentPage = 0;
         loadPage(currentPage);
     }
+    
     
     private void loadInitialCards()
     {

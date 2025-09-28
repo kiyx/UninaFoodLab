@@ -873,13 +873,8 @@ public class Controller
 	{
 		try
 		{	
-			/*if(cacheCorsi == null || cacheCorsi.isEmpty())
-				cacheCorsi = (isChefLogged()) ? getCorsoDAO().getCorsiByIdChef(loggedUser.getId()) : 
-										    	getCorsoDAO().getCorsiIscrittiByIdPartecipante(loggedUser.getId());*/
-			
 			List<Integer> ids = (isChefLogged()) ? getCorsoDAO().getCorsiByIdChef(getLoggedUser().getId()) : 
 									 getCorsoDAO().getIdCorsiIscrittiByIdPartecipante(getLoggedUser().getId());
-
 			
 			for(Corso c : cacheCorsi)
 			{				
@@ -999,7 +994,7 @@ public class Controller
 			        numeroSessioni
 			);
 			courseFrame.addCourseCard(newCard);
-			
+
 			JOptionPane.showMessageDialog(currDialog, "Corso " + nomeCorso + " salvato con successo");
 			LOGGER.log(Level.INFO, "Salvataggio del corso " + nomeCorso + " dello chef " + getLoggedUser().getUsername() + " effettuato ");
 			currDialog.dispose();
@@ -1011,6 +1006,49 @@ public class Controller
 		}
 	}
 	
+	public void saveAdesione(int idSession)
+	{
+		try
+		{
+			
+		}
+		catch(DAOException e)
+		{
+			
+			LOGGER.log(Level.SEVERE, "Errore nel salvataggio dell'adesione alla sessione pratica " + idSession, e);
+		}
+	}
+	
+	public void eliminaCorso(Window owner, DetailedCourseFrame card, int idCorso)
+	{
+		try
+		{
+			getCorsoDAO().delete(idCorso);
+			
+			Corso toRemove = null;
+			for(Corso c : cacheCorsi)
+			{
+				if(c.getId() == idCorso)
+				{
+					toRemove = c;
+					break;
+				}	
+			}
+
+			cacheCorsi.remove(toRemove);
+			card.showMessage("Corso eliminato!");
+            card.dispose();
+            if(owner instanceof MyCoursesFrame) ((MyCoursesFrame)owner).removeCourseCard(idCorso);
+            
+		}
+		catch(DAOException e)
+		{
+			card.showMessage(e.getMessage());
+			LOGGER.log(Level.SEVERE, "Errore eliminaCorso da DB", e);
+		}
+	}
+	
+
 	/**
 	 * -------------------------
 	 * 
