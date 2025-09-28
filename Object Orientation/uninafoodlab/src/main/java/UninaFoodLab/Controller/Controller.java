@@ -872,30 +872,40 @@ public class Controller
 						  List<List<String>> namesArguments, List<Date> startDates, List<Integer> sessionsNumbers)
 	{
 		try
-		{
-			if(cacheCorsi == null || cacheCorsi.isEmpty())
+		{	
+			/*if(cacheCorsi == null || cacheCorsi.isEmpty())
 				cacheCorsi = (isChefLogged()) ? getCorsoDAO().getCorsiByIdChef(loggedUser.getId()) : 
-										    	getCorsoDAO().getCorsiByIdPartecipante(loggedUser.getId());
+										    	getCorsoDAO().getCorsiIscrittiByIdPartecipante(loggedUser.getId());*/
+			
+			List<Integer> ids = (isChefLogged()) ? getCorsoDAO().getCorsiByIdChef(getLoggedUser().getId()) : 
+									 getCorsoDAO().getIdCorsiIscrittiByIdPartecipante(getLoggedUser().getId());
 
+			
 			for(Corso c : cacheCorsi)
 			{				
-				idsCorsi.add(c.getId());
-				namesCorsi.add(c.getNome());
-
-	            List<Integer> thisCourseArgIds = new ArrayList<>();
-	            List<String> thisCourseArgNames = new ArrayList<>();
-	            
-				for(Argomento a : c.getArgomenti())	
+				for(Integer id : ids)
 				{
-					thisCourseArgIds.add(a.getId());
-		            thisCourseArgNames.add(a.getNome());
-				}	
-				
-				idsArguments.add(thisCourseArgIds);
-	            namesArguments.add(thisCourseArgNames);
-	            
-				startDates.add(c.getDataInizio());
-				sessionsNumbers.add(c.getNumeroSessioni());
+					if(c.getId() == id.intValue())
+					{
+						idsCorsi.add(c.getId());
+						namesCorsi.add(c.getNome());
+
+			            List<Integer> thisCourseArgIds = new ArrayList<>();
+			            List<String> thisCourseArgNames = new ArrayList<>();
+			            
+						for(Argomento a : c.getArgomenti())	
+						{
+							thisCourseArgIds.add(a.getId());
+				            thisCourseArgNames.add(a.getNome());
+						}	
+						
+						idsArguments.add(thisCourseArgIds);
+			            namesArguments.add(thisCourseArgNames);
+			            
+						startDates.add(c.getDataInizio());
+						sessionsNumbers.add(c.getNumeroSessioni());
+					}
+				}
 			}
 		}
 		catch(DAOException e)

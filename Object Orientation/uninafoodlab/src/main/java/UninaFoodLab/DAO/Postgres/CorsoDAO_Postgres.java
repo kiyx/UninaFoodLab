@@ -160,14 +160,14 @@ public class CorsoDAO_Postgres implements CorsoDAO
     }
 	
 	@Override
-    public List<Corso> getCorsiByIdChef(int idChef)
+    public List<Integer> getCorsiByIdChef(int idChef)
     {
         String sql =
-        			 "SELECT * "
+        			 "SELECT IdCorso "
         		   + "FROM Corso "
         		   + "WHERE IdChef = ?";
         
-        List<Corso> courses = new ArrayList<>();
+        List<Integer> courses = new ArrayList<>();
         
         try(Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
         {
@@ -175,7 +175,7 @@ public class CorsoDAO_Postgres implements CorsoDAO
             ResultSet rs = s.executeQuery();
 
             while(rs.next())
-                courses.add(mapResultSetToCorso(rs));
+                courses.add(rs.getInt("IdCorso"));
         }
         catch(SQLException e)
         {
@@ -186,14 +186,14 @@ public class CorsoDAO_Postgres implements CorsoDAO
     }
 
 	@Override 
-	public List<Corso> getCorsiByIdPartecipante(int idPartecipante)
+	public List<Integer> getIdCorsiIscrittiByIdPartecipante(int idPartecipante)
 	{
 		String sql =
 		   			 "SELECT * "
 		   		   + "FROM Corso C JOIN Iscrizioni I ON C.IdCorso = I.IdCorso "
 		   		   + "WHERE IdPartecipante = ?";
    
-	   List<Corso> courses = new ArrayList<>();
+	   List<Integer> courses = new ArrayList<>();
 	   
 	   try(Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
 	   {
@@ -201,7 +201,7 @@ public class CorsoDAO_Postgres implements CorsoDAO
 	       ResultSet rs = s.executeQuery();
 	
 	       while(rs.next())
-	           courses.add(mapResultSetToCorso(rs));
+	           courses.add(rs.getInt("IdCorso"));
 	   }
 	   catch(SQLException e)
 	   {
@@ -234,7 +234,7 @@ public class CorsoDAO_Postgres implements CorsoDAO
         
         return courses;
     }
-	
+
 	@Override
 	public boolean checkIscrizione(int idCorso, int idPartecipante)
 	{

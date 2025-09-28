@@ -11,11 +11,11 @@ public interface CorsoDAO
 	void save(Corso toSaveCorso, Connection conn);
 	void saveIscrizione(int idCorso, int idPartecipante);
     Corso getCorsoById(int idCorso);
-    List<Corso> getCorsiByIdChef(int idChef);
-    List<Corso> getCorsiByIdPartecipante(int idPartecipante);
+    List<Integer> getCorsiByIdChef(int idChef);
+    List<Integer> getIdCorsiIscrittiByIdPartecipante(int idPartecipante);
     List<Corso> getAllCorsi();
-    boolean checkIscrizione(int idCorso, int idPartecipante);
     Integer getNumeroIscrittiById(int idCorso);
+    boolean checkIscrizione(int idCorso, int idPartecipante);
     void update(Corso oldCorso, Corso newCorso);
     void deleteIscrizione(int idCorso, int idPartecipante);
     void delete(int idCorso);

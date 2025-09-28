@@ -2,6 +2,7 @@ package UninaFoodLab.Boundary;
 
 import java.awt.*;
 import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.math.BigDecimal;
 import java.time.*;
 import java.util.ArrayList;
@@ -157,7 +158,7 @@ public class DetailedCourseFrame extends JDialog
         btnIscrivitiCorso.addMouseListener(new MouseAdapter()
 									       {
 									           @Override
-									           public void mouseEntered(java.awt.event.MouseEvent e)
+									           public void mouseEntered(MouseEvent e)
 									           {
 									               if(!btnIscrivitiCorso.isEnabled() || "Iscritto".equals(btnIscrivitiCorso.getText()))
 									               {
@@ -170,7 +171,7 @@ public class DetailedCourseFrame extends JDialog
         btnDisiscrivitiCorso.addMouseListener(new MouseAdapter()
 										      {
 										          @Override
-										          public void mouseExited(java.awt.event.MouseEvent e)
+										          public void mouseExited(MouseEvent e)
 										          {
 										              if(!btnIscrivitiCorso.isEnabled() || "Iscritto".equals(btnIscrivitiCorso.getText()))
 										              {
