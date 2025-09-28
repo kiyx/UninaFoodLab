@@ -109,6 +109,12 @@ public class Controller
 		return loggedUser instanceof Partecipante;
 	}
 
+	/** @return Chef attualmente autenticato */
+	public Chef getLoggedChef()
+	{
+	    return (Chef)getLoggedUser();
+	}
+	
 	/** Metodi getter Lazy-loaded per ogni DAO */
 	public AdesioneDAO_Postgres getAdesioneDAO()
 	{
@@ -782,6 +788,7 @@ public class Controller
 		try
 		{
 			getCorsoDAO().saveIscrizione(idCorso, getLoggedUser().getId());
+			((Partecipante)getLoggedUser()).getCorsi().add(getCorsoDAO().getCorsoById(idCorso));
 		}
 		catch(DAOException e)
 		{		
@@ -807,6 +814,7 @@ public class Controller
 		try
 		{
 			getCorsoDAO().deleteIscrizione(idCorso, getLoggedUser().getId());
+			((Partecipante)getLoggedUser()).getCorsi().remove(getCorsoDAO().getCorsoById(idCorso));
 			card.dispose();
 			if(owner instanceof MyCoursesFrame) ((MyCoursesFrame)owner).removeCourseCard(idCorso);
 		}
@@ -1006,15 +1014,44 @@ public class Controller
 		}
 	}
 	
-	public void saveAdesione(int idSession)
+	public void saveAdesione(SessionInfoPanel panel, int idSession)
 	{
 		try
 		{
-			
+			Adesione toSave = new Adesione(LocalDate.now(), (Partecipante)getLoggedUser(), getSessionePraticaDAO().getSessionePraticaById(idSession));
+			getAdesioneDAO().save(toSave);
+			((Partecipante)getLoggedUser()).aggiungiAdesione(toSave);
 		}
 		catch(DAOException e)
 		{
-			
+			panel.showMessage("Non puoi aderire alla sessione se sei a meno di 3 giorni dall'avvenimento di essa!");
+			LOGGER.log(Level.SEVERE, "Errore nel salvataggio dell'adesione alla sessione pratica " + idSession, e);
+		}
+	}
+	
+	public Boolean checkAdesione(int idSessionePratica)
+	{
+		try
+		{
+			return getAdesioneDAO().checkAdesione(idSessionePratica, getLoggedUser().getId());
+		}
+		catch(DAOException e)
+		{
+			LOGGER.log(Level.SEVERE, "Errore checkAderito da DB", e);
+			return null;
+		}
+	}
+	
+	public void removeAdesione(SessionInfoPanel panel, int idSession)
+	{
+		try
+		{
+			getAdesioneDAO().delete(getLoggedUser().getId(), idSession);
+			((Partecipante)getLoggedUser()).getAdesioni().remove(new Adesione(LocalDate.now(), (Partecipante)getLoggedUser(), getSessionePraticaDAO().getSessionePraticaById(idSession)));
+		}
+		catch(DAOException e)
+		{
+			panel.showMessage("Non puoi eliminare l'adesione alla sessione se sei a meno di 3 giorni dall'avvenimento di essa!");
 			LOGGER.log(Level.SEVERE, "Errore nel salvataggio dell'adesione alla sessione pratica " + idSession, e);
 		}
 	}
@@ -1739,12 +1776,4 @@ public class Controller
    	LOGGER.log(Level.WARNING, "Eliminazione fallita: {0}", message);
        currDialog.showError(message);
    }
-   
-   public Chef getLoggedChef()
-   {
-   		return (Chef)getLoggedUser();
-   }
-
-   
-
 }

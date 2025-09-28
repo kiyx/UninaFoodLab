@@ -11,6 +11,7 @@ import java.util.List;
 import UninaFoodLab.DAO.AdesioneDAO;
 import UninaFoodLab.DTO.Adesione;
 import UninaFoodLab.Exceptions.DAOException;
+import UninaFoodLab.Exceptions.IscrizioneNotFoundException;
 
 public class AdesioneDAO_Postgres implements AdesioneDAO
 {
@@ -18,7 +19,7 @@ public class AdesioneDAO_Postgres implements AdesioneDAO
 	public void save(Adesione toSaveAdesione)
 	{
 		String sql = 
-				 	  "INSERT INTO Adesione(IdPartecipante, IdSessionePratica, DataAdesione) " +
+				 	  "INSERT INTO Adesioni(IdPartecipante, IdSessionePratica, DataAdesione) " +
 				 	  "VALUES(?, ?, ?)";
 
 	  try(Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
@@ -60,11 +61,33 @@ public class AdesioneDAO_Postgres implements AdesioneDAO
 	}
 	
 	@Override
+	public boolean checkAdesione(int idSessionePratica, int idPartecipante)
+	{
+		String sql = "SELECT EXISTS (SELECT 1 FROM Adesioni WHERE IdSessionePratica = ? AND IdPartecipante = ?)";
+
+		try(Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
+		{
+		    s.setInt(1, idSessionePratica);
+		    s.setInt(2, idPartecipante);
+		    ResultSet rs = s.executeQuery();
+		
+		    if(rs.next())
+		        return rs.getBoolean(1);
+		    else
+		    	throw new IscrizioneNotFoundException("Adesione con idCorso: " + idSessionePratica + "e idPartecipante: " + idPartecipante + " non trovato");
+		}
+		catch(SQLException e)
+		{
+			throw new DAOException("Errore DB durante checkIscrizione", e);
+		}
+	}
+
+	@Override
 	public void delete(int idPartecipante, int idSessionePratica)
 	{
 		String sql = 
 		   			 "DELETE "
-		   		   + "FROM Utilizzi "
+		   		   + "FROM Adesioni "
 		   		   + "WHERE IdPartecipante = ? AND IdSessionePratica = ?";
 
 	   try(Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))

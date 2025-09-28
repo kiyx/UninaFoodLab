@@ -3,7 +3,6 @@ package UninaFoodLab.Boundary;
 import java.awt.*;
 import java.awt.event.*;
 import java.time.*;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import javax.swing.*;
 import org.jdesktop.swingx.*;
@@ -31,9 +30,9 @@ public class SessionInfoPanel extends JPanel
     private ActionListener adesioneListener;
 
     public SessionInfoPanel(int idSession, int number, boolean pratica, LocalDate dataStr, LocalTime orarioStr, int durata, List<String> ricette, String luogo,
-    						Integer numeroPartecipanti, String linkRiunione, String userContext)
+                            Integer numeroPartecipanti, String linkRiunione, String userContext)
     {
-    	this.idSession = idSession;
+        this.idSession = idSession;
         this.number = number;
         this.pratica = pratica;
         this.dataStr = dataStr;
@@ -57,11 +56,9 @@ public class SessionInfoPanel extends JPanel
 
     private void initComponents()
     {
-    
-    	titleLbl = new JXLabel(String.format("Sessione %d - %s", number, pratica ? "Pratica" : "Online"));
-    	titleLbl.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        
-    	titleLbl.setForeground(dataStr.isAfter(LocalDate.now()) ? Color.GRAY : new Color(255, 87, 34));
+        titleLbl = new JXLabel(String.format("Sessione %d - %s", number, pratica ? "Pratica" : "Online"));
+        titleLbl.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        titleLbl.setForeground(dataStr.isAfter(LocalDate.now()) ? Color.GRAY : new Color(255, 87, 34));
         add(titleLbl, "span 2, wrap");
 
         dataLbl = new JXLabel(dataStr.toString());
@@ -102,34 +99,91 @@ public class SessionInfoPanel extends JPanel
 
         btnPanel = new JXPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         btnPanel.setOpaque(false);
-        
-        btnAdesione = new JXButton("Adesione", FontIcon.of(MaterialDesign.MDI_CHECK, 16));
-        btnAdesione.setBackground(new Color(76, 175, 80));
-        btnAdesione.setForeground(Color.WHITE);
 
-        boolean canAdesione = pratica && !Controller.getController().isChefLogged() && userContext.equals("MyCourses") &&
-            !dataStr.isBefore(LocalDate.now()) && !(ChronoUnit.DAYS.between(LocalDate.now(), dataStr) <= 3);
+        // Mostra pulsante adesione solo se:
+        // - è pratica
+        // - non è uno Chef
+        // - il contesto è MyCourses
+        // - la sessione non è passata
+        if(pratica && !Controller.getController().isChefLogged() && "MyCourses".equals(userContext) && !dataStr.isBefore(LocalDate.now()))
+        {
+            boolean alreadyAdesione = Controller.getController().checkAdesione(idSession);
+            
+            if(alreadyAdesione)
+                createAdesioneButton("Elimina adesione", new Color(244, 67, 54), MaterialDesign.MDI_CLOSE);
+            else
+                createAdesioneButton("Aderisci", new Color(76, 175, 80), MaterialDesign.MDI_CHECK);
 
-        btnAdesione.setEnabled(canAdesione);
-
-        if(canAdesione)
             btnPanel.add(btnAdesione);
-
+        }
 
         add(btnPanel, "span 2, growx, align right");
     }
 
+    private void createAdesioneButton(String text, Color baseColor, MaterialDesign icon)
+    {
+        btnAdesione = new JXButton(text, FontIcon.of(icon, 16));
+        btnAdesione.setBackground(baseColor);
+        btnAdesione.setForeground(Color.WHITE);
+
+        // Hover effect
+        btnAdesione.addMouseListener(new MouseAdapter()
+        {
+            @Override
+            public void mouseEntered(MouseEvent e)
+            {
+                btnAdesione.setBackground(baseColor.darker());
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e)
+            {
+                btnAdesione.setBackground(baseColor);
+            }
+        });
+    }
+
     private void initListeners()
     {
-        adesioneListener = new ActionListener()
+        if(btnAdesione != null)
         {
-            public void actionPerformed(ActionEvent e)
+        	adesioneListener = new ActionListener()
             {
-               JOptionPane.showMessageDialog(SessionInfoPanel.this, "Adesione alla sessione " + number);
-               Controller.getController().saveAdesione(idSession); 
-            }
-        };
+                public void actionPerformed(ActionEvent e)
+                {
+                    boolean alreadyAdesione = Controller.getController().checkAdesione(idSession);
+
+                    if(alreadyAdesione)
+                    {
+                        Controller.getController().removeAdesione(SessionInfoPanel.this, idSession);
+                        showMessage("Hai eliminato l’adesione alla sessione " + number);
+                        updateAdesioneButton(false);
+                    }
+                    else
+                    {
+                        Controller.getController().saveAdesione(SessionInfoPanel.this, idSession);
+                        showMessage("Hai aderito alla sessione " + number);
+                        updateAdesioneButton(true);
+                    }
+                }
+            };
+            btnAdesione.addActionListener(adesioneListener);	
+        } 
+    }
+
+    private void updateAdesioneButton(boolean aderito)
+    {
+        btnPanel.removeAll();
+        
+        if(aderito)
+            createAdesioneButton("Elimina adesione", new Color(244, 67, 54), MaterialDesign.MDI_CLOSE);
+        else
+            createAdesioneButton("Aderisci", new Color(76, 175, 80), MaterialDesign.MDI_CHECK);
+
         btnAdesione.addActionListener(adesioneListener);
+        btnPanel.add(btnAdesione);
+        btnPanel.revalidate();
+        btnPanel.repaint();
     }
 
     public void disposeListeners()
@@ -140,4 +194,6 @@ public class SessionInfoPanel extends JPanel
             adesioneListener = null;
         }
     }
+    
+    public void showMessage(String msg) { JOptionPane.showMessageDialog(this, msg); }
 }

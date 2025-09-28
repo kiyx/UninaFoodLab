@@ -182,29 +182,18 @@ public class DetailedCourseFrame extends JDialog
 										          }
 										      });
     }
-
-    public void showMessage(String msg) { JOptionPane.showMessageDialog(this, msg); }
     
-    // ---------- SET DATA ----------
-    public void setCourseData(int courseId, String nome, String descrizione, LocalDate dataInizio, int numeroSessioni,
-                              String frequenza, Integer limitePartecipanti, BigDecimal costo, String nomeChef, String cognomeChef, String userContext)
+    @Override
+    public void dispose()
     {
-        this.idCorso = courseId;
-        this.courseStartDate = dataInizio;
-        this.courseLimitePartecipanti = limitePartecipanti;
-        this.userContext = userContext;
-
-        lblNome.setText(nome);
-        txtDescrizione.setText(descrizione);
-        lblDataInizio.setText(dataInizio.toString());
-        lblNumeroSessioni.setText(String.valueOf(numeroSessioni));
-        lblFrequenza.setText(frequenza);
-        lblLimitePartecipanti.setText((limitePartecipanti != null) ? String.valueOf(limitePartecipanti) : "Nessuno");
-        lblCosto.setText(String.format("€ %.2f", costo));
-
-        updateButtonsVisibility();
+    	for(Component s : sessionsPanel.getComponents())
+    	{
+    		((SessionInfoPanel)s).disposeListeners();
+    	}
+    	
+    	super.dispose();
     }
-
+    
     private void updateButtonsVisibility()
     {
         boolean corsoIniziato = courseStartDate != null && courseStartDate.isBefore(today);
@@ -251,13 +240,33 @@ public class DetailedCourseFrame extends JDialog
             }
         }
     }
+    
+    // ---------- SET DATA ----------
+    public void setCourseData(int courseId, String nome, String descrizione, LocalDate dataInizio, int numeroSessioni,
+                              String frequenza, Integer limitePartecipanti, BigDecimal costo, String nomeChef, String cognomeChef, String userContext)
+    {
+        this.idCorso = courseId;
+        this.courseStartDate = dataInizio;
+        this.courseLimitePartecipanti = limitePartecipanti;
+        this.userContext = userContext;
+
+        lblNome.setText(nome);
+        txtDescrizione.setText(descrizione);
+        lblDataInizio.setText(dataInizio.toString());
+        lblNumeroSessioni.setText(String.valueOf(numeroSessioni));
+        lblFrequenza.setText(frequenza);
+        lblLimitePartecipanti.setText((limitePartecipanti != null) ? String.valueOf(limitePartecipanti) : "Nessuno");
+        lblCosto.setText(String.format("€ %.2f", costo));
+
+        updateButtonsVisibility();
+    }
 
     // ---------- SESSIONI ----------
     public void setSessions(List<Sessione> sessioni)
     {
         sessionsPanel.removeAll();
 
-        if (sessioni != null)
+        if(sessioni != null)
         {
             int i = 1;
             for(Sessione s : sessioni)
@@ -266,10 +275,8 @@ public class DetailedCourseFrame extends JDialog
                 List<String> recipes = new ArrayList<>();
 
                 if(pratica)
-                {
-                    for (Ricetta r : ((SessionePratica) s).getRicette())
+                    for(Ricetta r : ((SessionePratica) s).getRicette())
                         recipes.add(r.getNome());
-                }
 
                 sessionsPanel.add(new SessionInfoPanel(s.getId(), i++, pratica, s.getData().toLocalDate(), s.getOrario().toLocalTime(), s.getDurata(), recipes,
                         (pratica) ? ((SessionePratica) s).getIndirizzo() : null,
@@ -299,8 +306,9 @@ public class DetailedCourseFrame extends JDialog
 
     private void onDeleteCourse()
     {
-        int result = JOptionPane.showConfirmDialog(this, "Sei sicuro di voler eliminare questo corso?", "Elimina Corso", JOptionPane.YES_NO_OPTION);
-        if(result == JOptionPane.YES_OPTION)
+        if(JOptionPane.showConfirmDialog(this, "Sei sicuro di voler eliminare questo corso?", "Elimina Corso", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)
         	Controller.getController().eliminaCorso(owner, this, idCorso);
     }
+    
+    public void showMessage(String msg) { JOptionPane.showMessageDialog(this, msg); }
 }

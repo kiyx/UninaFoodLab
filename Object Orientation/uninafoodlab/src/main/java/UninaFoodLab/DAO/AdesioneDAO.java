@@ -8,5 +8,6 @@ public interface AdesioneDAO
 {
 	void save(Adesione toSaveAdesione);
 	List<Integer> getAdesioniByIdSessionePratica(int idSessionePratica);
+	boolean checkAdesione(int idSessionePratica, int idPartecipante);
 	void delete(int idPartecipante, int idSessionePratica);
 }
