@@ -7,8 +7,8 @@ import java.util.Objects;
 public class Adesione
 {
     private LocalDate dataAdesione;
-    Partecipante partecipante;
-    SessionePratica sessione;
+    private Partecipante partecipante;
+    private SessionePratica sessione;
 
     public Adesione(LocalDate dataAdesione, Partecipante partecipante, SessionePratica sessione)
     {

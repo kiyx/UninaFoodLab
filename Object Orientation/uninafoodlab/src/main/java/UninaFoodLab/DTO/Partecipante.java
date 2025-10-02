@@ -5,7 +5,7 @@ import java.time.LocalDate;
 
 public class Partecipante extends Utente
 {
-    private int numeroCorsi;
+
     private ArrayList<Corso> corsi;
     private ArrayList<Adesione> adesioni;
 
@@ -16,20 +16,13 @@ public class Partecipante extends Utente
         if(corsi != null)
         {
             this.corsi = corsi;
-            this.numeroCorsi = corsi.size();
         }
         else
         {
             this.corsi = new ArrayList<>();
-            this.numeroCorsi = 0;
         }
 
         this.adesioni = (adesioni != null) ? adesioni : new ArrayList<>();
-    }
-
-    public int getNumeroCorsi()
-    {
-        return numeroCorsi;
     }
 
     public ArrayList<Corso> getCorsi()
@@ -40,7 +33,6 @@ public class Partecipante extends Utente
     public void aggiungiCorso(Corso toAddCorso)
     {
         corsi.add(toAddCorso);
-        ++numeroCorsi;
     }
 
     public ArrayList<Adesione> getAdesioni()
