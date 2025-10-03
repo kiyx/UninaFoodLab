@@ -11,6 +11,7 @@ import javax.swing.*;
 import javax.swing.border.TitledBorder;
 
 import org.jdesktop.swingx.JXButton;
+import org.jdesktop.swingx.JXLabel;
 import org.kordamp.ikonli.materialdesign.MaterialDesign;
 import org.kordamp.ikonli.swing.FontIcon;
 
@@ -32,7 +33,7 @@ public class DetailedCourseFrame extends JDialog
     private String userContext;
 
     private JPanel courseInfoPanel, buttonsPanel, sessionsPanel;
-    private JLabel lblNome, lblDataInizio, lblNumeroSessioni, lblFrequenza, lblLimitePartecipanti, lblCosto;
+    private JXLabel lblNome, lblDataInizio, lblNumeroSessioni, lblFrequenza, lblLimitePartecipanti, lblCosto, lblIscrizioneStatus;
     private JTextArea txtDescrizione;
 
     private JXButton btnEditCourse, btnDeleteCourse, btnIscrivitiCorso, btnDisiscrivitiCorso;
@@ -65,12 +66,12 @@ public class DetailedCourseFrame extends JDialog
                                                   new Font("Segoe UI", Font.BOLD, 16),
                                                   new Color(255, 87, 34)));
 
-        courseInfoPanel.add(new JLabel("Nome:"), "right");
-        lblNome = new JLabel();
+        courseInfoPanel.add(new JXLabel("Nome:"), "right");
+        lblNome = new JXLabel();
         lblNome.setFont(lblNome.getFont().deriveFont(Font.BOLD));
         courseInfoPanel.add(lblNome, "growx");
 
-        courseInfoPanel.add(new JLabel("Descrizione:"), "top, right");
+        courseInfoPanel.add(new JXLabel("Descrizione:"), "top, right");
         txtDescrizione = new JTextArea();
         txtDescrizione.setLineWrap(true);
         txtDescrizione.setWrapStyleWord(true);
@@ -81,24 +82,24 @@ public class DetailedCourseFrame extends JDialog
         txtDescrizione.setBorder(BorderFactory.createEmptyBorder(2, 4, 2, 4));
         courseInfoPanel.add(txtDescrizione, "growx, h 80!");
 
-        courseInfoPanel.add(new JLabel("Data Inizio:"), "right");
-        lblDataInizio = new JLabel();
+        courseInfoPanel.add(new JXLabel("Data Inizio:"), "right");
+        lblDataInizio = new JXLabel();
         courseInfoPanel.add(lblDataInizio);
 
-        courseInfoPanel.add(new JLabel("Numero Sessioni:"), "right");
-        lblNumeroSessioni = new JLabel();
+        courseInfoPanel.add(new JXLabel("Numero Sessioni:"), "right");
+        lblNumeroSessioni = new JXLabel();
         courseInfoPanel.add(lblNumeroSessioni);
 
-        courseInfoPanel.add(new JLabel("Frequenza Sessioni:"), "right");
-        lblFrequenza = new JLabel();
+        courseInfoPanel.add(new JXLabel("Frequenza Sessioni:"), "right");
+        lblFrequenza = new JXLabel();
         courseInfoPanel.add(lblFrequenza);
 
-        courseInfoPanel.add(new JLabel("Limite Partecipanti (solo pratico):"), "right");
-        lblLimitePartecipanti = new JLabel();
+        courseInfoPanel.add(new JXLabel("Limite Partecipanti (solo pratico):"), "right");
+        lblLimitePartecipanti = new JXLabel();
         courseInfoPanel.add(lblLimitePartecipanti);
 
         courseInfoPanel.add(new JLabel("Costo (€):"), "right");
-        lblCosto = new JLabel();
+        lblCosto = new JXLabel();
         courseInfoPanel.add(lblCosto);
 
         // ---------- BOTTONI ----------
@@ -127,6 +128,17 @@ public class DetailedCourseFrame extends JDialog
         buttonsPanel.add(btnDeleteCourse);
 
         courseInfoPanel.add(buttonsPanel, "span, growx, align right");
+        
+        lblIscrizioneStatus = new JXLabel();
+        lblIscrizioneStatus.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblIscrizioneStatus.setForeground(new Color(244, 67, 54)); // rosso
+        lblIscrizioneStatus.setVisible(false); 
+
+        // icona "X rossa"
+        lblIscrizioneStatus.setIcon(FontIcon.of(MaterialDesign.MDI_CLOSE_CIRCLE, 18, new Color(244, 67, 54)));
+
+        courseInfoPanel.add(lblIscrizioneStatus, "span, growx, wrap");
+
         add(courseInfoPanel, "growx, wrap");
 
         // ---------- SESSIONI ----------
@@ -216,24 +228,35 @@ public class DetailedCourseFrame extends JDialog
         else
         {
             // Utente
-            if("Homepage".equals(userContext))
-            {
-                boolean canIscriviti = !corsoIniziato &&
-                        (courseLimitePartecipanti == null || Controller.getController().getNumeroIscritti(idCorso) < courseLimitePartecipanti);
+        	if("Homepage".equals(userContext))
+        	{
+        	    boolean canIscriviti = !corsoIniziato &&
+        	            (courseLimitePartecipanti == null || Controller.getController().getNumeroIscritti(idCorso) < courseLimitePartecipanti);
 
-                if(Controller.getController().checkIscritto(idCorso))
-                {
-                    btnIscrivitiCorso.setText("Iscritto");
-                    btnIscrivitiCorso.setEnabled(false);
-                    btnIscrivitiCorso.setVisible(true);
-                }
-                else
-                {
-                    btnIscrivitiCorso.setText("Iscriviti");
-                    btnIscrivitiCorso.setEnabled(canIscriviti);
-                    btnIscrivitiCorso.setVisible(canIscriviti);
-                }
-            }
+        	    if(Controller.getController().checkIscritto(idCorso))
+        	    {
+        	        lblIscrizioneStatus.setVisible(false);
+        	        btnIscrivitiCorso.setText("Iscritto");
+        	        btnIscrivitiCorso.setEnabled(false);
+        	        btnIscrivitiCorso.setVisible(true);
+        	    }
+        	    else
+        	    {
+        	        if(canIscriviti)
+        	        {
+        	            lblIscrizioneStatus.setVisible(false);
+        	            btnIscrivitiCorso.setText("Iscriviti");
+        	            btnIscrivitiCorso.setEnabled(true);
+        	            btnIscrivitiCorso.setVisible(true);
+        	        }
+        	        else
+        	        {
+        	            btnIscrivitiCorso.setVisible(false);
+        	            lblIscrizioneStatus.setText(" Non è più possibile iscriversi al corso");
+        	            lblIscrizioneStatus.setVisible(true);
+        	        }
+        	    }
+        	}
             else if("MyCourses".equals(userContext))
             {
                 btnDisiscrivitiCorso.setVisible(true);
@@ -281,7 +304,7 @@ public class DetailedCourseFrame extends JDialog
                 sessionsPanel.add(new SessionInfoPanel(s.getId(), i++, pratica, s.getData().toLocalDate(), s.getOrario().toLocalTime(), s.getDurata(), recipes,
                         (pratica) ? ((SessionePratica) s).getIndirizzo() : null,
                         (pratica) ? ((SessionePratica) s).getNumeroPartecipanti() : null,
-                        (!pratica) ? ((SessioneOnline) s).getLinkRiunione() : null, userContext), "growx");
+                        (!pratica) ? ((SessioneOnline) s).getLinkRiunione() : null), "growx");
             }
         }
 

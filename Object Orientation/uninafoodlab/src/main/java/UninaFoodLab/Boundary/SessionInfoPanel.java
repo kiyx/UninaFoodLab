@@ -24,13 +24,13 @@ public class SessionInfoPanel extends JPanel
     private final boolean pratica;
     private final LocalDate dataStr;
     private final LocalTime orarioStr;
-    private final String luogo, linkRiunione, userContext;
+    private final String luogo, linkRiunione;
     private final List<String> ricette;
     
     private ActionListener adesioneListener;
 
     public SessionInfoPanel(int idSession, int number, boolean pratica, LocalDate dataStr, LocalTime orarioStr, int durata, List<String> ricette, String luogo,
-                            Integer numeroPartecipanti, String linkRiunione, String userContext)
+                            Integer numeroPartecipanti, String linkRiunione)
     {
         this.idSession = idSession;
         this.number = number;
@@ -42,7 +42,6 @@ public class SessionInfoPanel extends JPanel
         this.luogo = luogo;
         this.numeroPartecipanti = numeroPartecipanti;
         this.linkRiunione = linkRiunione;
-        this.userContext = userContext;
         
         setLayout(new MigLayout("fill, insets 10", "[grow, fill][pref!]", "[][][][][][][][]"));
         setBackground(dataStr.isBefore(LocalDate.now()) ? new Color(245, 245, 245) : new Color(255, 250, 240));
@@ -105,7 +104,7 @@ public class SessionInfoPanel extends JPanel
         // - non è uno Chef
         // - il contesto è MyCourses
         // - la sessione non è passata
-        if(pratica && !Controller.getController().isChefLogged() && "MyCourses".equals(userContext) && !dataStr.isBefore(LocalDate.now()))
+        if(pratica && !Controller.getController().isChefLogged() && !dataStr.isBefore(LocalDate.now()))
         {
             boolean alreadyAdesione = Controller.getController().checkAdesione(idSession);
             
