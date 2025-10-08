@@ -736,92 +736,44 @@ public class Controller
      *  -------------------------
 	*/
 	
-	public Integer getNumeroIscritti(int idCourse)
+	public void loadCorsiForMyCourses(List<Integer> idsCorsi, List<String> namesCorsi, List<List<Integer>> idsArguments,
+			  List<List<String>> namesArguments, List<Date> startDates, List<Integer> sessionsNumbers)
 	{
 		try
-		{
-			return getCorsoDAO().getNumeroIscrittiById(idCourse);
+		{	
+			List<Integer> ids = (isChefLogged()) ? getCorsoDAO().getCorsiByIdChef(getLoggedUser().getId()) : 
+									 getCorsoDAO().getIdCorsiIscrittiByIdPartecipante(getLoggedUser().getId());
+			
+			for(Corso c : cacheCorsi)
+			{				
+				for(Integer id : ids)
+				{
+					if(c.getId() == id.intValue())
+					{
+						idsCorsi.add(c.getId());
+						namesCorsi.add(c.getNome());
+			
+			          List<Integer> thisCourseArgIds = new ArrayList<>();
+			          List<String> thisCourseArgNames = new ArrayList<>();
+			          
+						for(Argomento a : c.getArgomenti())	
+						{
+							thisCourseArgIds.add(a.getId());
+				            thisCourseArgNames.add(a.getNome());
+						}	
+						
+						idsArguments.add(thisCourseArgIds);
+			          namesArguments.add(thisCourseArgNames);
+			          
+						startDates.add(c.getDataInizio());
+						sessionsNumbers.add(c.getNumeroSessioni());
+					}
+				}
+			}
 		}
 		catch(DAOException e)
 		{
-			LOGGER.log(Level.SEVERE, "Errore getNumeroIscritti da DB", e);
-			return null;
-		}
-	}
-	
-	public void showCourseDetail(JFrame parentFrame, int idCorso)
-	{
-		if(cacheCorsi == null || cacheCorsi.isEmpty())
-			cacheCorsi = getCorsoDAO().getAllCorsi();
-		
-		DetailedCourseFrame corso = new DetailedCourseFrame(parentFrame);
-		
-		for(Corso c : cacheCorsi)
-		{
-			if(c.getId() == idCorso)
-				corso.setCourseData(c.getId(), c.getNome(), c.getDescrizione(), c.getDataInizio().toLocalDate(), c.getNumeroSessioni(), 
-									c.getFrequenzaSessioni().toString(), (c.getIsPratico()) ? c.getLimite() : null, c.getCosto(), 
-									c.getChef().getNome(), c.getChef().getCognome(), 
-									(parentFrame instanceof HomepageFrame) ? "Homepage": "MyCourses");
-		}
-		
-		List<Sessione> sessioni = new ArrayList<>();
-		sessioni.addAll(getSessionePraticaDAO().getSessioniPraticheByIdCorso(idCorso));
-		sessioni.addAll(getSessioneOnlineDAO().getSessioniOnlineByIdCorso(idCorso));
-		
-		corso.setSessions(sessioni);
-		corso.setVisible(true);
-	}
-	
-	public void showCreateCourseDialog(MyCoursesFrame parentFrame)
-	{
-		 new CreateCourseDialog(parentFrame).setVisible(true);	
-	}
-	
-	public void callRemoveSessionCard(CreateCourseDialog parent, CreateSessionPanel panel)
-	{
-		parent.removeSessionCard(panel);
-	}
-	
-	public void registerIscrizione(int idCorso)
-	{
-		try
-		{
-			getCorsoDAO().saveIscrizione(idCorso, getLoggedUser().getId());
-			((Partecipante)getLoggedUser()).getCorsi().add(getCorsoDAO().getCorsoById(idCorso));
-		}
-		catch(DAOException e)
-		{		
-			LOGGER.log(Level.SEVERE, "Errore registerIscrizione da DB", e);
-		}
-	}
-	
-	public Boolean checkIscritto(int idCorso)
-	{
-		try
-		{
-			return getCorsoDAO().checkIscrizione(idCorso, getLoggedUser().getId());
-		}
-		catch(DAOException e)
-		{
-			LOGGER.log(Level.SEVERE, "Errore checkIscritto da DB", e);
-			return null;
-		}
-	}
-	
-	public void disiscriviCorso(Window owner, DetailedCourseFrame card, int idCorso)
-	{
-		try
-		{
-			getCorsoDAO().deleteIscrizione(idCorso, getLoggedUser().getId());
-			((Partecipante)getLoggedUser()).getCorsi().remove(getCorsoDAO().getCorsoById(idCorso));
-			card.dispose();
-			if(owner instanceof MyCoursesFrame) ((MyCoursesFrame)owner).removeCourseCard(idCorso);
-		}
-		catch(DAOException e)
-		{
-			card.showMessage("Impossibile disiscriversi dal corso!! ");
-			LOGGER.log(Level.SEVERE, "Errore disiscriviCorso da DB", e);
+			LOGGER.log(Level.SEVERE, "Errore loadCorsi da DB", e);
 		}
 	}
 	
@@ -835,7 +787,7 @@ public class Controller
 		
 		return namesFrequenze;
 	}
-
+	
 	public void loadArgomenti(List<Integer> idsArgomenti, List<String> namesArgomenti)
 	{
 		try
@@ -876,48 +828,151 @@ public class Controller
 		}
 	}
 	
-	public void loadCorsiForMyCourses(List<Integer> idsCorsi, List<String> namesCorsi, List<List<Integer>> idsArguments,
-						  List<List<String>> namesArguments, List<Date> startDates, List<Integer> sessionsNumbers)
+	public void registerIscrizione(int idCorso)
 	{
 		try
-		{	
-			List<Integer> ids = (isChefLogged()) ? getCorsoDAO().getCorsiByIdChef(getLoggedUser().getId()) : 
-									 getCorsoDAO().getIdCorsiIscrittiByIdPartecipante(getLoggedUser().getId());
-			
-			for(Corso c : cacheCorsi)
-			{				
-				for(Integer id : ids)
-				{
-					if(c.getId() == id.intValue())
-					{
-						idsCorsi.add(c.getId());
-						namesCorsi.add(c.getNome());
-
-			            List<Integer> thisCourseArgIds = new ArrayList<>();
-			            List<String> thisCourseArgNames = new ArrayList<>();
-			            
-						for(Argomento a : c.getArgomenti())	
-						{
-							thisCourseArgIds.add(a.getId());
-				            thisCourseArgNames.add(a.getNome());
-						}	
-						
-						idsArguments.add(thisCourseArgIds);
-			            namesArguments.add(thisCourseArgNames);
-			            
-						startDates.add(c.getDataInizio());
-						sessionsNumbers.add(c.getNumeroSessioni());
-					}
-				}
-			}
+		{
+			getCorsoDAO().saveIscrizione(idCorso, getLoggedUser().getId());
+			((Partecipante)getLoggedUser()).getCorsi().add(getCorsoDAO().getCorsoById(idCorso));
 		}
 		catch(DAOException e)
-		{
-			LOGGER.log(Level.SEVERE, "Errore loadCorsi da DB", e);
+		{		
+			LOGGER.log(Level.SEVERE, "Errore registerIscrizione da DB", e);
 		}
 	}
 	
-	public void createCourse(MyCoursesFrame courseFrame, CreateCourseDialog currDialog, String nomeCorso, LocalDate dataInizio, int numeroSessioni, String frequenza,
+	public void disiscriviCorso(Window owner, DetailedCourseFrame card, int idCorso)
+	{
+		try
+		{
+			getCorsoDAO().deleteIscrizione(idCorso, getLoggedUser().getId());
+			((Partecipante)getLoggedUser()).getCorsi().remove(getCorsoDAO().getCorsoById(idCorso));
+			card.dispose();
+			if(owner instanceof MyCoursesFrame) ((MyCoursesFrame)owner).removeCourseCard(idCorso);
+		}
+		catch(DAOException e)
+		{
+			card.showMessage("Impossibile disiscriversi dal corso!! ");
+			LOGGER.log(Level.SEVERE, "Errore disiscriviCorso da DB", e);
+		}
+	}
+	
+	public Boolean checkIscritto(int idCorso)
+	{
+		try
+		{
+			return getCorsoDAO().checkIscrizione(idCorso, getLoggedUser().getId());
+		}
+		catch(DAOException e)
+		{
+			LOGGER.log(Level.SEVERE, "Errore checkIscritto da DB", e);
+			return null;
+		}
+	}
+	
+	public Integer getNumeroIscritti(int idCourse)
+	{
+		try
+		{
+			return getCorsoDAO().getNumeroIscrittiById(idCourse);
+		}
+		catch(DAOException e)
+		{
+			LOGGER.log(Level.SEVERE, "Errore getNumeroIscritti da DB", e);
+			return null;
+		}
+	}
+	
+	public void saveAdesione(SessionInfoPanel panel, int idSession)
+	{
+		try
+		{
+			Adesione toSave = new Adesione(LocalDate.now(), (Partecipante)getLoggedUser(), getSessionePraticaDAO().getSessionePraticaById(idSession));
+			getAdesioneDAO().save(toSave);
+			((Partecipante)getLoggedUser()).aggiungiAdesione(toSave);
+		}
+		catch(DAOException e)
+		{
+			panel.showMessage("Non puoi aderire alla sessione se sei a meno di 3 giorni dall'avvenimento di essa!");
+			LOGGER.log(Level.SEVERE, "Errore nel salvataggio dell'adesione alla sessione pratica " + idSession, e);
+		}
+	}
+	
+	public Boolean checkAdesione(int idSessionePratica)
+	{
+		try
+		{
+			return getAdesioneDAO().checkAdesione(idSessionePratica, getLoggedUser().getId());
+		}
+		catch(DAOException e)
+		{
+			LOGGER.log(Level.SEVERE, "Errore checkAderito da DB", e);
+			return null;
+		}
+	}
+	
+	public void removeAdesione(SessionInfoPanel panel, int idSession)
+	{
+		try
+		{
+			getAdesioneDAO().delete(getLoggedUser().getId(), idSession);
+			((Partecipante)getLoggedUser()).getAdesioni().remove(new Adesione(LocalDate.now(), (Partecipante)getLoggedUser(), getSessionePraticaDAO().getSessionePraticaById(idSession)));
+		}
+		catch(DAOException e)
+		{
+			panel.showMessage("Non puoi eliminare l'adesione alla sessione se sei a meno di 3 giorni dall'avvenimento di essa!");
+			LOGGER.log(Level.SEVERE, "Errore nel salvataggio dell'adesione alla sessione pratica " + idSession, e);
+		}
+	}
+	
+	public Integer getNumeroAdesioni(int idSessione)
+	{
+		try
+		{
+			return getAdesioneDAO().getNumeroAdesioniByIdSessionePratica(idSessione);
+		}
+		catch(DAOException e)
+		{
+			LOGGER.log(Level.SEVERE, "Errore getNumeroAdesionida DB", e);
+			return null;
+		}
+	}
+	
+	public void showCourseDetail(JFrame parentFrame, int idCorso)
+	{
+		if(cacheCorsi == null || cacheCorsi.isEmpty())
+			cacheCorsi = getCorsoDAO().getAllCorsi();
+		
+		DetailedCourseFrame corso = new DetailedCourseFrame(parentFrame);
+		
+		for(Corso c : cacheCorsi)
+		{
+			if(c.getId() == idCorso)
+				corso.setCourseData(c.getId(), c.getNome(), c.getDescrizione(), c.getDataInizio().toLocalDate(), c.getNumeroSessioni(), 
+									c.getFrequenzaSessioni().toString(), (c.getIsPratico()) ? c.getLimite() : null, c.getCosto(), 
+									c.getChef().getNome(), c.getChef().getCognome(), 
+									(parentFrame instanceof HomepageFrame) ? "Homepage": "MyCourses");
+		}
+		
+		List<Sessione> sessioni = new ArrayList<>();
+		sessioni.addAll(getSessionePraticaDAO().getSessioniPraticheByIdCorso(idCorso));
+		sessioni.addAll(getSessioneOnlineDAO().getSessioniOnlineByIdCorso(idCorso));
+		
+		corso.setSessions(sessioni);
+		corso.setVisible(true);
+	}
+	
+	public void showCreateCourseDialog(MyCoursesFrame parentFrame)
+	{
+		 new CreateCourseDialog(parentFrame, false).setVisible(true);	
+	}
+	
+	public void callRemoveSessionCard(CreateCourseDialog parent, CreateSessionPanel panel)
+	{
+		parent.removeSessionCard(panel);
+	}	
+	
+	public void createCourse(JFrame courseFrame, CreateCourseDialog currDialog, String nomeCorso, LocalDate dataInizio, int numeroSessioni, String frequenza,
 							 int limite, String descrizione, BigDecimal costo, boolean isPratico, List<Integer> idArgomenti,
 							 List<Integer> durateOnline, List<Time>  orariOnline, List<LocalDate> dateOnline,
 							 List<String> linksOnline, List<Integer> duratePratiche, List<Time> orariPratiche,
@@ -1001,7 +1056,7 @@ public class Controller
 			        Date.valueOf(dataInizio),
 			        numeroSessioni
 			);
-			courseFrame.addCourseCard(newCard);
+			((MyCoursesFrame)courseFrame).addCourseCard(newCard);
 
 			JOptionPane.showMessageDialog(currDialog, "Corso " + nomeCorso + " salvato con successo");
 			LOGGER.log(Level.INFO, "Salvataggio del corso " + nomeCorso + " dello chef " + getLoggedUser().getUsername() + " effettuato ");
@@ -1014,47 +1069,118 @@ public class Controller
 		}
 	}
 	
-	public void saveAdesione(SessionInfoPanel panel, int idSession)
+	public void openEditCourseDialog(Window owner, DetailedCourseFrame dialog, int idCorso)
+	{
+		Corso corso = corsoDAO.getCorsoById(idCorso);
+		if(corso != null) 
+		{	
+			CreateCourseDialog editDialog = new CreateCourseDialog((JFrame)owner, true);
+			
+			
+			
+			
+	    }
+		else
+			JOptionPane.showMessageDialog(owner, "Errore nel caricamento del corso.", "Errore", JOptionPane.ERROR_MESSAGE);
+	}
+	
+	public void editCourse(JFrame courseFrame, CreateCourseDialog currDialog, String nomeCorso, LocalDate dataInizio, int numeroSessioni, String frequenza,
+			 int limite, String descrizione, BigDecimal costo, boolean isPratico, List<Integer> idArgomenti,
+			 List<Integer> durateOnline, List<Time>  orariOnline, List<LocalDate> dateOnline,
+			 List<String> linksOnline, List<Integer> duratePratiche, List<Time> orariPratiche,
+			 List<LocalDate> datePratiche, List<String> indirizziPratiche, 
+			 List<ArrayList<Integer>> idsRicettePratiche) 
 	{
 		try
 		{
-			Adesione toSave = new Adesione(LocalDate.now(), (Partecipante)getLoggedUser(), getSessionePraticaDAO().getSessionePraticaById(idSession));
-			getAdesioneDAO().save(toSave);
-			((Partecipante)getLoggedUser()).aggiungiAdesione(toSave);
-		}
+			ArrayList<Argomento> argomenti = new ArrayList<>();
+			
+			// Costruisco gli argomenti da salvare guardando prima in cache e poi fallback su dao
+			for(Integer id : idArgomenti)
+			{
+			boolean trovato = false;
+			
+			for(Argomento a : cacheArgomenti)
+			{
+				if(a.getId() == id)
+				{
+					argomenti.add(a);
+					trovato = true;
+					break;
+				}		
+			}
+			if(!trovato)
+				argomenti.add(getArgomentoDAO().getArgomentoById(id));
+			}
+			
+			ArrayList<ArrayList<Ricetta>> ricette = new ArrayList<>();
+			
+			// Costruisco le ricette da salvare guardando prima in cache e poi fallback su dao
+			for(List<Integer> ricetteSessione : idsRicettePratiche)
+			{
+			ArrayList<Ricetta> ricettePerSessione = new ArrayList<>();
+			
+			for(Integer id : ricetteSessione)
+			{
+				boolean trovato = false;
+				
+				for(Ricetta r : cacheRicette)
+				{
+					if(r.getId() == id)
+					{
+						ricettePerSessione.add(r);
+						trovato = true;
+						break;
+					}
+				}
+					
+				if(!trovato)
+					ricettePerSessione.add(getRicettaDAO().getRicettaById(id));
+			}
+			
+			ricette.add(ricettePerSessione);
+			}
+			
+			// Costruisco le sessioni da salvare guardando prima in cache e poi fallback su dao		
+			ArrayList<Sessione> sessioni = new ArrayList<>();
+			for(int i = 0; i < durateOnline.size(); i++)
+			sessioni.add(new SessioneOnline(durateOnline.get(i), orariOnline.get(i), dateOnline.get(i), linksOnline.get(i)));
+			for(int i = 0; i < duratePratiche.size(); i++)
+			sessioni.add(new SessionePratica(duratePratiche.get(i), orariPratiche.get(i), datePratiche.get(i), indirizziPratiche.get(i),
+											 ricette.get(i)));
+			
+			Corso toSaveCorso = new Corso(nomeCorso, dataInizio, numeroSessioni, FrequenzaSessioni.valueOf(frequenza), limite, descrizione, 
+				  costo, isPratico, (Chef) getLoggedUser(), argomenti, sessioni);
+			
+			getCorsoDAO().update(getCorsoDAO().getCorsoById());
+			cacheCorsi.add(toSaveCorso);
+			
+			List<String> namesArgs = new ArrayList<>();
+			for(Argomento a : argomenti)
+			namesArgs.add(a.getNome());
+			
+			CourseCardPanel newCard = new CourseCardPanel
+			(
+			   toSaveCorso.getId(),
+			   toSaveCorso.getNome(),
+			   idArgomenti,            
+			   namesArgs,           
+			   Date.valueOf(dataInizio),
+			   numeroSessioni
+			);
+			((MyCoursesFrame)courseFrame).addCourseCard(newCard);
+			
+			JOptionPane.showMessageDialog(currDialog, "Corso " + nomeCorso + " salvato con successo");
+			LOGGER.log(Level.INFO, "Salvataggio del corso " + nomeCorso + " dello chef " + getLoggedUser().getUsername() + " effettuato ");
+			currDialog.dispose();
+		} 
 		catch(DAOException e)
 		{
-			panel.showMessage("Non puoi aderire alla sessione se sei a meno di 3 giorni dall'avvenimento di essa!");
-			LOGGER.log(Level.SEVERE, "Errore nel salvataggio dell'adesione alla sessione pratica " + idSession, e);
+			JOptionPane.showMessageDialog(currDialog, "Errore nel salvataggio del corso: " + e.getMessage());
+			LOGGER.log(Level.SEVERE, "Errore nel salvataggio del corso su DB", e);
 		}
 	}
 	
-	public Boolean checkAdesione(int idSessionePratica)
-	{
-		try
-		{
-			return getAdesioneDAO().checkAdesione(idSessionePratica, getLoggedUser().getId());
-		}
-		catch(DAOException e)
-		{
-			LOGGER.log(Level.SEVERE, "Errore checkAderito da DB", e);
-			return null;
-		}
-	}
-	
-	public void removeAdesione(SessionInfoPanel panel, int idSession)
-	{
-		try
-		{
-			getAdesioneDAO().delete(getLoggedUser().getId(), idSession);
-			((Partecipante)getLoggedUser()).getAdesioni().remove(new Adesione(LocalDate.now(), (Partecipante)getLoggedUser(), getSessionePraticaDAO().getSessionePraticaById(idSession)));
-		}
-		catch(DAOException e)
-		{
-			panel.showMessage("Non puoi eliminare l'adesione alla sessione se sei a meno di 3 giorni dall'avvenimento di essa!");
-			LOGGER.log(Level.SEVERE, "Errore nel salvataggio dell'adesione alla sessione pratica " + idSession, e);
-		}
-	}
 	
 	public void eliminaCorso(Window owner, DetailedCourseFrame card, int idCorso)
 	{
@@ -1085,7 +1211,6 @@ public class Controller
 		}
 	}
 	
-
 	/**
 	 * -------------------------
 	 * 

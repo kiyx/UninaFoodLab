@@ -33,7 +33,7 @@ public class DetailedCourseFrame extends JDialog
     private String userContext;
 
     private JPanel courseInfoPanel, buttonsPanel, sessionsPanel;
-    private JXLabel lblNome, lblDataInizio, lblNumeroSessioni, lblFrequenza, lblLimitePartecipanti, lblCosto, lblIscrizioneStatus;
+    private JXLabel lblNome, lblDataInizio, lblNumeroSessioni, lblFrequenza, lblLimitePartecipanti, lblCosto, lblIscrizioneStatus, lblNumeroIscritti;
     private JTextArea txtDescrizione;
 
     private JXButton btnEditCourse, btnDeleteCourse, btnIscrivitiCorso, btnDisiscrivitiCorso;
@@ -98,6 +98,10 @@ public class DetailedCourseFrame extends JDialog
         lblLimitePartecipanti = new JXLabel();
         courseInfoPanel.add(lblLimitePartecipanti);
 
+        courseInfoPanel.add(new JXLabel("Numero Iscritti Attuali:"), "right");
+        lblNumeroIscritti = new JXLabel();
+        courseInfoPanel.add(lblNumeroIscritti);
+        
         courseInfoPanel.add(new JLabel("Costo (€):"), "right");
         lblCosto = new JXLabel();
         courseInfoPanel.add(lblCosto);
@@ -131,7 +135,7 @@ public class DetailedCourseFrame extends JDialog
         
         lblIscrizioneStatus = new JXLabel();
         lblIscrizioneStatus.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lblIscrizioneStatus.setForeground(new Color(244, 67, 54)); // rosso
+        lblIscrizioneStatus.setForeground(new Color(244, 67, 54)); 
         lblIscrizioneStatus.setVisible(false); 
 
         // icona "X rossa"
@@ -165,7 +169,12 @@ public class DetailedCourseFrame extends JDialog
         btnEditCourse.addActionListener(_ -> onEditCourse());
         btnDeleteCourse.addActionListener(_ -> onDeleteCourse());
         btnIscrivitiCorso.addActionListener(_ -> onIscrivitiCorso());
-        btnDisiscrivitiCorso.addActionListener(_ ->  Controller.getController().disiscriviCorso(owner, DetailedCourseFrame.this, idCorso));
+        btnDisiscrivitiCorso.addActionListener(_ -> 
+        {
+            Controller.getController().disiscriviCorso(owner, DetailedCourseFrame.this, idCorso);
+            lblNumeroIscritti.setText(String.valueOf(Controller.getController().getNumeroIscritti(idCorso)));
+        });
+
 
         // Hover: da Iscritto → mostra Disiscriviti
         btnIscrivitiCorso.addMouseListener(new MouseAdapter()
@@ -199,9 +208,7 @@ public class DetailedCourseFrame extends JDialog
     public void dispose()
     {
     	for(Component s : sessionsPanel.getComponents())
-    	{
     		((SessionInfoPanel)s).disposeListeners();
-    	}
     	
     	super.dispose();
     }
@@ -279,6 +286,7 @@ public class DetailedCourseFrame extends JDialog
         lblNumeroSessioni.setText(String.valueOf(numeroSessioni));
         lblFrequenza.setText(frequenza);
         lblLimitePartecipanti.setText((limitePartecipanti != null) ? String.valueOf(limitePartecipanti) : "Nessuno");
+        lblNumeroIscritti.setText(String.valueOf(Controller.getController().getNumeroIscritti(courseId)));
         lblCosto.setText(String.format("€ %.2f", costo));
 
         updateButtonsVisibility();
@@ -303,7 +311,6 @@ public class DetailedCourseFrame extends JDialog
 
                 sessionsPanel.add(new SessionInfoPanel(s.getId(), i++, pratica, s.getData().toLocalDate(), s.getOrario().toLocalTime(), s.getDurata(), recipes,
                         (pratica) ? ((SessionePratica) s).getIndirizzo() : null,
-                        (pratica) ? ((SessionePratica) s).getNumeroPartecipanti() : null,
                         (!pratica) ? ((SessioneOnline) s).getLinkRiunione() : null), "growx");
             }
         }
@@ -317,14 +324,15 @@ public class DetailedCourseFrame extends JDialog
     {
         Controller.getController().registerIscrizione(idCorso);
         JOptionPane.showMessageDialog(this, "Iscritto al corso: " + lblNome.getText());
-        btnIscrivitiCorso.setEnabled(false);
+        btnIscrivitiCorso.setEnabled(false);  
+        lblNumeroIscritti.setText(String.valueOf(Controller.getController().getNumeroIscritti(idCorso)));
         btnIscrivitiCorso.setText("Iscritto");
     }
 
     private void onEditCourse()
     {
         JOptionPane.showMessageDialog(this, "Modifica corso " + lblNome.getText());
-        // TODO: aprire dialog modifica corso
+        Controller.getController().openEditCourseDialog(owner, this, idCorso);
     }
 
     private void onDeleteCourse()

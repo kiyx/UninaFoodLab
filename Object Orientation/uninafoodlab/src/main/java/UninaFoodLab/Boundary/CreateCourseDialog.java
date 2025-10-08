@@ -77,23 +77,25 @@ public class CreateCourseDialog extends JDialog
     private List<String> namesArguments = new ArrayList<>();
     private List<Integer> idsSelectedArguments = new ArrayList<>();
     
-    private MyCoursesFrame parentFrame;
+    private JFrame parentFrame;
     
-    public CreateCourseDialog(MyCoursesFrame parentFrame)
+    public CreateCourseDialog(JFrame parentFrame, boolean editMode)
     {
-        super(parentFrame, "UninaFoodLab - Crea nuovo corso", true);
+        super(parentFrame, true);
         this.parentFrame = parentFrame; 
         
+        initComponents();
+       
+        setTitle("Crea corso");
+        confirmBtn.setText("Crea corso");    
         setMinimumSize(new Dimension(1670, 725));
         setPreferredSize(new Dimension(1200, 700));
         setLocationRelativeTo(parentFrame);
         setResizable(true);
         setIconImage(parentFrame.getIconImage());
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-        
-        initComponents();
+          
         initListeners();
-
         pack();
     }
 
@@ -327,7 +329,6 @@ public class CreateCourseDialog extends JDialog
         mainPanel.add(sessionPanel, "cell 1 0, grow, push");
     }
 
-    
     /**
      * Registra i listener per tutti i componenti interattivi del dialog.
      */
@@ -466,17 +467,17 @@ public class CreateCourseDialog extends JDialog
                     	{
                     		if(!praticoCheck.isSelected() || (praticoCheck.isSelected() && !duratePratiche.isEmpty()))
                     		{
-                    			Controller.getController().createCourse
-                        		(
-    	                    		parentFrame, CreateCourseDialog.this, nameField.getText().trim(), dataInizioField.getDate(),
-    	                    		(int) numeroSessioniSpinner.getValue(), frequencyList.getSelectedItem().toString(), (int) limitSpinner.getValue(),
-    	                    		descrizioneArea.getText(), BigDecimal.valueOf((double)costSpinner.getValue()), praticoCheck.isSelected(),
-    	                    		idsSelectedArguments, durateOnline, orariOnline, dateOnline, linksOnline, duratePratiche,
-    	                    		orariPratiche, datePratiche, indirizziPratiche, ricettePratiche
-                        		);
+                    				Controller.getController().createCourse
+                            		(
+        	                    		parentFrame, CreateCourseDialog.this, nameField.getText().trim(), dataInizioField.getDate(),
+        	                    		(int) numeroSessioniSpinner.getValue(), frequencyList.getSelectedItem().toString(), (int) limitSpinner.getValue(),
+        	                    		descrizioneArea.getText(), BigDecimal.valueOf((double)costSpinner.getValue()), praticoCheck.isSelected(),
+        	                    		idsSelectedArguments, durateOnline, orariOnline, dateOnline, linksOnline, duratePratiche,
+        	                    		orariPratiche, datePratiche, indirizziPratiche, ricettePratiche
+                            		);
                     		}
                     		else
-                    			JOptionPane.showMessageDialog(CreateCourseDialog.this, "Devi aggiungere almeno una sessione.", "Errore", 
+                    			JOptionPane.showMessageDialog(CreateCourseDialog.this, "Devi aggiungere almeno una sessione pratica.", "Errore", 
    				 					   JOptionPane.ERROR_MESSAGE);
                     	}
                 	}
@@ -568,7 +569,6 @@ public class CreateCourseDialog extends JDialog
         	card.disposeListeners();
         }       
 
-        // Listener del dialog addSessionDialog (se esiste)
         removeDialogListeners();
     }
     

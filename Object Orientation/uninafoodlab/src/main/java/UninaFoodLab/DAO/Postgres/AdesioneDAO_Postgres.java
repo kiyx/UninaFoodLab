@@ -10,6 +10,7 @@ import java.util.List;
 
 import UninaFoodLab.DAO.AdesioneDAO;
 import UninaFoodLab.DTO.Adesione;
+import UninaFoodLab.Exceptions.AdesioneNotFoundException;
 import UninaFoodLab.Exceptions.DAOException;
 import UninaFoodLab.Exceptions.IscrizioneNotFoundException;
 
@@ -58,6 +59,30 @@ public class AdesioneDAO_Postgres implements AdesioneDAO
         }
         
         return adesioni;
+	}
+	
+	@Override
+	public Integer getNumeroAdesioniByIdSessionePratica(int idSessionePratica)
+	{
+		String sql = 
+    			"SELECT COUNT(*) "
+    		  + "FROM Adesioni "
+    		  + "WHERE IdSessionePratica = ?";
+
+		try(Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
+		{
+		    s.setInt(1, idSessionePratica);
+		    ResultSet rs = s.executeQuery();
+		
+		    if(rs.next())
+		        return rs.getInt(1);
+		    else
+		    	throw new AdesioneNotFoundException("Sessione con id " + idSessionePratica + " non trovata");
+		}
+		catch(SQLException e)
+		{
+			throw new DAOException("Errore DB durante getNumeroAdesioniByIdSessionePratica", e);
+		}
 	}
 	
 	@Override

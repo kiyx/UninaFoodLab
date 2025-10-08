@@ -18,9 +18,8 @@ public class SessionInfoPanel extends JPanel
     
     private JXPanel btnPanel;
     private JXButton btnAdesione;
-    private JXLabel titleLbl, dataLbl, orarioLabel, durataLabel, ricetteLabel, luogoLabel, partecipantiLabel, linkLabel;
+    private JXLabel titleLbl, dataLbl, orarioLabel, durataLabel, ricetteLabel, luogoLabel, linkLabel, adesioniLabel;
     private final int idSession, number, durata;
-    private final Integer numeroPartecipanti;
     private final boolean pratica;
     private final LocalDate dataStr;
     private final LocalTime orarioStr;
@@ -29,8 +28,8 @@ public class SessionInfoPanel extends JPanel
     
     private ActionListener adesioneListener;
 
-    public SessionInfoPanel(int idSession, int number, boolean pratica, LocalDate dataStr, LocalTime orarioStr, int durata, List<String> ricette, String luogo,
-                            Integer numeroPartecipanti, String linkRiunione)
+    public SessionInfoPanel(int idSession, int number, boolean pratica, LocalDate dataStr, LocalTime orarioStr, int durata, List<String> ricette, String luogo
+    						, String linkRiunione)
     {
         this.idSession = idSession;
         this.number = number;
@@ -40,7 +39,6 @@ public class SessionInfoPanel extends JPanel
         this.durata = durata;
         this.ricette = ricette;
         this.luogo = luogo;
-        this.numeroPartecipanti = numeroPartecipanti;
         this.linkRiunione = linkRiunione;
         
         setLayout(new MigLayout("fill, insets 10", "[grow, fill][pref!]", "[][][][][][][][]"));
@@ -76,7 +74,7 @@ public class SessionInfoPanel extends JPanel
         {
             ricetteLabel = new JXLabel(String.join(", ", ricette));
             luogoLabel = new JXLabel(luogo != null ? luogo : "-");
-            partecipantiLabel = new JXLabel(String.valueOf(numeroPartecipanti));
+            adesioniLabel = new JXLabel(String.valueOf(Controller.getController().getNumeroAdesioni(idSession)));
 
             add(new JLabel("Ricette:"), "right");
             add(ricetteLabel, "wrap");
@@ -84,8 +82,8 @@ public class SessionInfoPanel extends JPanel
             add(new JLabel("Luogo:"), "right");
             add(luogoLabel, "wrap");
 
-            add(new JLabel("Numero Partecipanti:"), "right");
-            add(partecipantiLabel, "wrap");
+            add(new JLabel("Numero di Adesioni:"), "right");
+            add(adesioniLabel, "wrap");
         }
         else
         {
@@ -156,12 +154,14 @@ public class SessionInfoPanel extends JPanel
                     {
                         Controller.getController().removeAdesione(SessionInfoPanel.this, idSession);
                         showMessage("Hai eliminato l’adesione alla sessione " + number);
+                        adesioniLabel.setText(String.valueOf(Controller.getController().getNumeroAdesioni(idSession)));
                         updateAdesioneButton(false);
                     }
                     else
                     {
                         Controller.getController().saveAdesione(SessionInfoPanel.this, idSession);
                         showMessage("Hai aderito alla sessione " + number);
+                        adesioniLabel.setText(String.valueOf(Controller.getController().getNumeroAdesioni(idSession)));
                         updateAdesioneButton(true);
                     }
                 }
