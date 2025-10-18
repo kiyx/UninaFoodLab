@@ -78,16 +78,30 @@ public class CreateCourseDialog extends JDialog
     private List<Integer> idsSelectedArguments = new ArrayList<>();
     
     private JFrame parentFrame;
+    private boolean editMode;
+    private int idCorsoDaModificare;
     
     public CreateCourseDialog(JFrame parentFrame, boolean editMode)
     {
         super(parentFrame, true);
-        this.parentFrame = parentFrame; 
-        
+        this.parentFrame = parentFrame;
+        this.editMode = editMode; 
+
         initComponents();
+
+        if(editMode)
+        {
+            setTitle("Modifica corso");
+            confirmBtn.setText("Salva Modifiche");
+            title.setText("Modifica i dettagli del corso");
+        }
+        else
+        {
+            setTitle("Crea corso");
+            confirmBtn.setText("Crea corso");
+            title.setText("Inserisci i dettagli del nuovo corso");
+        }
        
-        setTitle("Crea corso");
-        confirmBtn.setText("Crea corso");    
         setMinimumSize(new Dimension(1670, 725));
         setPreferredSize(new Dimension(1200, 700));
         setLocationRelativeTo(parentFrame);
@@ -175,27 +189,34 @@ public class CreateCourseDialog extends JDialog
             JCheckBox cb = new JCheckBox(namesArguments.get(i));
             
             cb.addItemListener( new ItemListener()
-						        {
-						            @Override
-						            public void itemStateChanged(ItemEvent e)
-						            {    		
-						            	int argumentId = idsArguments.get(j);
-						            	 
-						            	if(cb.isSelected() && !idsSelectedArguments.contains(argumentId))
-						            		idsSelectedArguments.add(argumentId);
-						            	else
-						            	{
-						            		int index = idsSelectedArguments.indexOf(argumentId);
-						                    if(index >= 0) 
-						                    	idsSelectedArguments.remove(index);
-						            	}
-						            	
-						            	// Se raggiungo il limite disabilito quelle non selezionate 
-						            	for(JCheckBox cb : argumentsCheck)
-						            		if(!cb.isSelected())
-						                       cb.setEnabled(!(idsSelectedArguments.size() >= 5));					        		                   
-						            }
-						         });
+            {
+                @Override
+                public void itemStateChanged(ItemEvent e)
+                {
+                    // Questo listener è attivo solo in modalità CREAZIONE,
+                    // perché in EDIT le checkbox sono disabilitate da popolaDatiCorso.
+                    if(!editMode)
+                    {
+                        int argumentId = idsArguments.get(j);
+
+                        if(cb.isSelected() && !idsSelectedArguments.contains(argumentId))
+                        {
+                            idsSelectedArguments.add(argumentId);
+                        }
+                        else
+                        {
+                            int index = idsSelectedArguments.indexOf(argumentId);
+                            if(index >= 0)
+                                idsSelectedArguments.remove(index);
+                        }
+
+                        // Se raggiungo il limite (5) disabilito quelle non selezionate
+                        for(JCheckBox otherCb : argumentsCheck)
+                            if(!otherCb.isSelected())
+                               otherCb.setEnabled(!(idsSelectedArguments.size() >= 5));
+                    }
+                }
+            });
             argumentsCheck.add(cb);
             argomentiPanel.add(cb);
         }
@@ -414,76 +435,105 @@ public class CreateCourseDialog extends JDialog
          */
         confirmBtnListener = new ActionListener()
         {
-        	
             @Override
             public void actionPerformed(ActionEvent e)
             {               
-                if(isValidCourse())
+                boolean isValid = editMode 
+                    ? (validateNome() && validateDescrizione() && validateDataInizio()) 
+                    : isValidCourse();
+
+                if(isValid)
                 {
-                	if(!sessionCards.isEmpty())
-                	{
-                		List<Integer> durateOnline = new ArrayList<>();
-                		List<Time> orariOnline = new ArrayList<>();
-                		List<LocalDate> dateOnline = new ArrayList<>();
-                		List<String> linksOnline = new ArrayList<>();
-                		
-                		List<Integer> duratePratiche = new ArrayList<>();
-                		List<Time> orariPratiche = new ArrayList<>();	
-                		List<LocalDate> datePratiche = new ArrayList<>();
-                		List<String> indirizziPratiche = new ArrayList<>();
-                		List<ArrayList<Integer>> ricettePratiche = new ArrayList<>();
-                		
-                		boolean check = true;
-                		for(CreateSessionPanel card : sessionCards)
+                    if(!sessionCards.isEmpty())
+                    {
+                        List<Integer> durateOnline = new ArrayList<>();
+                        List<Time> orariOnline = new ArrayList<>();
+                        List<LocalDate> dateOnline = new ArrayList<>();
+                        List<String> linksOnline = new ArrayList<>();
+                        
+                        List<Integer> duratePratiche = new ArrayList<>();
+                        List<Time> orariPratiche = new ArrayList<>();	
+                        List<LocalDate> datePratiche = new ArrayList<>();
+                        List<String> indirizziPratiche = new ArrayList<>();
+                        List<ArrayList<Integer>> ricettePratiche = new ArrayList<>();
+                        
+                        boolean check = true;
+                        for(CreateSessionPanel card : sessionCards)
                         {
                             if(!card.isValidSession())
                             {
                                 JOptionPane.showMessageDialog(CreateCourseDialog.this, "Errore nei dati di una sessione. Controlla i campi", 
-                                						   	  "Errore", JOptionPane.ERROR_MESSAGE);
+                                                            "Errore", JOptionPane.ERROR_MESSAGE);
                                 check = false;
                                 break;
                             }
                             else
                             {
-                            	if(card.getTipo().equals("Online"))
-                            	{
-                            		 durateOnline.add(card.getDurata());
-                            		 orariOnline.add(Time.valueOf(card.getOrario()));
-                            		 dateOnline.add(card.getDataSessione());
-                            		 linksOnline.add(card.getLinkRiunione());
-                            	}
-                            	else
-                            	{
-                            		duratePratiche.add(card.getDurata());
-                            		orariPratiche.add(Time.valueOf(card.getOrario()));
-                            		datePratiche.add(card.getDataSessione());
-                           		 	indirizziPratiche.add(card.getIndirizzo());
-                           			ricettePratiche.add((ArrayList<Integer>) card.getIdRicetteSelezionate());
-                            	}
+                                if(card.getTipo().equals("Online"))
+                                {
+                                     durateOnline.add(card.getDurata());
+                                     orariOnline.add(Time.valueOf(card.getOrario()));
+                                     dateOnline.add(card.getDataSessione());
+                                     linksOnline.add(card.getLinkRiunione());
+                                }
+                                else
+                                {
+                                    duratePratiche.add(card.getDurata());
+                                    orariPratiche.add(Time.valueOf(card.getOrario()));
+                                    datePratiche.add(card.getDataSessione());
+                                     indirizziPratiche.add(card.getIndirizzo());
+                                   ricettePratiche.add((ArrayList<Integer>) card.getIdRicetteSelezionate());
+                                }
                             }  	
                         } 	
 
-                    	if(check)
-                    	{
-                    		if(!praticoCheck.isSelected() || (praticoCheck.isSelected() && !duratePratiche.isEmpty()))
-                    		{
-                    				Controller.getController().createCourse
-                            		(
-        	                    		parentFrame, CreateCourseDialog.this, nameField.getText().trim(), dataInizioField.getDate(),
-        	                    		(int) numeroSessioniSpinner.getValue(), frequencyList.getSelectedItem().toString(), (int) limitSpinner.getValue(),
-        	                    		descrizioneArea.getText(), BigDecimal.valueOf((double)costSpinner.getValue()), praticoCheck.isSelected(),
-        	                    		idsSelectedArguments, durateOnline, orariOnline, dateOnline, linksOnline, duratePratiche,
-        	                    		orariPratiche, datePratiche, indirizziPratiche, ricettePratiche
-                            		);
-                    		}
-                    		else
-                    			JOptionPane.showMessageDialog(CreateCourseDialog.this, "Devi aggiungere almeno una sessione pratica.", "Errore", 
-   				 					   JOptionPane.ERROR_MESSAGE);
-                    	}
-                	}
-                	else
-                  		 JOptionPane.showMessageDialog(CreateCourseDialog.this, "Devi aggiungere almeno una sessione.", "Errore", 
-                  				 					   JOptionPane.ERROR_MESSAGE);                
+                        if(check)
+                        {
+                            if(!praticoCheck.isSelected() || (praticoCheck.isSelected() && !duratePratiche.isEmpty()))
+                            {
+                                if(editMode)
+                                {
+                                    String frequenzaScelta = frequencyList.getSelectedItem().toString();
+
+                                    Controller.getController().editCourse(
+                                        parentFrame, CreateCourseDialog.this, idCorsoDaModificare,
+                                        nameField.getText().trim(), 
+                                        dataInizioField.getDate(),
+                                        (int) numeroSessioniSpinner.getValue(), 
+                                        frequenzaScelta, 
+                                        (int) limitSpinner.getValue(),
+                                        descrizioneArea.getText(), 
+                                        BigDecimal.valueOf((double)costSpinner.getValue()),
+                                        praticoCheck.isSelected(),
+                                        idsSelectedArguments,
+                                        durateOnline, orariOnline, dateOnline, linksOnline, duratePratiche,
+                                        orariPratiche, datePratiche, indirizziPratiche, ricettePratiche
+                                    );
+                                }
+                                else
+                                {
+                                    Controller.getController().createCourse 
+                                    (
+                                        parentFrame, CreateCourseDialog.this, nameField.getText().trim(), dataInizioField.getDate(),
+                                        (int) numeroSessioniSpinner.getValue(), frequencyList.getSelectedItem().toString(), (int) limitSpinner.getValue(),
+                                        descrizioneArea.getText(), BigDecimal.valueOf((double)costSpinner.getValue()), praticoCheck.isSelected(),
+                                        idsSelectedArguments, durateOnline, orariOnline, dateOnline, linksOnline, duratePratiche,
+                                        orariPratiche, datePratiche, indirizziPratiche, ricettePratiche
+                                    );
+                                }
+                            }
+                            else
+                            {
+                                JOptionPane.showMessageDialog(CreateCourseDialog.this, "Devi aggiungere almeno una sessione pratica.", "Errore", 
+                                                            JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
+                    }
+                    else
+                    {
+                         JOptionPane.showMessageDialog(CreateCourseDialog.this, "Devi aggiungere almeno una sessione.", "Errore", 
+                                                        JOptionPane.ERROR_MESSAGE);                
+                    }
                 } 
             }
         };
@@ -581,6 +631,78 @@ public class CreateCourseDialog extends JDialog
         disposeListeners();
         super.dispose();
     } 
+    
+
+    /**
+     * Popola i campi principali del corso con dati.
+     * Chiamato dal Controller.
+     */
+    public void popolaDatiCorso(int idCorso, String nome, String descrizione, LocalDate dataInizio, double costo, String frequenza, boolean isPratico, int limite, List<Integer> idArgomentiSelezionati)
+    {
+        this.idCorsoDaModificare = idCorso;
+        LocalDate today = LocalDate.now();
+        boolean corsoIniziato = dataInizio.isBefore(today);
+
+        nameField.setText(nome);
+        descrizioneArea.setText(descrizione);
+
+        dataInizioField.setDate(dataInizio);
+        dataInizioField.setEnabled(false); 
+        
+        costSpinner.setValue(costo);
+        costSpinner.setEnabled(false); 
+        
+        frequencyList.setSelectedItem(frequenza);
+        
+        praticoCheck.setSelected(isPratico);
+        praticoCheck.setEnabled(false);
+        
+        if(isPratico)
+        {
+            limitSpinner.setValue(limite);
+            togglePartecipantiLimit(true);
+        }
+        limitSpinner.setEnabled(false); 
+        limitLabel.setEnabled(false);
+
+        if(corsoIniziato)
+        {
+            aggiungiSessioneLabel.setVisible(false);
+            frequencyList.setEnabled(false);
+        }
+
+        idsSelectedArguments.clear();
+        for(int i = 0; i < idsArguments.size(); i++)
+        {
+            int idArgomentoAttuale = idsArguments.get(i);
+            JCheckBox cb = argumentsCheck.get(i);
+
+            if(idArgomentiSelezionati.contains(idArgomentoAttuale))
+            {
+                cb.setSelected(true);
+                idsSelectedArguments.add(idArgomentoAttuale);
+            }
+            cb.setEnabled(false);
+        }
+
+        sessionCards.clear();
+        sessionsContainer.removeAll();
+    }
+
+    /**
+     * Aggiunge una card sessione e la popola con i dati
+     * Chiamato dal Controller
+     */
+    public void aggiungiSessionePopolata(LocalDate dataSessione, LocalTime orario, int durataMinuti, boolean isPratica, String link, String indirizzo, List<Integer> idRicetteSelezionate)
+    {
+        CreateSessionPanel card = new CreateSessionPanel(sessionCards.size() + 1, isPratica, this);
+        card.popolaDatiSessione(dataSessione, orario, durataMinuti, link, indirizzo, idRicetteSelezionate); 
+        
+        sessionCards.add(card);
+        sessionsContainer.add(card, "growx, growy, w 33%");
+        
+        refreshSessionLayout();
+    }
     
     /**
      * Riesegue la schedulazione automatica delle date delle sessioni in base a data iniziale e frequenza.
@@ -737,6 +859,12 @@ public class CreateCourseDialog extends JDialog
         
         for(int i = 0; i < sessionCards.size(); i++)
             sessionCards.get(i).aggiornaNumero(i + 1);
+        
+        if(editMode)
+        {
+            frequencyList.setSelectedItem("Libera");
+            frequencyList.setEnabled(false);
+        }
         
         refreshSessionLayout();
         rescheduleSessions();

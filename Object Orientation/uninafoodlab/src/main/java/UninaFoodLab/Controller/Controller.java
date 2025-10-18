@@ -1071,114 +1071,280 @@ public class Controller
 	
 	public void openEditCourseDialog(Window owner, DetailedCourseFrame dialog, int idCorso)
 	{
-		Corso corso = corsoDAO.getCorsoById(idCorso);
-		if(corso != null) 
-		{	
-			CreateCourseDialog editDialog = new CreateCourseDialog((JFrame)owner, true);
-			
-			
-			
-			
+	    Corso corso = corsoDAO.getCorsoById(idCorso);
+	    if(corso != null) 
+	    {	
+	        List<Sessione> sessioni = new ArrayList<>();
+	        try
+	        {
+	            List<SessionePratica> pratiche = getSessionePraticaDAO().getSessioniPraticheByIdCorso(idCorso);
+	            List<SessioneOnline> online = getSessioneOnlineDAO().getSessioniOnlineByIdCorso(idCorso);
+	            
+	            sessioni.addAll(pratiche);
+	            sessioni.addAll(online);
+	            
+	            sessioni.sort(Comparator.comparing(Sessione::getData).thenComparing(Sessione::getOrario));
+
+	        }
+	        catch(DAOException e)
+	        {
+	            JOptionPane.showMessageDialog(owner, "Errore nel caricamento delle sessioni.", "Errore", JOptionPane.ERROR_MESSAGE);
+	            LOGGER.log(Level.SEVERE, "Errore fetch sessioni per edit", e);
+	            return;
+	        }
+
+	        CreateCourseDialog editDialog = new CreateCourseDialog((JFrame)owner, true);
+	        
+	        List<Integer> idArgomentiSelezionati = new ArrayList<>();
+	        for(Argomento a : corso.getArgomenti())
+	            idArgomentiSelezionati.add(a.getId());
+
+	        editDialog.popolaDatiCorso(
+	            corso.getId(),
+	            corso.getNome(),
+	            corso.getDescrizione(),
+	            corso.getDataInizio().toLocalDate(),
+	            corso.getCosto().doubleValue(),
+	            corso.getFrequenzaSessioni().toString(),
+	            corso.getIsPratico(),
+	            corso.getLimite(),
+	            idArgomentiSelezionati
+	        ); 
+	        
+	        for(Sessione s : sessioni)
+	        {
+	            String link = null;
+	            String indirizzo = null;
+	            List<Integer> idRicette = new ArrayList<>();
+	            boolean isPratica = false;
+
+	            if(s instanceof SessionePratica)
+	            {
+	                isPratica = true;
+	                SessionePratica sp = (SessionePratica) s;
+	                indirizzo = sp.getIndirizzo();
+	                for(Ricetta r : sp.getRicette())
+	                    idRicette.add(r.getId());
+	            }
+	            else
+	            {
+	                SessioneOnline so = (SessioneOnline) s;
+	                link = so.getLinkRiunione();
+	            }
+
+	            editDialog.aggiungiSessionePopolata(
+	                s.getData().toLocalDate(),
+	                s.getOrario().toLocalTime(),
+	                s.getDurata(),
+	                isPratica,
+	                link,
+	                indirizzo,
+	                idRicette
+	            );
+	        }
+	        
+	        editDialog.setVisible(true);
 	    }
-		else
-			JOptionPane.showMessageDialog(owner, "Errore nel caricamento del corso.", "Errore", JOptionPane.ERROR_MESSAGE);
+	    else
+	    {
+	        JOptionPane.showMessageDialog(owner, "Errore nel caricamento del corso.", "Errore", JOptionPane.ERROR_MESSAGE);
+	    }
 	}
 	
-	public void editCourse(JFrame courseFrame, CreateCourseDialog currDialog, String nomeCorso, LocalDate dataInizio, int numeroSessioni, String frequenza,
-			 int limite, String descrizione, BigDecimal costo, boolean isPratico, List<Integer> idArgomenti,
-			 List<Integer> durateOnline, List<Time>  orariOnline, List<LocalDate> dateOnline,
-			 List<String> linksOnline, List<Integer> duratePratiche, List<Time> orariPratiche,
-			 List<LocalDate> datePratiche, List<String> indirizziPratiche, 
-			 List<ArrayList<Integer>> idsRicettePratiche) 
+	// In Controller.java
+
+	// In Controller.java
+
+	public void editCourse(JFrame courseFrame, CreateCourseDialog currDialog, int idCorso,
+	                       String nomeCorso, LocalDate dataInizio, int numeroSessioni, String frequenza,
+	                       int limite, String descrizione, BigDecimal costo, boolean isPratico,
+	                       List<Integer> idArgomenti, // ID argomenti originali (non modificati)
+	                       List<Integer> durateOnline, List<Time>  orariOnline, List<LocalDate> dateOnline,
+	                       List<String> linksOnline,
+	                       List<Integer> duratePratiche, List<Time> orariPratiche,
+	                       List<LocalDate> datePratiche, List<String> indirizziPratiche,
+	                       List<ArrayList<Integer>> idsRicettePratiche)
 	{
-		try
-		{
-			ArrayList<Argomento> argomenti = new ArrayList<>();
-			
-			// Costruisco gli argomenti da salvare guardando prima in cache e poi fallback su dao
-			for(Integer id : idArgomenti)
-			{
-			boolean trovato = false;
-			
-			for(Argomento a : cacheArgomenti)
-			{
-				if(a.getId() == id)
-				{
-					argomenti.add(a);
-					trovato = true;
-					break;
-				}		
-			}
-			if(!trovato)
-				argomenti.add(getArgomentoDAO().getArgomentoById(id));
-			}
-			
-			ArrayList<ArrayList<Ricetta>> ricette = new ArrayList<>();
-			
-			// Costruisco le ricette da salvare guardando prima in cache e poi fallback su dao
-			for(List<Integer> ricetteSessione : idsRicettePratiche)
-			{
-			ArrayList<Ricetta> ricettePerSessione = new ArrayList<>();
-			
-			for(Integer id : ricetteSessione)
-			{
-				boolean trovato = false;
-				
-				for(Ricetta r : cacheRicette)
-				{
-					if(r.getId() == id)
-					{
-						ricettePerSessione.add(r);
-						trovato = true;
-						break;
-					}
-				}
-					
-				if(!trovato)
-					ricettePerSessione.add(getRicettaDAO().getRicettaById(id));
-			}
-			
-			ricette.add(ricettePerSessione);
-			}
-			
-			// Costruisco le sessioni da salvare guardando prima in cache e poi fallback su dao		
-			ArrayList<Sessione> sessioni = new ArrayList<>();
-			for(int i = 0; i < durateOnline.size(); i++)
-			sessioni.add(new SessioneOnline(durateOnline.get(i), orariOnline.get(i), dateOnline.get(i), linksOnline.get(i)));
-			for(int i = 0; i < duratePratiche.size(); i++)
-			sessioni.add(new SessionePratica(duratePratiche.get(i), orariPratiche.get(i), datePratiche.get(i), indirizziPratiche.get(i),
-											 ricette.get(i)));
-			
-			Corso toSaveCorso = new Corso(nomeCorso, dataInizio, numeroSessioni, FrequenzaSessioni.valueOf(frequenza), limite, descrizione, 
-				  costo, isPratico, (Chef) getLoggedUser(), argomenti, sessioni);
-			
-			getCorsoDAO().update(getCorsoDAO().getCorsoById());
-			cacheCorsi.add(toSaveCorso);
-			
-			List<String> namesArgs = new ArrayList<>();
-			for(Argomento a : argomenti)
-			namesArgs.add(a.getNome());
-			
-			CourseCardPanel newCard = new CourseCardPanel
-			(
-			   toSaveCorso.getId(),
-			   toSaveCorso.getNome(),
-			   idArgomenti,            
-			   namesArgs,           
-			   Date.valueOf(dataInizio),
-			   numeroSessioni
-			);
-			((MyCoursesFrame)courseFrame).addCourseCard(newCard);
-			
-			JOptionPane.showMessageDialog(currDialog, "Corso " + nomeCorso + " salvato con successo");
-			LOGGER.log(Level.INFO, "Salvataggio del corso " + nomeCorso + " dello chef " + getLoggedUser().getUsername() + " effettuato ");
-			currDialog.dispose();
-		} 
-		catch(DAOException e)
-		{
-			JOptionPane.showMessageDialog(currDialog, "Errore nel salvataggio del corso: " + e.getMessage());
-			LOGGER.log(Level.SEVERE, "Errore nel salvataggio del corso su DB", e);
-		}
+	    Connection conn = null;
+	    Corso corsoOriginale = null;
+	    List<SessioneOnline> oldOnlineSessions = null;
+	    List<SessionePratica> oldPraticaSessions = null;
+	    // List<Argomento> oldArgomenti = null; // Non più necessario recuperare i vecchi argomenti
+
+	    try
+	    {
+	        // 0. Recupera il Corso originale e le sue sessioni esistenti
+	        final int finalIdCorso = idCorso;
+	        corsoOriginale = cacheCorsi.stream()
+	                                  .filter(c -> c.getId() == finalIdCorso)
+	                                  .findFirst()
+	                                  .orElseGet(() -> getCorsoDAO().getCorsoById(finalIdCorso));
+
+	        if(corsoOriginale == null)
+	        {
+	             throw new DAOException("Corso originale non trovato per l'aggiornamento.");
+	        }
+
+	        oldOnlineSessions = getSessioneOnlineDAO().getSessioniOnlineByIdCorso(idCorso);
+	        oldPraticaSessions = getSessionePraticaDAO().getSessioniPraticheByIdCorso(idCorso);
+	        // Non serve recuperare oldArgomenti
+
+
+	        // 1. Costruisci DTO Argomenti (usando gli ID originali passati dalla GUI bloccata)
+	        ArrayList<Argomento> argomentiCorso = new ArrayList<>(); // Lista dei DTO Argomento
+	        for(Integer id : idArgomenti) // idArgomenti contiene gli ID originali
+	        {
+	            argomentiCorso.add(cacheArgomenti.stream()
+	                                       .filter(a -> a.getId() == id)
+	                                       .findFirst()
+	                                       .orElseGet(() -> getArgomentoDAO().getArgomentoById(id)));
+	        }
+
+	        // 1b. Costruisci DTO Ricette
+	        ArrayList<ArrayList<Ricetta>> ricette = new ArrayList<>();
+	        for(List<Integer> ricetteSessione : idsRicettePratiche)
+	        {
+	            ArrayList<Ricetta> ricettePerSessione = new ArrayList<>();
+	            for(Integer id : ricetteSessione)
+	            {
+	                ricettePerSessione.add(cacheRicette.stream()
+	                                                   .filter(r -> r.getId() == id)
+	                                                   .findFirst()
+	                                                   .orElseGet(() -> getRicettaDAO().getRicettaById(id)));
+	            }
+	            ricette.add(ricettePerSessione);
+	        }
+
+
+	        // 2. Costruisci DTO NUOVE Sessioni
+	        ArrayList<SessioneOnline> nuoveSessioniOnline = new ArrayList<>();
+	        ArrayList<SessionePratica> nuoveSessioniPratiche = new ArrayList<>();
+	        for(int i = 0; i < durateOnline.size(); i++)
+	        {
+	            nuoveSessioniOnline.add(new SessioneOnline(durateOnline.get(i), orariOnline.get(i), dateOnline.get(i), linksOnline.get(i)));
+	        }
+	        for(int i = 0; i < duratePratiche.size(); i++)
+	        {
+	            nuoveSessioniPratiche.add(new SessionePratica(duratePratiche.get(i), orariPratiche.get(i), datePratiche.get(i), indirizziPratiche.get(i), ricette.get(i)));
+	        }
+
+
+	        // 3. Costruisci DTO Corso Aggiornato (passando gli argomenti originali/bloccati)
+	        Corso corsoAggiornato = new Corso(
+	            nomeCorso, dataInizio, numeroSessioni, FrequenzaSessioni.valueOf(frequenza), limite, descrizione,
+	            costo, isPratico, (Chef) getLoggedUser(), argomentiCorso, null // Passa argomentiCorso
+	        );
+	        corsoAggiornato.setId(idCorso);
+
+	        // 4. Associa il Corso aggiornato alle NUOVE Sessioni
+	        for(SessioneOnline so : nuoveSessioniOnline)
+	        {
+	            so.setCorso(corsoAggiornato);
+	        }
+	        for(SessionePratica sp : nuoveSessioniPratiche)
+	        {
+	            sp.setCorso(corsoAggiornato);
+	        }
+
+	        // --- OPERAZIONI DB ---
+
+	        // 5. Delete SOLO le Sessioni esistenti (FUORI TRANSAZIONE)
+	        for(SessioneOnline oldSo : oldOnlineSessions)
+	        {
+	            getSessioneOnlineDAO().delete(oldSo.getId());
+	        }
+	        for(SessionePratica oldSp : oldPraticaSessions)
+	        {
+	            getSessionePraticaDAO().delete(oldSp.getId());
+	        }
+	        // NON CANCELLIAMO PIÙ GLI ARGOMENTI
+
+
+	        // --- INIZIO TRANSAZIONE (solo per update corso base e recreate sessioni) ---
+	        //    (La gestione argomenti è rimossa dalla transazione)
+	        conn = ConnectionManager.getConnection();
+	        conn.setAutoCommit(false);
+
+	        // 6. Aggiorna dati base Corso (passando originale e nuovo)
+	        //    Il DAO update ignorerà le differenze negli argomenti se non cambia i campi base
+	        getCorsoDAO().update(corsoOriginale, corsoAggiornato);
+
+	        // 7. Recreate Sessioni (usano connessione transazione)
+	        for(SessioneOnline so : nuoveSessioniOnline)
+	        {
+	            getSessioneOnlineDAO().save(so, conn);
+	        }
+	        for(SessionePratica sp : nuoveSessioniPratiche)
+	        {
+	            getSessionePraticaDAO().save(sp, conn);
+	        }
+
+	        // --- COMMIT TRANSAZIONE ---
+	        conn.commit();
+
+	        // 8. Aggiorna cache
+	        cacheCorsi.removeIf(c -> c.getId() == idCorso);
+	        Corso corsoPerCache = new Corso( // Crea un DTO pulito per la cache
+	            corsoAggiornato.getNome(), corsoAggiornato.getDataInizio().toLocalDate(), corsoAggiornato.getNumeroSessioni(),
+	            corsoAggiornato.getFrequenzaSessioni(), corsoAggiornato.getLimite(), corsoAggiornato.getDescrizione(),
+	            corsoAggiornato.getCosto(), corsoAggiornato.getIsPratico(), corsoAggiornato.getChef(),
+	            corsoAggiornato.getArgomenti(), null // Sessioni a null nella cache
+	        );
+	        corsoPerCache.setId(idCorso);
+	        cacheCorsi.add(corsoPerCache);
+
+	        // 9. Aggiorna UI e chiudi finestre
+	        List<String> namesArgs = new ArrayList<>();
+	        for(Argomento a : argomentiCorso) // Usa gli argomenti originali/bloccati per l'UI
+	        {
+	            namesArgs.add(a.getNome());
+	        }
+	        CourseCardPanel updatedCard = new CourseCardPanel
+	        (
+	           corsoAggiornato.getId(),
+	           corsoAggiornato.getNome(),
+	           idArgomenti, // Lista degli ID originali
+	           namesArgs,
+	           Date.valueOf(dataInizio),
+	           numeroSessioni
+	        );
+
+	        if(courseFrame instanceof MyCoursesFrame)
+	        {
+	            ((MyCoursesFrame)courseFrame).updateCourseCard(updatedCard);
+	        }
+	        JOptionPane.showMessageDialog(currDialog, "Corso " + nomeCorso + " modificato con successo");
+	        LOGGER.log(Level.INFO, "Modifica del corso " + nomeCorso + " effettuata ");
+	        currDialog.dispose();
+
+	        Window[] windows = Window.getWindows();
+	        for(Window window : windows)
+	        {
+	            if(window instanceof DetailedCourseFrame && window.isShowing())
+	            {
+	                window.dispose();
+	                break;
+	            }
+	        }
+	    }
+	    catch(DAOException | SQLException e)
+	    {
+	        // --- ROLLBACK TRANSAZIONE ---
+	        if(conn != null)
+	        {
+	            try { conn.rollback(); } catch(SQLException ex) { /* log */ }
+	        }
+	        JOptionPane.showMessageDialog(currDialog, "Errore nella modifica del corso: " + e.getMessage());
+	        LOGGER.log(Level.SEVERE, "Errore modifica corso DB", e);
+	    }
+	    finally
+	    {
+	         // --- CHIUSURA CONNESSIONE ---
+	         if(conn != null)
+	         {
+	            try { conn.setAutoCommit(true); conn.close(); } catch(SQLException ex) { /* log */ }
+	         }
+	    }
 	}
 	
 	

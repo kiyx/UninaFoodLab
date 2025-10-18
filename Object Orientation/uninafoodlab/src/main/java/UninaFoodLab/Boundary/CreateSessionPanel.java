@@ -737,6 +737,73 @@ public class CreateSessionPanel extends JXPanel
 	    }
 	}
 	
+	// TODO:  TEST
+	public void popolaDatiSessione(LocalDate dataSessione, LocalTime orario, int durataMinuti, String link, String indirizzo, List<Integer> idRicetteSelezionate)
+	{
+	    LocalDate today = LocalDate.now();
+	    boolean isPassed = dataSessione.isBefore(today);
+
+	    datePicker.setDate(dataSessione);
+	    timePicker.setTime(orario);
+	    
+	    int ore = durataMinuti / 60;
+	    int minuti = durataMinuti % 60;
+	    oreSpinner.setValue(ore);
+	    minutiSpinner.setValue(minuti);
+
+	    oreSpinner.setEnabled(false);
+	    minutiSpinner.setEnabled(false);
+
+	    if(pratica)
+	    {
+	        addressField.setText(indirizzo);
+
+	        idsSelectedRecipes.clear();
+	        for(int i = 0; i < idsRecipes.size(); i++)
+	        {
+	            int idRicettaAttuale = idsRecipes.get(i);
+	            JCheckBox cb = ricettaChecks.get(i);
+
+	            if(idRicetteSelezionate.contains(idRicettaAttuale))
+	            {
+	                cb.setSelected(true);
+	            }
+	            
+	            if(isPassed)
+	            {
+	                cb.setEnabled(false);
+	            }
+	        }
+	        
+	        if(isPassed)
+	        {
+	            addressField.setEnabled(false);
+	            ricercaRicetteField.setEnabled(false);
+	            removeBtn.setVisible(false);
+	        }
+	    }
+	    else // Sessione Online
+	    {
+	        linkField.setText(link);
+	        
+	        if(isPassed)
+	        {
+	            linkField.setEnabled(false);
+	            removeBtn.setVisible(false);
+	        }
+	    }
+
+	    if(isPassed)
+	    {
+	        datePicker.setEnabled(false);
+	        timePicker.setEnabled(false);
+	    }
+	}
+	
+	
+	
+	
+	
 	/**
 	 * Imposta la politica di selezione della data consentita nel selettore di date.
 	 * <p>

@@ -253,6 +253,33 @@ public class MyCoursesFrame extends JXFrame implements ArgumentFilterable
         loadPage(currentPage);
     }
     
+    public void updateCourseCard(CourseCardPanel updatedCard)
+    {
+        boolean cardReplaced = false;
+
+        for(int i = 0; i < allCourseCards.size(); i++)
+        {
+             if(allCourseCards.get(i).getId() == updatedCard.getId())
+             {
+                allCourseCards.set(i, updatedCard);
+                break;
+            }
+        }
+
+        for(int i = 0; i < filteredCourseCards.size(); i++)
+        {
+            if(filteredCourseCards.get(i).getId() == updatedCard.getId())
+            {
+                filteredCourseCards.set(i, updatedCard);
+                cardReplaced = true;
+                break;
+            }
+        }
+
+        if(cardReplaced)
+            loadPage(currentPage);
+    }
+    
     /**
      * Aggiunge una nuova CourseCardPanel alla lista e, se
      * rispetta i filtri correnti, la rende visibile subito.
