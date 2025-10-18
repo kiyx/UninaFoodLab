@@ -433,108 +433,109 @@ public class CreateCourseDialog extends JDialog
          * ActionListener per il pulsante "Crea Corso".
          * Valida i campi, raccoglie i dati delle sessioni e invoca il controller per la creazione del corso.
          */
+     // In CreateCourseDialog.java -> initListeners()
+
         confirmBtnListener = new ActionListener()
         {
             @Override
             public void actionPerformed(ActionEvent e)
-            {               
-                boolean isValid = editMode 
-                    ? (validateNome() && validateDescrizione() && validateDataInizio()) 
+            {
+                boolean isDataValid = dataInizioField.isEnabled() ? validateDataInizio() : true;
+                boolean isValid = editMode
+                    ? (validateNome() && validateDescrizione() && isDataValid)
                     : isValidCourse();
 
                 if(isValid)
                 {
-                    if(!sessionCards.isEmpty())
+                    if(sessionCards.isEmpty())
                     {
-                        List<Integer> durateOnline = new ArrayList<>();
-                        List<Time> orariOnline = new ArrayList<>();
-                        List<LocalDate> dateOnline = new ArrayList<>();
-                        List<String> linksOnline = new ArrayList<>();
-                        
-                        List<Integer> duratePratiche = new ArrayList<>();
-                        List<Time> orariPratiche = new ArrayList<>();	
-                        List<LocalDate> datePratiche = new ArrayList<>();
-                        List<String> indirizziPratiche = new ArrayList<>();
-                        List<ArrayList<Integer>> ricettePratiche = new ArrayList<>();
-                        
-                        boolean check = true;
-                        for(CreateSessionPanel card : sessionCards)
-                        {
-                            if(!card.isValidSession())
-                            {
-                                JOptionPane.showMessageDialog(CreateCourseDialog.this, "Errore nei dati di una sessione. Controlla i campi", 
-                                                            "Errore", JOptionPane.ERROR_MESSAGE);
-                                check = false;
-                                break;
-                            }
-                            else
-                            {
-                                if(card.getTipo().equals("Online"))
-                                {
-                                     durateOnline.add(card.getDurata());
-                                     orariOnline.add(Time.valueOf(card.getOrario()));
-                                     dateOnline.add(card.getDataSessione());
-                                     linksOnline.add(card.getLinkRiunione());
-                                }
-                                else
-                                {
-                                    duratePratiche.add(card.getDurata());
-                                    orariPratiche.add(Time.valueOf(card.getOrario()));
-                                    datePratiche.add(card.getDataSessione());
-                                     indirizziPratiche.add(card.getIndirizzo());
-                                   ricettePratiche.add((ArrayList<Integer>) card.getIdRicetteSelezionate());
-                                }
-                            }  	
-                        } 	
+                         JOptionPane.showMessageDialog(CreateCourseDialog.this, "Il corso deve avere almeno una sessione.", "Errore", JOptionPane.ERROR_MESSAGE);
+                         return;
+                    }
 
-                        if(check)
-                        {
-                            if(!praticoCheck.isSelected() || (praticoCheck.isSelected() && !duratePratiche.isEmpty()))
-                            {
-                                if(editMode)
-                                {
-                                    String frequenzaScelta = frequencyList.getSelectedItem().toString();
+                    // Raccolta dati dalle sessioni presenti nella GUI
+                    List<Integer> durateOnline = new ArrayList<>();
+                    List<Time> orariOnline = new ArrayList<>();
+                    List<LocalDate> dateOnline = new ArrayList<>();
+                    List<String> linksOnline = new ArrayList<>();
+                    List<Integer> duratePratiche = new ArrayList<>();
+                    List<Time> orariPratiche = new ArrayList<>();
+                    List<LocalDate> datePratiche = new ArrayList<>();
+                    List<String> indirizziPratiche = new ArrayList<>();
+                    List<ArrayList<Integer>> ricettePratiche = new ArrayList<>();
+                    boolean checkSessionValidity = true;
 
-                                    Controller.getController().editCourse(
-                                        parentFrame, CreateCourseDialog.this, idCorsoDaModificare,
-                                        nameField.getText().trim(), 
-                                        dataInizioField.getDate(),
-                                        (int) numeroSessioniSpinner.getValue(), 
-                                        frequenzaScelta, 
-                                        (int) limitSpinner.getValue(),
-                                        descrizioneArea.getText(), 
-                                        BigDecimal.valueOf((double)costSpinner.getValue()),
-                                        praticoCheck.isSelected(),
-                                        idsSelectedArguments,
-                                        durateOnline, orariOnline, dateOnline, linksOnline, duratePratiche,
-                                        orariPratiche, datePratiche, indirizziPratiche, ricettePratiche
-                                    );
-                                }
-                                else
-                                {
-                                    Controller.getController().createCourse 
-                                    (
-                                        parentFrame, CreateCourseDialog.this, nameField.getText().trim(), dataInizioField.getDate(),
-                                        (int) numeroSessioniSpinner.getValue(), frequencyList.getSelectedItem().toString(), (int) limitSpinner.getValue(),
-                                        descrizioneArea.getText(), BigDecimal.valueOf((double)costSpinner.getValue()), praticoCheck.isSelected(),
-                                        idsSelectedArguments, durateOnline, orariOnline, dateOnline, linksOnline, duratePratiche,
-                                        orariPratiche, datePratiche, indirizziPratiche, ricettePratiche
-                                    );
-                                }
-                            }
-                            else
+                    for(CreateSessionPanel card : sessionCards)
+                    {
+                        if(!card.isPassed() && !card.isValidSession())
+                        {
+                            checkSessionValidity = false;
+                            break;
+                        }
+
+                        if(card.getTipo().equals("Online"))
+                        {
+                           durateOnline.add(card.getDurata());
+                           LocalTime orarioOnline = card.getOrario();                       
+                           orariOnline.add(orarioOnline != null ? Time.valueOf(orarioOnline) : null);
+                           dateOnline.add(card.getDataSessione());
+                           linksOnline.add(card.getLinkRiunione());
+                        }
+                        else
+                        {
+                           duratePratiche.add(card.getDurata());
+                           LocalTime orarioPratica = card.getOrario();
+                           orariPratiche.add(orarioPratica != null ? Time.valueOf(orarioPratica) : null);
+                           datePratiche.add(card.getDataSessione());
+                           indirizziPratiche.add(card.getIndirizzo());
+                           List<Integer> ricetteSelezionate = card.getIdRicetteSelezionate();
+                           ricettePratiche.add(ricetteSelezionate != null ? new ArrayList<>(ricetteSelezionate) : new ArrayList<>());
+                        }
+                    } 
+
+                    // Procedi solo se le sessioni future sono valide
+                    if(checkSessionValidity)
+                    {
+                        // Controlla il vincolo della sessione pratica (se corso pratico)
+                        if(!praticoCheck.isSelected() || (praticoCheck.isSelected() && !duratePratiche.isEmpty()))
+                        {
+                            if(editMode)
                             {
-                                JOptionPane.showMessageDialog(CreateCourseDialog.this, "Devi aggiungere almeno una sessione pratica.", "Errore", 
-                                                            JOptionPane.ERROR_MESSAGE);
+                                LocalDate dataInizioDaPassare = dataInizioField.getDate();
+                                String frequenzaScelta = frequencyList.getSelectedItem().toString();
+
+                                Controller.getController().editCourse(
+                                    parentFrame, CreateCourseDialog.this, idCorsoDaModificare,
+                                    nameField.getText().trim(),
+                                    dataInizioDaPassare, 
+                                    sessionCards.size(),
+                                    frequenzaScelta,
+                                    (int) limitSpinner.getValue(),
+                                    descrizioneArea.getText(),
+                                    BigDecimal.valueOf((double)costSpinner.getValue()), 
+                                    praticoCheck.isSelected(),
+                                    idsSelectedArguments,
+                                    durateOnline, orariOnline, dateOnline, linksOnline, duratePratiche,
+                                    orariPratiche, datePratiche, indirizziPratiche, ricettePratiche
+                                );
+                            }
+                            else // Modalità Creazione
+                            {
+                                Controller.getController().createCourse(
+                                    parentFrame, CreateCourseDialog.this, nameField.getText().trim(), dataInizioField.getDate(),
+                                    sessionCards.size(), frequencyList.getSelectedItem().toString(), (int) limitSpinner.getValue(),
+                                    descrizioneArea.getText(), BigDecimal.valueOf((double)costSpinner.getValue()), praticoCheck.isSelected(),
+                                    idsSelectedArguments, durateOnline, orariOnline, dateOnline, linksOnline, duratePratiche,
+                                    orariPratiche, datePratiche, indirizziPratiche, ricettePratiche
+                                );
                             }
                         }
+                        else
+                        {
+                            JOptionPane.showMessageDialog(CreateCourseDialog.this, "Se il corso è pratico, devi aggiungere almeno una sessione pratica.", "Errore", JOptionPane.ERROR_MESSAGE);
+                        }
                     }
-                    else
-                    {
-                         JOptionPane.showMessageDialog(CreateCourseDialog.this, "Devi aggiungere almeno una sessione.", "Errore", 
-                                                        JOptionPane.ERROR_MESSAGE);                
-                    }
-                } 
+                }
             }
         };
         confirmBtn.addActionListener(confirmBtnListener);
@@ -632,59 +633,58 @@ public class CreateCourseDialog extends JDialog
         super.dispose();
     } 
     
-
     /**
      * Popola i campi principali del corso con dati.
      * Chiamato dal Controller.
      */
-    public void popolaDatiCorso(int idCorso, String nome, String descrizione, LocalDate dataInizio, double costo, String frequenza, boolean isPratico, int limite, List<Integer> idArgomentiSelezionati)
+    public void popolaDatiCorso(int idCorso, String nome, String descrizione, LocalDate dataInizio, double costo, String frequenza, boolean isPratico, int limite, List<Integer> idArgomentiSelezionati, boolean canChangeAddAndFreq) // Rinominato ultimo parametro
     {
         this.idCorsoDaModificare = idCorso;
-        LocalDate today = LocalDate.now();
-        boolean corsoIniziato = dataInizio.isBefore(today);
 
         nameField.setText(nome);
         descrizioneArea.setText(descrizione);
-
         dataInizioField.setDate(dataInizio);
-        dataInizioField.setEnabled(false); 
-        
+        dataInizioField.setEnabled(false);
+
+        if(dataInizioListener != null)
+        {
+            dataInizioField.removeDateChangeListener(dataInizioListener);
+        }
+        dataInizioField.getSettings().setVetoPolicy(date -> date != null && date.equals(dataInizio));
+
+
+        // Blocca altri campi fissi
         costSpinner.setValue(costo);
-        costSpinner.setEnabled(false); 
-        
-        frequencyList.setSelectedItem(frequenza);
-        
+        costSpinner.setEnabled(false);
         praticoCheck.setSelected(isPratico);
         praticoCheck.setEnabled(false);
-        
         if(isPratico)
         {
             limitSpinner.setValue(limite);
             togglePartecipantiLimit(true);
         }
-        limitSpinner.setEnabled(false); 
+        limitSpinner.setEnabled(false);
         limitLabel.setEnabled(false);
 
-        if(corsoIniziato)
-        {
-            aggiungiSessioneLabel.setVisible(false);
-            frequencyList.setEnabled(false);
-        }
+        frequencyList.setEnabled(canChangeAddAndFreq);
+        frequencyList.setSelectedItem(frequenza);
 
         idsSelectedArguments.clear();
         for(int i = 0; i < idsArguments.size(); i++)
         {
             int idArgomentoAttuale = idsArguments.get(i);
             JCheckBox cb = argumentsCheck.get(i);
-
             if(idArgomentiSelezionati.contains(idArgomentoAttuale))
             {
                 cb.setSelected(true);
                 idsSelectedArguments.add(idArgomentoAttuale);
             }
+            else
+            {
+                 cb.setSelected(false);
+            }
             cb.setEnabled(false);
         }
-
         sessionCards.clear();
         sessionsContainer.removeAll();
     }
@@ -696,28 +696,32 @@ public class CreateCourseDialog extends JDialog
     public void aggiungiSessionePopolata(LocalDate dataSessione, LocalTime orario, int durataMinuti, boolean isPratica, String link, String indirizzo, List<Integer> idRicetteSelezionate)
     {
         CreateSessionPanel card = new CreateSessionPanel(sessionCards.size() + 1, isPratica, this);
-        card.popolaDatiSessione(dataSessione, orario, durataMinuti, link, indirizzo, idRicetteSelezionate); 
-        
+        card.popolaDatiSessione(dataSessione, orario, durataMinuti, link, indirizzo, idRicetteSelezionate);
+
         sessionCards.add(card);
         sessionsContainer.add(card, "growx, growy, w 33%");
-        
-        refreshSessionLayout();
+    }
+    
+    public void triggerInitialReschedule()
+    {
+        refreshSessionLayout(); // Aggiorna il layout prima
+        rescheduleSessions();   // Poi applica le logiche di data iniziali
     }
     
     /**
      * Riesegue la schedulazione automatica delle date delle sessioni in base a data iniziale e frequenza.
      */
-    private void rescheduleSessions()
+    void rescheduleSessions()
     {
-        LocalDate dataInizio = dataInizioField.getDate();
+        LocalDate currentDataInizioCorso = dataInizioField.getDate();
         String frequenza = frequencyList.getSelectedItem().toString();
 
-        if(dataInizio != null && frequenza != null)
+        if(currentDataInizioCorso != null)
         {
         	if(frequenza.equals("Libera"))
-                rescheduleLibera(dataInizio);
+                rescheduleLibera(currentDataInizioCorso);
             else
-                rescheduleFissa(dataInizio, frequenza);
+                rescheduleFissa(currentDataInizioCorso, frequenza);
         }
     }
     
@@ -726,43 +730,80 @@ public class CreateCourseDialog extends JDialog
      * @param dataInizio Data di inizio del corso.
      * @param frequenza Stringa che rappresenta la frequenza.
      */
-    private void rescheduleFissa(LocalDate dataInizio, String frequenza)
+    private void rescheduleFissa(LocalDate dataInizioCorso, String frequenza)
     {
         int giorniFrequenza = switch(frequenza)
-						      {
-						          case "Giornaliera" -> 1;
-						          case "Settimanale" -> 7;
-						          case "Bisettimanale" -> 14;
-						          case "Mensile" -> 30;
-						          default -> -1;
-						      };
+                              {
+                                  case "Giornaliera" -> 1;
+                                  case "Settimanale" -> 7;
+                                  case "Bisettimanale" -> 14;
+                                  case "Mensile" -> 30; // Considera approx. per mensile
+                                  default -> 0; // Frequenza non valida o libera
+                              };
 
         if(giorniFrequenza > 0)
         {
-        	for(int i = 0; i < sessionCards.size(); i++)
+            int sessionIndex = 0;
+            for(int i = 0; i < sessionCards.size(); i++)
             {
                 CreateSessionPanel panel = sessionCards.get(i);
-                LocalDate start = dataInizio.plusDays(giorniFrequenza * i);
-                LocalDate end = start.plusDays(giorniFrequenza - 1);
-
-                panel.setDataPrevista(start, i == 0 ? start : end, i == 0);
-                panel.setData(start);
+                if(!panel.isPassed())
+                {
+                    LocalDate dataPrevista = dataInizioCorso.plusDays((long)giorniFrequenza * sessionIndex);
+                    
+                    panel.setDataPrevista(dataPrevista, null, true);
+                     if(panel.getDateChangeListener() != null)
+                     {
+                         panel.getDatePicker().removeDateChangeListener(panel.getDateChangeListener());
+                         panel.setDateChangeListener(null);
+                     }
+                    sessionIndex++;
+                }
+                 else
+                 {
+                     panel.getDatePicker().setEnabled(false);
+                     if(panel.getDateChangeListener() != null)
+                     {
+                         panel.getDatePicker().removeDateChangeListener(panel.getDateChangeListener());
+                         panel.setDateChangeListener(null);
+                     }
+                 }
             }
         }
     }
     
     /**
-     * Abilita la selezione manuale delle date delle sessioni (frequenza libera).
-     * @param dataInizio Data minima consentita per le sessioni.
+     * Abilita la selezione manuale delle date delle sessioni (frequenza libera)
+     * e imposta le Veto Policy corrette.
+     * @param dataInizioCorso Data minima consentita per le sessioni.
      */
-    private void rescheduleLibera(LocalDate dataInizio)
+
+    private void rescheduleLibera(LocalDate dataInizioCorso)
     {
         for(CreateSessionPanel panel : sessionCards)
         {
-            panel.getDatePicker().getSettings().setVetoPolicy(getVetoPolicy(dataInizio, panel));
-            updateSelectedDate(panel, dataInizio);
-            updateSessionListener(panel);
+            if(!panel.isPassed())
+            {
+                panel.getDatePicker().setEnabled(true);
+                panel.getDatePicker().getSettings().setVetoPolicy(getVetoPolicy(dataInizioCorso, panel));
+                updateSelectedDate(panel, dataInizioCorso);
+                updateSessionListener(panel);
+            }
+            else
+            {
+                panel.getDatePicker().setEnabled(false);
+                
+                if(panel.getDateChangeListener() != null)
+                {
+                    panel.getDatePicker().removeDateChangeListener(panel.getDateChangeListener());
+                    panel.setDateChangeListener(null);
+                }
+            }
         }
+
+         for(CreateSessionPanel panel : sessionCards)
+            if(!panel.isPassed())
+                updateSelectedDate(panel, dataInizioCorso);
     }
     
     /**

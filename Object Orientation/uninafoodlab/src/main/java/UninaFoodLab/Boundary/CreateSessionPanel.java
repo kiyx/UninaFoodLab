@@ -737,72 +737,102 @@ public class CreateSessionPanel extends JXPanel
 	    }
 	}
 	
-	// TODO:  TEST
 	public void popolaDatiSessione(LocalDate dataSessione, LocalTime orario, int durataMinuti, String link, String indirizzo, List<Integer> idRicetteSelezionate)
 	{
 	    LocalDate today = LocalDate.now();
-	    boolean isPassed = dataSessione.isBefore(today);
+	    boolean isPassedOrToday = dataSessione != null && !dataSessione.isAfter(today);
 
 	    datePicker.setDate(dataSessione);
 	    timePicker.setTime(orario);
-	    
-	    int ore = durataMinuti / 60;
-	    int minuti = durataMinuti % 60;
-	    oreSpinner.setValue(ore);
-	    minutiSpinner.setValue(minuti);
+	    oreSpinner.setValue(durataMinuti / 60);
+	    minutiSpinner.setValue(durataMinuti % 60);
 
-	    oreSpinner.setEnabled(false);
-	    minutiSpinner.setEnabled(false);
-
-	    if(pratica)
-	    {
-	        addressField.setText(indirizzo);
-
-	        idsSelectedRecipes.clear();
-	        for(int i = 0; i < idsRecipes.size(); i++)
-	        {
-	            int idRicettaAttuale = idsRecipes.get(i);
-	            JCheckBox cb = ricettaChecks.get(i);
-
-	            if(idRicetteSelezionate.contains(idRicettaAttuale))
-	            {
-	                cb.setSelected(true);
-	            }
-	            
-	            if(isPassed)
-	            {
-	                cb.setEnabled(false);
-	            }
-	        }
-	        
-	        if(isPassed)
-	        {
-	            addressField.setEnabled(false);
-	            ricercaRicetteField.setEnabled(false);
-	            removeBtn.setVisible(false);
-	        }
-	    }
-	    else // Sessione Online
-	    {
-	        linkField.setText(link);
-	        
-	        if(isPassed)
-	        {
-	            linkField.setEnabled(false);
-	            removeBtn.setVisible(false);
-	        }
-	    }
-
-	    if(isPassed)
+	   
+	    if(isPassedOrToday)
 	    {
 	        datePicker.setEnabled(false);
 	        timePicker.setEnabled(false);
+	        removeBtn.setVisible(false);
+	        oreSpinner.setEnabled(false);
+		    minutiSpinner.setEnabled(false);
+		    
+		    if(pratica)
+	        {
+	            addressField.setEnabled(false);
+	            if(ricercaRicetteField != null) 
+	            	ricercaRicetteField.setEnabled(false);
+	            for(JCheckBox cb : ricettaChecks)
+	                cb.setEnabled(false);
+	            
+	             idsSelectedRecipes.clear();
+	             if(idRicetteSelezionate != null) 
+	             {
+	                 for(int i = 0; i < idsRecipes.size(); i++) 
+	                 {	                	 
+	                     if(idRicetteSelezionate.contains(idsRecipes.get(i))) 
+	                     {
+	                         ricettaChecks.get(i).setSelected(true);
+	                         idsSelectedRecipes.add(idsRecipes.get(i));
+	                     } 
+	                     else 
+	                     {
+	                         ricettaChecks.get(i).setSelected(false);
+	                     }
+	                 }
+	             }
+	        }
+	        else
+	        {
+	            if(linkField != null) 
+	            	linkField.setEnabled(false);
+	            linkField.setText(link);
+	        }
+	    }
+	    else
+	    {
+	    	datePicker.setEnabled(true);
+	        timePicker.setEnabled(true);
+	        removeBtn.setVisible(true);
+
+	        if(pratica)
+	        {
+	            addressField.setEnabled(true);
+	            if(ricercaRicetteField != null) 
+	            	ricercaRicetteField.setEnabled(true);
+	            idsSelectedRecipes.clear();
+
+	            for(int i = 0; i < idsRecipes.size(); i++)
+	            {
+	                JCheckBox cb = ricettaChecks.get(i);
+	                cb.setEnabled(true);
+
+	                if(idRicetteSelezionate != null && idRicetteSelezionate.contains(idsRecipes.get(i)))
+	                    cb.setSelected(true);
+	                else
+	                    cb.setSelected(false);
+	            }
+	            addressField.setText(indirizzo);
+	        }
+	        else
+	        {
+	            if(linkField != null) 
+	            {
+	                 linkField.setEnabled(true);
+	                 linkField.setText(link);
+	            }
+	        }
 	    }
 	}
-	
-	
-	
-	
+
+	/**
+	 * Controlla se la data della sessione è uguale o precedente ad oggi.
+	 * @return true se la sessione è passata (o è oggi), false altrimenti.
+	 */
+	public boolean isPassed()
+	{
+	    LocalDate sessionDate = getDataSessione();
+	    return sessionDate != null && !sessionDate.isAfter(LocalDate.now());
+	}
 	
 	/**
 	 * Imposta la politica di selezione della data consentita nel selettore di date.
@@ -817,31 +847,35 @@ public class CreateSessionPanel extends JXPanel
 	 * @param disable se {@code true}, disabilita il selettore e imposta la data fissa a {@code minDate}
 	 */
 	public void setDataPrevista(LocalDate minDate, LocalDate maxDate, boolean disable)
-    {
-        if(disable)
-        {
-            datePicker.setEnabled(false);
-            datePicker.setDate(minDate);
-        }
-        else
-        {
-            datePicker.setEnabled(true);
-            datePicker.getSettings().setVetoPolicy(new DateVetoPolicy()
-            {
-                @Override
-                public boolean isDateAllowed(LocalDate date)
-                {
-                    if(date == null)
-                        return false;
-                    return (!date.isBefore(minDate)) && (!date.isAfter(maxDate));
-                }
-            });
-
-            LocalDate current = datePicker.getDate();
-            if(current == null || current.isBefore(minDate) || current.isAfter(maxDate))
-                datePicker.setDate(minDate);
-        }
-    }
+	{
+	    if(disable)
+	    {
+	        datePicker.setEnabled(false);
+	        if(minDate != null) 
+	        	datePicker.setDate(minDate);
+	        datePicker.getSettings().setVetoPolicy(null);
+	        if(dateChangeListener != null)
+	            datePicker.removeDateChangeListener(dateChangeListener);
+	    }
+	    else
+	    {
+	        datePicker.setEnabled(true);
+	        LocalDate current = datePicker.getDate();
+	        boolean changed = false;
+	        if(current == null || current.isBefore(minDate) || (maxDate != null && current.isAfter(maxDate))) 
+	        {
+	            if(minDate != null) 
+	            {
+	                datePicker.setDate(minDate);
+	                changed = true;
+	            }
+	        }
+	        
+	        // Se la data è cambiata, forza un reschedule per aggiornare le veto policy delle altre schede
+	       if(changed && parent != null && dateChangeListener != null) 
+	            SwingUtilities.invokeLater(() -> parent.rescheduleSessions());
+	    }
+	}
 	
 	/**
 	 * Crea un'etichetta {@link JXLabel} con font coerente.
