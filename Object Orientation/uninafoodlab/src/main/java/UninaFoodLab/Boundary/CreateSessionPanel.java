@@ -747,79 +747,96 @@ public class CreateSessionPanel extends JXPanel
 	    oreSpinner.setValue(durataMinuti / 60);
 	    minutiSpinner.setValue(durataMinuti % 60);
 
-	   
 	    if(isPassedOrToday)
 	    {
 	        datePicker.setEnabled(false);
 	        timePicker.setEnabled(false);
-	        removeBtn.setVisible(false);
 	        oreSpinner.setEnabled(false);
-		    minutiSpinner.setEnabled(false);
-		    
-		    if(pratica)
+	        minutiSpinner.setEnabled(false);
+	        removeBtn.setVisible(false);
+
+	        if(pratica)
 	        {
-	            addressField.setEnabled(false);
+	            if(addressField != null) 
+	            	addressField.setEnabled(false);
+	            
 	            if(ricercaRicetteField != null) 
 	            	ricercaRicetteField.setEnabled(false);
-	            for(JCheckBox cb : ricettaChecks)
-	                cb.setEnabled(false);
 	            
-	             idsSelectedRecipes.clear();
-	             if(idRicetteSelezionate != null) 
+	            idsSelectedRecipes.clear();
+	             if(idRicetteSelezionate != null)
 	             {
-	                 for(int i = 0; i < idsRecipes.size(); i++) 
-	                 {	                	 
-	                     if(idRicetteSelezionate.contains(idsRecipes.get(i))) 
+	                 for(int i = 0; i < idsRecipes.size(); i++)
+	                 {
+	                    JCheckBox cb = ricettaChecks.get(i);
+	                     cb.setEnabled(false);
+	                     
+	                     if(idRicetteSelezionate.contains(idsRecipes.get(i)))
 	                     {
-	                         ricettaChecks.get(i).setSelected(true);
+	                         cb.setSelected(true);
 	                         idsSelectedRecipes.add(idsRecipes.get(i));
-	                     } 
-	                     else 
-	                     {
-	                         ricettaChecks.get(i).setSelected(false);
 	                     }
+	                     else
+	                         cb.setSelected(false);
 	                 }
 	             }
+	             else
+	             {
+	                  for(JCheckBox cb : ricettaChecks) 
+	                  { 
+	                	  cb.setEnabled(false); 
+	                	  cb.setSelected(false); 
+	                  }
+	             }
+	             if(addressField != null) addressField.setText(indirizzo);
 	        }
 	        else
 	        {
-	            if(linkField != null) 
-	            	linkField.setEnabled(false);
-	            linkField.setText(link);
+	            if(linkField != null)
+	            {
+	                 linkField.setEnabled(false);
+	                 linkField.setText(link);
+	            }
 	        }
+	        
+	        if(dateChangeListener != null)
+	            datePicker.removeDateChangeListener(dateChangeListener);
 	    }
 	    else
 	    {
 	    	datePicker.setEnabled(true);
 	        timePicker.setEnabled(true);
+	        oreSpinner.setEnabled(true);
+	        minutiSpinner.setEnabled(true);
 	        removeBtn.setVisible(true);
 
 	        if(pratica)
 	        {
-	            addressField.setEnabled(true);
-	            if(ricercaRicetteField != null) 
+	            if(addressField != null) 
+	            	addressField.setEnabled(true);
+	            
+	            if(ricercaRicetteField != null) 	           
 	            	ricercaRicetteField.setEnabled(true);
+	            
 	            idsSelectedRecipes.clear();
-
 	            for(int i = 0; i < idsRecipes.size(); i++)
 	            {
 	                JCheckBox cb = ricettaChecks.get(i);
 	                cb.setEnabled(true);
-
 	                if(idRicetteSelezionate != null && idRicetteSelezionate.contains(idsRecipes.get(i)))
 	                    cb.setSelected(true);
 	                else
 	                    cb.setSelected(false);
 	            }
-	            addressField.setText(indirizzo);
+	            if(addressField != null) addressField.setText(indirizzo);
 	        }
 	        else
 	        {
-	            if(linkField != null) 
-	            {
+	             if(linkField != null)
+	             {
 	                 linkField.setEnabled(true);
 	                 linkField.setText(link);
-	            }
+	             }
 	        }
 	    }
 	}
