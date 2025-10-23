@@ -282,7 +282,7 @@ public class CorsoDAO_Postgres implements CorsoDAO
 	}
 	
 	@Override
-    public void update(Corso oldCorso, Corso newCorso)
+	public void update(Corso oldCorso, Corso newCorso)
     {
 		String sql = "UPDATE Corso SET ";
         List<Object> param = new ArrayList<>();
@@ -295,10 +295,24 @@ public class CorsoDAO_Postgres implements CorsoDAO
         
         if(! (oldCorso.getDescrizione().equals(newCorso.getDescrizione())) )
         {
-            sql += "Descrizione = ? ";
+            sql += "Descrizione = ?, ";
             param.add(newCorso.getDescrizione());
         }
+
+        if (!oldCorso.getDataInizio().equals(newCorso.getDataInizio()))
+        {
+            sql += "DataInizio = ?, ";
+            param.add(newCorso.getDataInizio());
+        }
         
+        // Rule 4: Modifica Frequenza
+        // Questo viene impostato a 'Libera' dalla GUI se l'utente cancella una sessione.
+        if(!oldCorso.getFrequenzaSessioni().equals(newCorso.getFrequenzaSessioni()))
+        {
+            sql += "FrequenzaSessioni = ?::frequenza, ";
+            param.add(newCorso.getFrequenzaSessioni().toString());
+        }
+
         if(!param.isEmpty())
         {
         	if(sql.endsWith(", ")) 
@@ -316,8 +330,78 @@ public class CorsoDAO_Postgres implements CorsoDAO
             }
             catch(SQLException e)
             {
-            	throw new DAOException("Errore DB durante aggiornamento Corso", e);
+            	throw new DAOException("Errore DB durante aggiornamento Corso: " + e.getMessage(), e);
             }
+        }
+    }
+	
+	/**
+     * Aggiorna i dati base di un corso (Nome, Descrizione, DataInizio, Frequenza)
+     * utilizzando una connessione esterna fornita, senza gestirne l'apertura/chiusura
+     * o la transazione.
+     *
+     * @param oldCorso L'oggetto Corso originale (usato per ID e confronto).
+     * @param newCorso L'oggetto Corso con i nuovi dati da salvare.
+     * @param conn La connessione SQL esterna da utilizzare.
+     * @throws SQLException Se si verifica un errore durante l'esecuzione dell'aggiornamento SQL.
+     * @throws DAOException Se non vengono forniti parametri validi per l'aggiornamento.
+     */
+    public void update(Corso oldCorso, Corso newCorso, Connection conn) throws SQLException, DAOException
+    {
+        String sql = "UPDATE Corso SET ";
+        List<Object> param = new ArrayList<>();
+
+        // Rule 2: Modifica Nome
+        if(! (oldCorso.getNome().equals(newCorso.getNome())) )
+        {
+            sql += "Nome = ?, ";
+            param.add(newCorso.getNome());
+        }
+
+        // Rule 2: Modifica Descrizione
+        if(! (oldCorso.getDescrizione().equals(newCorso.getDescrizione())) )
+        {
+            sql += "Descrizione = ?, ";
+            param.add(newCorso.getDescrizione());
+        }
+
+        // Rule 3: Modifica DataInizio
+        if (!oldCorso.getDataInizio().equals(newCorso.getDataInizio()))
+        {
+            sql += "DataInizio = ?, ";
+            param.add(newCorso.getDataInizio());
+        }
+
+        // Rule 4: Modifica Frequenza
+        if(!oldCorso.getFrequenzaSessioni().equals(newCorso.getFrequenzaSessioni()))
+        {
+            sql += "FrequenzaSessioni = ?::frequenza, ";
+            param.add(newCorso.getFrequenzaSessioni().toString());
+        }
+
+        // Rule 1: isPratico e Limite NON vengono aggiornati.
+
+        if(!param.isEmpty())
+        {
+            if(sql.endsWith(", "))
+                sql = sql.substring(0, sql.length() - 2);
+
+            sql += " WHERE IdCorso = ?";
+            param.add(oldCorso.getId());
+
+            try(PreparedStatement s = conn.prepareStatement(sql)) // Usa la connessione esterna 'conn'
+            {
+                for(int i = 0; i < param.size(); i++)
+                    s.setObject(i + 1, param.get(i));
+
+                s.executeUpdate();
+            }
+            // Non chiudere la connessione qui!
+        }
+        else
+        {
+             // Opzionale: Lanciare eccezione o loggare se non c'è nulla da aggiornare?
+             throw new DAOException("Nessun campo modificato per l'aggiornamento del corso ID: " + oldCorso.getId());
         }
     }
 	

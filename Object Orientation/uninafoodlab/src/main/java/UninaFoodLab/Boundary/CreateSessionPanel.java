@@ -940,6 +940,57 @@ public class CreateSessionPanel extends JXPanel
 		numeroLabel.setText("Sessione #" + nuovoNumero);
 	}
 
+	/**
+     * Abilita o disabilita tutti i componenti di input del pannello.
+     * Usato in modalità modifica per bloccare le sessioni passate.
+     * @param enabled true per abilitare, false per disabilitare
+     */
+	/**
+     * Abilita o disabilita tutti i componenti di input del pannello.
+     * Usato in modalità modifica per bloccare le sessioni passate.
+     * @param enabled true per abilitare, false per disabilitare
+     */
+    public void setPanelEnabled(boolean enabled)
+    {
+        // Componenti comuni
+        datePicker.setEnabled(enabled);
+        timePicker.setEnabled(enabled);
+        oreSpinner.setEnabled(enabled);
+        minutiSpinner.setEnabled(enabled);
+        removeBtn.setEnabled(enabled); // Bottone per rimuovere la sessione
+
+        // Componenti specifici (online/pratica)
+        if (addressField != null) // Sessione pratica
+        {
+            addressField.setEnabled(enabled);
+            ricercaRicetteField.setEnabled(enabled);
+            scrollRicette.setEnabled(enabled); // Abilita/disabilita lo scroll
+            ricettePanel.setEnabled(enabled); // Abilita/disabilita il pannello interno
+            for (JCheckBox cb : ricettaChecks)
+            {
+                cb.setEnabled(enabled); // Disabilita le singole checkbox
+            }
+            if (clearButton != null)
+            {
+                clearButton.setEnabled(enabled); // Bottone per pulire la ricerca ricette
+            }
+        }
+        else if (linkField != null) // Sessione online
+        {
+            linkField.setEnabled(enabled);
+        }
+        
+        if (!enabled)
+        {
+           this.setFocusable(false); 
+           KeyboardFocusManager.getCurrentKeyboardFocusManager().focusNextComponent();
+        }
+        else
+        {
+            this.setFocusable(true);
+        }
+    }
+	
 	 /**
      * Valida tutti i campi della sessione e imposta il focus sul primo campo errato.
      * 

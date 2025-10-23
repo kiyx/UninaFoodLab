@@ -19,6 +19,7 @@ import com.github.lgooddatepicker.optionalusertools.*;
 import com.github.lgooddatepicker.zinternaltools.*;
 
 import UninaFoodLab.Controller.Controller;
+import UninaFoodLab.DTO.FrequenzaSessioni;
 import net.miginfocom.swing.MigLayout;
 
 public class CreateCourseDialog extends JDialog
@@ -901,14 +902,17 @@ public class CreateCourseDialog extends JDialog
         for(int i = 0; i < sessionCards.size(); i++)
             sessionCards.get(i).aggiornaNumero(i + 1);
         
-        if(editMode)
-        {
-            frequencyList.setSelectedItem("Libera");
-            frequencyList.setEnabled(false);
-        }
-        
         refreshSessionLayout();
         rescheduleSessions();
+    }
+    
+    /**
+     * Chiamato dal Controller quando una sessione viene rimossa in modalità modifica.
+     * Forza la ComboBox della Frequenza su "Libera" (Rule 4).
+     */
+    public void setFrequenzaToLibera()
+    {
+        frequencyList.setSelectedItem(FrequenzaSessioni.Libera.toString());
     }
     
     /**

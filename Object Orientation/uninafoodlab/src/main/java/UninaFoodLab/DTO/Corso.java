@@ -39,7 +39,7 @@ public class Corso
     		throw new RequiredArgomentoException();	
         this.argomenti = argomenti; 
         
-        if(sessioni == null || sessioni.isEmpty())
+        if(sessioni == null)
             throw new RequiredSessioneException();
         
         this.sessioni = new ArrayList<>();
