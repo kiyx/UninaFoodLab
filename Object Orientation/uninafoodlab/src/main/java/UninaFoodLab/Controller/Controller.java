@@ -1172,9 +1172,9 @@ public class Controller
 	}
 
 	public void editCourse(JFrame courseFrame, CreateCourseDialog currDialog, int idCorso,
-            String nomeCorso, LocalDate dataInizioInput, // Ignorato, ricalcolato
-            int numeroSessioni, String frequenza, // 'frequenza' ora è cruciale (Rule 4)
-            int limite, String descrizione, BigDecimal costo, boolean isPratico, // 'limite' e 'isPratico' ignorati (Rule 1)
+            String nomeCorso, LocalDate dataInizioInput,
+            int numeroSessioni, String frequenza,
+            int limite, String descrizione, BigDecimal costo, boolean isPratico,
             List<Integer> idArgomenti, 
             List<Integer> durateOnline, List<Time>  orariOnline, List<LocalDate> dateOnline,
             List<String> linksOnline,
@@ -1272,15 +1272,12 @@ public class Controller
 			  // Raccogli *tutte* le date delle sessioni future (online e pratiche) dal dialog
 			  List<LocalDate> allFutureDates = new ArrayList<>();
 			  for(int i = 0; i < dateOnline.size(); i++)
-			  {
 			      if(!dateOnline.get(i).isBefore(today)) 
 			          allFutureDates.add(dateOnline.get(i));
-			  }
+			  
 			  for(int i = 0; i < datePratiche.size(); i++)
-			  {
 			      if(!datePratiche.get(i).isBefore(today)) 
 			          allFutureDates.add(datePratiche.get(i));
-			  }
 			
 			  if(allFutureDates.isEmpty())
 			  {
@@ -1313,20 +1310,20 @@ public class Controller
 			
 			// 5. Associa il Corso aggiornato alle NUOVE Sessioni FUTURE
 			for(SessioneOnline so : nuoveSessioniOnlineFuture)
-				so.setCorso(corsoOriginale); // Associa all'oggetto originale
+				so.setCorso(corsoOriginale); 
 
 			for(SessionePratica sp : nuoveSessioniPraticheFuture)
-				sp.setCorso(corsoOriginale); // Associa all'oggetto originale
+				sp.setCorso(corsoOriginale);
 			
 			// --- OPERAZIONI DB ---
 			
 			// 6. Delete SOLO le Sessioni *future* esistenti (Rule 5)
 			for(SessioneOnline oldSo : oldOnlineSessions)
-			 if(!oldSo.getData().toLocalDate().isBefore(today)) // Elimina solo future e odierne
+			 if(!oldSo.getData().toLocalDate().isBefore(today))
 			    getSessioneOnlineDAO().delete(oldSo.getId());
 
 			for(SessionePratica oldSp : oldPraticaSessions)
-			 if(!oldSp.getData().toLocalDate().isBefore(today)) // Elimina solo future e odierne
+			 if(!oldSp.getData().toLocalDate().isBefore(today))
 			    getSessionePraticaDAO().delete(oldSp.getId());
 	
 			// --- INIZIO TRANSAZIONE ---
@@ -1531,14 +1528,31 @@ public class Controller
 	
 	public void deleteRicetta(JXFrame parent,DetailedRecipeDialog currDialog, int id)
 	{
-		if(parent instanceof MyRecipesFrame)
+		if(!(parent instanceof MyRecipesFrame))
 		{
-			currDialog.dispose();
-			try
+			LOGGER.log(Level.SEVERE, "Questo metodo può essere chiamato solo da un MyRecipesFrame");
+			return;
+		}
+
+		MyRecipesFrame myRecipesFrame = (MyRecipesFrame) parent;
+
+		try
+		{
+
+			if(getRicettaDAO().isRicettaUsataInSessioni(id))
 			{
+				currDialog.showError(
+					"Impossibile eliminare: la ricetta è stata usata in una sessione pratica."
+				);
+				LOGGER.log(Level.WARNING, "Tentativo fallito di eliminare ricetta {0} perché è stata usata.", id);
+			}
+			else
+			{
+				currDialog.dispose();
 				getRicettaDAO().delete(id);
 				LOGGER.log(Level.INFO, "Ricetta eliminata con successo");
-				((MyRecipesFrame)parent).showSuccess("Ricetta eliminata con successo");
+				myRecipesFrame.showSuccess("Ricetta eliminata con successo");
+
 				for(Ricetta r: ricette)
 				{
 					if(r.getId()==id)
@@ -1547,16 +1561,15 @@ public class Controller
 						break;
 					}
 				}
-				((MyRecipesFrame)parent).deleteCard(id);
-			}
-			catch(DAOException e)
-			{
-				LOGGER.log(Level.SEVERE, "Errore durante l'eliminazione nel DB della ricetta", e);
-				((MyRecipesFrame)parent).showError("Errore durante l'eliminazione nel DB della ricetta");
+				myRecipesFrame.deleteCard(id);
 			}
 		}
-		else
-			LOGGER.log(Level.SEVERE, "Questo metodo può essere chiamato solo da un MyRecipesFrame");
+		catch(DAOException e)
+		{
+			currDialog.dispose();
+			LOGGER.log(Level.SEVERE, "Errore durante l'eliminazione nel DB della ricetta", e);
+			myRecipesFrame.showError("Errore durante l'eliminazione nel DB della ricetta: " + e.getMessage());
+		}
 	}
 	
 	

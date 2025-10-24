@@ -14,6 +14,7 @@ public interface RicettaDAO
     List<Ricetta> getRicetteByIdChef(int idChef);
     boolean existsRicettaByNome(Ricetta toSaveRicetta, int idChef);
     List<Ricetta> getRicettaByIdSessionePratica(int idSessionePratica);
+    boolean isRicettaUsataInSessioni(int idRicetta);
     void update(Ricetta previousRicetta, Ricetta updatedRicetta, ArrayList<Utilizzo> toAddUtilizzi, ArrayList<Utilizzo> toUpdateUtilizzi, ArrayList<Utilizzo> toDeleteUtilizzi);
     void delete(int idRicetta);
 }

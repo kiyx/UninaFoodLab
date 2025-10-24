@@ -199,6 +199,31 @@ public class RicettaDAO_Postgres implements RicettaDAO
     }
 
 	@Override
+    public boolean isRicettaUsataInSessioni(int idRicetta)
+	{
+
+        String sql = "SELECT EXISTS (" +
+                     "  SELECT 1 " +
+                     "  FROM Preparazioni p " +
+                     "  WHERE p.IdRicetta = ? " +
+                     ")";
+
+        try (Connection conn = ConnectionManager.getConnection();
+             PreparedStatement s = conn.prepareStatement(sql)) 
+        {
+
+            s.setInt(1, idRicetta);
+            ResultSet rs = s.executeQuery();
+
+            return rs.next() && rs.getBoolean(1);
+        } 
+        catch (SQLException e) 
+        {
+            throw new DAOException("Errore DB durante check isRicettaUsataInSessioni", e);
+        }
+    }
+	
+	@Override
 	public void update(Ricetta previousRicetta, Ricetta updatedRicetta, 
 	                   ArrayList<Utilizzo> toAddUtilizzi, 
 	                   ArrayList<Utilizzo> toUpdateUtilizzi, 

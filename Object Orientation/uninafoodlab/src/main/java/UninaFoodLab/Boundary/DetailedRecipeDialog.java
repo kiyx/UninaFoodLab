@@ -12,6 +12,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -244,8 +245,14 @@ public class DetailedRecipeDialog extends JDialog {
     }
 
     @Override
-    public void dispose() {
+    public void dispose() 
+    {
         disposeListeners();
         super.dispose();
+    }
+
+    public void showError(String message)
+    {
+        JOptionPane.showMessageDialog(this, message, "Errore", JOptionPane.ERROR_MESSAGE);
     }
 }
