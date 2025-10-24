@@ -61,12 +61,12 @@ public class HomepageFrame extends JXFrame implements ArgumentFilterable
 	
 	public HomepageFrame()
 	{
-
+		super("UninaFoodLab - Homepage");
         setDefaultCloseOperation(JXFrame.EXIT_ON_CLOSE);
         setMinimumSize(new Dimension(1230, 960));
         setExtendedState(MAXIMIZED_BOTH);
         setLocationRelativeTo(null);
-
+      
         initComponents();
         initListeners();
         loadInitialCards();

@@ -351,35 +351,29 @@ public class CorsoDAO_Postgres implements CorsoDAO
         String sql = "UPDATE Corso SET ";
         List<Object> param = new ArrayList<>();
 
-        // Rule 2: Modifica Nome
         if(! (oldCorso.getNome().equals(newCorso.getNome())) )
         {
             sql += "Nome = ?, ";
             param.add(newCorso.getNome());
         }
 
-        // Rule 2: Modifica Descrizione
         if(! (oldCorso.getDescrizione().equals(newCorso.getDescrizione())) )
         {
             sql += "Descrizione = ?, ";
             param.add(newCorso.getDescrizione());
         }
 
-        // Rule 3: Modifica DataInizio
         if (!oldCorso.getDataInizio().equals(newCorso.getDataInizio()))
         {
             sql += "DataInizio = ?, ";
             param.add(newCorso.getDataInizio());
         }
 
-        // Rule 4: Modifica Frequenza
         if(!oldCorso.getFrequenzaSessioni().equals(newCorso.getFrequenzaSessioni()))
         {
             sql += "FrequenzaSessioni = ?::frequenza, ";
             param.add(newCorso.getFrequenzaSessioni().toString());
         }
-
-        // Rule 1: isPratico e Limite NON vengono aggiornati.
 
         if(!param.isEmpty())
         {
@@ -389,18 +383,16 @@ public class CorsoDAO_Postgres implements CorsoDAO
             sql += " WHERE IdCorso = ?";
             param.add(oldCorso.getId());
 
-            try(PreparedStatement s = conn.prepareStatement(sql)) // Usa la connessione esterna 'conn'
+            try(PreparedStatement s = conn.prepareStatement(sql))
             {
                 for(int i = 0; i < param.size(); i++)
                     s.setObject(i + 1, param.get(i));
 
                 s.executeUpdate();
             }
-            // Non chiudere la connessione qui!
         }
         else
         {
-             // Opzionale: Lanciare eccezione o loggare se non c'è nulla da aggiornare?
              throw new DAOException("Nessun campo modificato per l'aggiornamento del corso ID: " + oldCorso.getId());
         }
     }

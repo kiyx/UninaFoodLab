@@ -1107,9 +1107,7 @@ public class Controller
 	    if(corso.getArgomenti() != null)
 	    {
 	        for(Argomento a : corso.getArgomenti())
-	        {
 	            idArgomentiSelezionati.add(a.getId());
-	        }
 	    }
 	    else
 	    {
@@ -1127,7 +1125,7 @@ public class Controller
 	        corso.getIsPratico(),
 	        corso.getLimite(),
 	        idArgomentiSelezionati,
-	        canChangeStartDate
+	        canChangeStartDate	        
 	    );
 
 	    for(Sessione s : sessioni)
@@ -1286,8 +1284,6 @@ public class Controller
 			
 			  if(allFutureDates.isEmpty())
 			  {
-			      // Non ci sono sessioni passate E non ci sono sessioni future
-			      // Questo è un errore, un corso deve avere sessioni
 			      throw new RequiredSessioneException(); 
 			  }
 			
@@ -1299,20 +1295,18 @@ public class Controller
 			
 			
 			// 4. Costruisci DTO Corso Aggiornato (per il DAO.update)
-			// Usiamo i valori immutabili (Rule 1) dall'originale
-			// e la Frequenza (Rule 4) e DataInizio (Rule 3) calcolati/passati.
 			Corso corsoAggiornato = new Corso(
-			 nomeCorso,                      // Rule 2
-			 dataInizioDaSalvare,            // Rule 3
-			 numeroSessioni,                 // Irrilevante (gestito da trigger)
-			 FrequenzaSessioni.valueOf(frequenza), // Rule 4
-			 corsoOriginale.getLimite(),     // Rule 1 (Originale)
-			 descrizione,                    // Rule 2
-			 corsoOriginale.getCosto(),      // Costo è immutabile (non menzionato, ma logico)
-			 corsoOriginale.getIsPratico(),  // Rule 1 (Originale)
+			 nomeCorso,                    
+			 dataInizioDaSalvare,         
+			 numeroSessioni,                
+			 FrequenzaSessioni.valueOf(frequenza),
+			 corsoOriginale.getLimite(),    
+			 descrizione,                   
+			 corsoOriginale.getCosto(),     
+			 corsoOriginale.getIsPratico(),  
 			 (Chef) getLoggedUser(), 
-			 argomentiOriginali,             // Irrilevante per DAO.update
-			 new ArrayList<Sessione>()                            // Irrilevante per DAO.update
+			 argomentiOriginali,            
+			 new ArrayList<Sessione>()                         
 			);
 			corsoAggiornato.setId(idCorso);
 			
@@ -1339,8 +1333,26 @@ public class Controller
 			conn = ConnectionManager.getConnection();
 			conn.setAutoCommit(false);
 			
-			// 7. Aggiorna dati base Corso (Nome, Descrizione, DataInizio, Frequenza)
-			getCorsoDAO().update(corsoOriginale, corsoAggiornato, conn);
+	        boolean corsoDetailsChanged = false;
+	        
+	        if(!corsoOriginale.getNome().equals(corsoAggiornato.getNome()))
+	            corsoDetailsChanged = true;
+	        if(!corsoOriginale.getDescrizione().equals(corsoAggiornato.getDescrizione()))
+	            corsoDetailsChanged = true;
+	        if(!corsoOriginale.getDataInizio().toLocalDate().equals(dataInizioDaSalvare))
+	            corsoDetailsChanged = true;
+	        if(!corsoOriginale.getFrequenzaSessioni().toString().equals(frequenza))
+	            corsoDetailsChanged = true;
+
+	        if(corsoDetailsChanged) 
+	        {
+	            LOGGER.log(Level.INFO, "Modifica dati base corso ID {0}...", idCorso);
+	            getCorsoDAO().update(corsoOriginale, corsoAggiornato, conn);
+	        } 
+	        else 
+	        {
+	            LOGGER.log(Level.INFO, "Dati base del corso ID {0} non modificati. Salto l'update della tabella Corso.", idCorso);
+	        }
 			
 			// 8. Recreate SOLO le Sessioni *future* (Rule 5)
 			for(SessioneOnline so : nuoveSessioniOnlineFuture)
@@ -1357,8 +1369,10 @@ public class Controller
 			// Aggiorniamo il DTO in cache (corsoOriginale) con i nuovi dati
 			corsoOriginale.setNome(corsoAggiornato.getNome());
 			corsoOriginale.setDescrizione(corsoAggiornato.getDescrizione());
-			cacheCorsi.add(corsoOriginale); // Ri-aggiungiamo il DTO modificato
-			
+			corsoOriginale.setDataInizio(dataInizioDaSalvare);
+            corsoOriginale.setFrequenzaSessioni(FrequenzaSessioni.valueOf(frequenza));
+            corsoOriginale.setNumeroSessioni(numeroSessioni);
+			cacheCorsi.add(corsoOriginale);		
 			
 			// 10. Aggiorna UI e chiudi finestre
 			List<String> namesArgs = new ArrayList<>();
@@ -1371,8 +1385,8 @@ public class Controller
 				corsoAggiornato.getNome(),
 				idArgomenti, 
 				namesArgs,
-				Date.valueOf(dataInizioDaSalvare), // Usa la data effettivamente salvata
-				numeroSessioni // Questo numero è gestito da trigger, la card sarà ok
+				Date.valueOf(dataInizioDaSalvare),
+				numeroSessioni
 			);
 			
 			if(courseFrame instanceof MyCoursesFrame)

@@ -143,6 +143,7 @@ public class CreateUtilizzoPanel extends JXPanel {
 		    scrollIngredienti = new JScrollPane(ingredientiPanel);
 		    scrollIngredienti.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		    scrollIngredienti.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		    scrollIngredienti.getVerticalScrollBar().setUnitIncrement(20);
 		    scrollIngredienti.setBorder(BorderFactory.createEmptyBorder());
 		    scrollIngredienti.getViewport().setBackground(Color.WHITE);
 		    scrollIngredienti.setBackground(Color.WHITE);
