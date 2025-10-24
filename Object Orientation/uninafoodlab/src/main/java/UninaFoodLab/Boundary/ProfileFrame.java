@@ -58,7 +58,7 @@ public class ProfileFrame extends JXFrame
 	public ProfileFrame()
 	{
 		setTitle("UninaFoodLab - Profilo");
-        setMinimumSize(new Dimension(700, 600));
+        setMinimumSize(new Dimension(1200, 1000));
         setSize(1280, 800);
         setLocationRelativeTo(null);
         setExtendedState(JXFrame.MAXIMIZED_BOTH);
@@ -71,7 +71,7 @@ public class ProfileFrame extends JXFrame
         setVisible(true);
 	}
 	
-    private void initComponents()
+	private void initComponents()
     {
     	rootPanel = new JXPanel(new MigLayout("fill, insets 0", "[grow]", "[][grow]"));
     	rootPanel.setBackground(Color.white);
@@ -84,8 +84,8 @@ public class ProfileFrame extends JXFrame
 
     	modifyBtn = new JXButton();
     	mainContentPanel = new JXPanel(new MigLayout("fill, insets 40",
-    		    "[push][grow]10[grow]30[grow]10[grow][push]",
-    		    "[]20[grow, top]10[]10[]10[]10[]10[]10[]10[]10[]30[grow, bottom]"));
+    		    "[push, grow]10[right]10[grow, fill]20[right]10[grow, fill]10[push, grow]",
+    		    "[]20[]10[]10[]10[]10[]10[]10[]10[]30[]"));
     	
         mainContentPanel.setBackground(Color.WHITE);
         mainContentPanel.setBorder(BorderFactory.createCompoundBorder(
@@ -97,7 +97,7 @@ public class ProfileFrame extends JXFrame
     	benvenutoLabel = new JXLabel("BENVENUTO "+ Controller.getController().getLoggedUser().getNome().toUpperCase() +" !");
     	benvenutoLabel.setFont(new Font("Roboto", Font.BOLD, 36));
     	benvenutoLabel.setForeground(new Color(0x9C5B17)); 
-    	mainContentPanel.add(benvenutoLabel, "span 4, cell 1 0, center, wrap 50");
+    	mainContentPanel.add(benvenutoLabel, "span 5, cell 1 0, center, wrap 50");
     	    	
     	datiLabel = new JXLabel("I tuoi dati:");
     	datiLabel.setFont(new Font("SansSerif", Font.BOLD, 26));
@@ -109,12 +109,12 @@ public class ProfileFrame extends JXFrame
         modifyBtn.setBorder(BorderFactory.createEmptyBorder());
         modifyBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         modifyBtn.setToolTipText("Modifica i tuoi dati");
-        mainContentPanel.add(modifyBtn, "cell 2 1, left, gaptop 10");
+        mainContentPanel.add(modifyBtn, "cell 1 1, left, gapbefore 10, gaptop 10");
         
         nomeErrorLabel = new JXLabel(" ");
         nomeErrorLabel.setFont(new Font("SansSerif", Font.BOLD, 13));
 		nomeErrorLabel.setForeground(Color.RED);
-		mainContentPanel.add(nomeErrorLabel, "span 2, cell 1 2, center");
+		mainContentPanel.add(nomeErrorLabel, "cell 2 2, span 2, center");
 		
     	nomeLabel = new JXLabel("Nome:");
     	nomeLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
@@ -129,17 +129,17 @@ public class ProfileFrame extends JXFrame
     	nomeField.setFocusable(false);
     	nomeField.setBorder(defaultBorder);
     	nomeField.setBackground(new Color(0xFFFBF5));
-    	mainContentPanel.add(nomeField, "cell 2 3, growx, wmax 160");
+    	mainContentPanel.add(nomeField, "cell 2 3, growx");
     	
     	cognomeErrorLabel = new JXLabel(" ");
         cognomeErrorLabel.setFont(new Font("SansSerif", Font.BOLD, 13));
 		cognomeErrorLabel.setForeground(Color.RED);
-		mainContentPanel.add(cognomeErrorLabel, "span 2, cell 3 2, center");
+		mainContentPanel.add(cognomeErrorLabel, "cell 4 2, span 2, center");
 		
     	cognomeLabel = new JXLabel("Cognome:");
     	cognomeLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
     	cognomeLabel.setForeground(new Color(0xD86F00));
-    	mainContentPanel.add(cognomeLabel, "cell 3 3, right");
+    	mainContentPanel.add(cognomeLabel, "cell 4 3, right");
     	
     	cognomeField = new JXTextField();
     	cognomeField.setFont(new Font("SansSerif", Font.PLAIN, 16));
@@ -149,17 +149,16 @@ public class ProfileFrame extends JXFrame
     	cognomeField.setFocusable(false);
     	cognomeField.setBorder(defaultBorder);
     	cognomeField.setBackground(new Color(0xFFFBF5));
-    	mainContentPanel.add(cognomeField, "cell 4 3, growx, left, wmax 160"); 
+    	mainContentPanel.add(cognomeField, "cell 5 3, growx, left"); 
     	
     	dataErrorLabel = new JXLabel(" ");
     	dataErrorLabel.setFont(new Font("SansSerif", Font.BOLD, 13));
     	dataErrorLabel.setForeground(Color.RED);
-    	mainContentPanel.add(dataErrorLabel, "span 2, cell 1 4, center");
+    	mainContentPanel.add(dataErrorLabel, "cell 2 4, span 2, center");
 		
 		dataLabel = new JXLabel("Data di nascita: ");
 		dataLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
 		dataLabel.setForeground(new Color(0xD86F00));
-		dataLabel.setSize(getMaximumSize());
 		mainContentPanel.add(dataLabel, "cell 1 5, right");
 		
 		DateVetoPolicy vetoPolicy = new DateVetoPolicyMinimumMaximumDate(null, LocalDate.now());
@@ -196,17 +195,17 @@ public class ProfileFrame extends JXFrame
 		dataPicker.setBackground(new Color(0xFFFBF5));
 		dataPicker.setFont(new Font("SansSerif", Font.PLAIN, 16));
 		dataPicker.setForeground(new Color(0x333333));
-		mainContentPanel.add(dataPicker, "cell 2 5, left");
+		mainContentPanel.add(dataPicker, "cell 2 5, growx");
 		
 		luogoErrorLabel = new JXLabel(" ");
 		luogoErrorLabel.setFont(new Font("SansSerif", Font.BOLD, 13));
 		luogoErrorLabel.setForeground(Color.RED);
-		mainContentPanel.add(luogoErrorLabel, "span 2, cell 3 4, center");
+		mainContentPanel.add(luogoErrorLabel, "cell 4 4, span 2, center");
 		
 		luogoLabel = new JXLabel("Luogo di nascita:");
 		luogoLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
 		luogoLabel.setForeground(new Color(0xD86F00));
-		mainContentPanel.add(luogoLabel, "cell 3 5, right");
+		mainContentPanel.add(luogoLabel, "cell 4 5, right");
     	
 		luogoField = new JXTextField();
 		luogoField.setFont(new Font("SansSerif", Font.PLAIN, 16));
@@ -216,12 +215,12 @@ public class ProfileFrame extends JXFrame
 		luogoField.setFocusable(false);
 		luogoField.setBorder(defaultBorder);
 		luogoField.setBackground(new Color(0xFFFBF5));
-		mainContentPanel.add(luogoField, "cell 4 5, growx, left, wmax 160");
+		mainContentPanel.add(luogoField, "cell 5 5, growx, left");
 		
     	codFiscErrorLabel = new JXLabel(" ");
     	codFiscErrorLabel.setFont(new Font("SansSerif", Font.BOLD, 13));
     	codFiscErrorLabel.setForeground(Color.RED);
-    	mainContentPanel.add(codFiscErrorLabel, "span 2, cell 1 6, center");
+    	mainContentPanel.add(codFiscErrorLabel, "cell 2 6, span 2, center");
 		
     	codFiscaleLabel = new JXLabel("Codice Fiscale:");
     	codFiscaleLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
@@ -238,12 +237,12 @@ public class ProfileFrame extends JXFrame
     	emailErrorLabel = new JXLabel(" ");
     	emailErrorLabel.setFont(new Font("SansSerif", Font.BOLD, 13));
     	emailErrorLabel.setForeground(Color.RED);
-    	mainContentPanel.add(emailErrorLabel, "span 2, cell 3 6, center");
+    	mainContentPanel.add(emailErrorLabel, "cell 4 6, span 2, center");
 		
     	emailLabel = new JXLabel("Email:");
     	emailLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
     	emailLabel.setForeground(new Color(0xD86F00));
-    	mainContentPanel.add(emailLabel, "cell 3 7, right");	
+    	mainContentPanel.add(emailLabel, "cell 4 7, right");	
 
     	emailField = new JXTextField();
     	emailField.setFont(new Font("SansSerif", Font.PLAIN, 16));
@@ -253,12 +252,12 @@ public class ProfileFrame extends JXFrame
     	emailField.setFocusable(false);
     	emailField.setBorder(defaultBorder);
     	emailField.setBackground(new Color(0xFFFBF5));
-    	mainContentPanel.add(emailField, "cell 4 7, growx");
+    	mainContentPanel.add(emailField, "cell 5 7, growx");
     	
     	userErrorLabel = new JXLabel(" ");
     	userErrorLabel.setFont(new Font("SansSerif", Font.BOLD, 13));
     	userErrorLabel.setForeground(Color.RED);
-    	mainContentPanel.add(userErrorLabel, "span 2, cell 1 8, center");
+    	mainContentPanel.add(userErrorLabel, "cell 2 8, span 2, center");
 		
     	usernameLabel = new JXLabel("Username:") ;
     	usernameLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
@@ -273,7 +272,7 @@ public class ProfileFrame extends JXFrame
     	usernameField.setFocusable(false);
     	usernameField.setBorder(defaultBorder);
     	usernameField.setBackground(new Color(0xFFFBF5));
-    	mainContentPanel.add(usernameField, "cell 2 9, growx, wmax 160");
+    	mainContentPanel.add(usernameField, "cell 2 9, growx");
     	
     	curriculumLabel = new JXLabel ("Curriculum:");
     	curriculumLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
@@ -300,12 +299,12 @@ public class ProfileFrame extends JXFrame
     	scegliCurriculumBtn.setFocusPainted(false);
     	scegliCurriculumBtn.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
     	scegliCurriculumBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-    	mainContentPanel.add(scegliCurriculumBtn, "cell 2 11, left");
+    	mainContentPanel.add(scegliCurriculumBtn, "cell 3 11, left, wrap");
     	
     	fileLabel = new JXLabel("Nessun file selezionato");
 		fileLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
 		fileLabel.setForeground(new Color(0x604A3C));
-		mainContentPanel.add(fileLabel,  "cell 3 11, span 2, left, gapleft 20");
+		mainContentPanel.add(fileLabel,  "cell 4 11, span 2, left, gapleft 20");
 		
 		if(Controller.getController().isPartecipanteLogged())
 		{
@@ -332,7 +331,7 @@ public class ProfileFrame extends JXFrame
 		eliminaProfiloBtn.setFocusPainted(false);
 		eliminaProfiloBtn.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
 		eliminaProfiloBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-		mainContentPanel.add(eliminaProfiloBtn, "cell 4 12, right, gaptop 40, span 2");
+		mainContentPanel.add(eliminaProfiloBtn, "cell 5 12, right, gaptop 40");
 		
 		confermaBtn = new JXButton ("Conferma");
 		confermaBtn.setFont(new Font("SansSerif", Font.BOLD, 15));
@@ -343,7 +342,7 @@ public class ProfileFrame extends JXFrame
 		confermaBtn.setFocusPainted(false);
 		confermaBtn.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
 		confermaBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-		mainContentPanel.add(confermaBtn, "cell 3 12, right, gaptop 40");
+		mainContentPanel.add(confermaBtn, "cell 4 12, right, gaptop 40");
 		
 		annullaBtn = new JXButton ("Annulla");
 		annullaBtn.setFont(new Font("SansSerif", Font.BOLD, 15));

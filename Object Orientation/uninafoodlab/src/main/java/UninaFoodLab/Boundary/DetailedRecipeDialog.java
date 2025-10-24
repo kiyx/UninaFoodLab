@@ -17,6 +17,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
 
+import org.jdesktop.swingx.JXFrame;
+
 import UninaFoodLab.Controller.Controller;
 import net.miginfocom.swing.MigLayout;
 
@@ -30,7 +32,7 @@ public class DetailedRecipeDialog extends JDialog {
     private JScrollPane allergeniScrollPane;
     private JTextArea allergeniTextArea;
     private JButton modificaButton, eliminaButton;
-    private MyRecipesFrame parent;
+    private JXFrame parent;
     private ActionListener modificaListener, eliminaListener; // Aggiunto eliminaListener
 
     private String nomeRicetta;
@@ -44,7 +46,7 @@ public class DetailedRecipeDialog extends JDialog {
     private ArrayList<Double> quantitaIngredienti;
     private ArrayList<String> udmIngredienti;
 
-    public DetailedRecipeDialog(MyRecipesFrame parent, int idRicetta,  String nomeRicetta, String provenienzaRicetta, int calorieRicetta, String difficoltaRicetta, String allergeniRicetta, int tempoRicetta, ArrayList<String> nomiIngredienti, ArrayList<Double> quantitaIngredienti, ArrayList<String> udmIngredienti) {
+    public DetailedRecipeDialog(JXFrame parent, int idRicetta,  String nomeRicetta, String provenienzaRicetta, int calorieRicetta, String difficoltaRicetta, String allergeniRicetta, int tempoRicetta, ArrayList<String> nomiIngredienti, ArrayList<Double> quantitaIngredienti, ArrayList<String> udmIngredienti) {
         super(parent, "Dettagli Ricetta", true);
         this.parent = parent;
         this.nomeRicetta = nomeRicetta;
@@ -58,7 +60,6 @@ public class DetailedRecipeDialog extends JDialog {
         this.quantitaIngredienti = quantitaIngredienti;
         this.udmIngredienti = udmIngredienti;
 
-        // Ho mantenuto le dimensioni precedenti, adattandole alla nuova disposizione dei bottoni.
         setPreferredSize(new Dimension(550, 700));
         setMinimumSize(new Dimension(450, 600));
 

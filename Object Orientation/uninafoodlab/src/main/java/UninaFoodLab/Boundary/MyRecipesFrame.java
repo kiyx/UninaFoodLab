@@ -324,6 +324,54 @@ public class MyRecipesFrame extends JXFrame implements SearchFilterable
         loadPage(currentPage);
     }
     
+    public void updateRecipeCard(int id, RecipeCardPanel cardToAdd)
+    {
+        int indexInModel = -1;
+        int indexInFiltered = -1;
+
+        // Aggiungo il listener alla nuova card
+        cardToAdd.addRecipeClickListener(cardClickListener);
+
+        // trova l'indice nel modello principale (allRecipeCards)
+        for (int i = 0; i < allRecipeCards.size(); i++) {
+            if (allRecipeCards.get(i).getId() == id) {
+                indexInModel = i;
+                break;
+            }
+        }
+        
+        if (indexInModel != -1) {
+            // Sostituzione nell'ArrayList principale
+            allRecipeCards.set(indexInModel, cardToAdd);
+            
+            // Sincronizzazione delle liste parallele
+            idRicette.remove(indexInModel);               
+            calorieRicette.remove(indexInModel);            
+            difficoltaRicette.remove(indexInModel);                
+            nomiRicette.remove(indexInModel);
+            
+            idRicette.add(indexInModel, cardToAdd.getId());
+            calorieRicette.add(indexInModel, cardToAdd.getCalorie());
+            difficoltaRicette.add(indexInModel, cardToAdd.getDifficolta());
+            nomiRicette.add(indexInModel, cardToAdd.getNome());
+        } else {
+            System.err.println("Errore: Card con ID " + id + " non trovata nella lista modello.");
+            return;
+        }
+        
+        // Cerchiamo l'indice nella lista filtrata
+        for (int i = 0; i < filteredRecipeCards.size(); i++) {
+            if (((RecipeCardPanel)filteredRecipeCards.get(i)).getId() == id) {
+                 indexInFiltered = i;
+                 filteredRecipeCards.set(indexInFiltered, cardToAdd);
+                 break;
+            }
+        }
+
+
+        loadPage(currentPage);        
+    }
+    
     private void loadPage(int page)
     {
         int maxPage = (filteredRecipeCards.size() - 1) / CARDS_PER_PAGE;

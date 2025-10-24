@@ -28,6 +28,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
 import org.jdesktop.swingx.JXButton;
+import org.jdesktop.swingx.JXFrame;
 import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTextArea;
@@ -97,7 +98,7 @@ private ArrayList<Double> oldQuantitaIngredienti = new ArrayList<>();
     //private ArrayList<Double> quantitaIngredienti = new ArrayList<>();
     //private ArrayList<String> udmIngredienti = new ArrayList<>();
     
-    private MyRecipesFrame parent;
+    private JXFrame parent;
     String nomeRicetta;
     String provenienzaRicetta;
     int calorieRicetta;
@@ -106,7 +107,7 @@ private ArrayList<Double> oldQuantitaIngredienti = new ArrayList<>();
     int tempoRicetta;
     int id;
     
-	public ChangeRecipeDialog(MyRecipesFrame parent, int idRicetta, String nomeRicetta, String provenienzaRicetta, int calorieRicetta, String difficoltaRicetta, String allergeniRicetta, int tempoRicetta, ArrayList<String> nomiIngredienti, ArrayList<Double> quantitaIngredienti, ArrayList<String> udmIngredienti)
+	public ChangeRecipeDialog(JXFrame parent, int idRicetta, String nomeRicetta, String provenienzaRicetta, int calorieRicetta, String difficoltaRicetta, String allergeniRicetta, int tempoRicetta, ArrayList<String> nomiIngredienti, ArrayList<Double> quantitaIngredienti, ArrayList<String> udmIngredienti)
 	{
         super(parent, "Cambia ricetta", true);
         setMinimumSize(new Dimension(1670, 700));
@@ -163,7 +164,7 @@ private ArrayList<Double> oldQuantitaIngredienti = new ArrayList<>();
 	        leftPanel.setBackground(BACKGROUND_COLOR);
 	        leftPanel.setPreferredSize(new Dimension(700, 700));
 
-	        title = new JXLabel("Inserisci i dettagli della nuova ricetta");
+	        title = new JXLabel("Inserisci i dettagli della ricetta da cambiare");
 	        title.setFont(new Font("Segoe UI", Font.BOLD, 20));
 	        leftPanel.add(title, "align center");
 
@@ -226,7 +227,7 @@ private ArrayList<Double> oldQuantitaIngredienti = new ArrayList<>();
 	        buttons = new JXPanel(new MigLayout("center", "[]20[]"));
 	        buttons.setBackground(BACKGROUND_COLOR);
 
-	        confirmBtn = new JXButton("Crea Ricetta");
+	        confirmBtn = new JXButton("Modifica Ricetta");
 	        confirmBtn.setBackground(BUTTON_COLOR);
 	        confirmBtn.setForeground(Color.WHITE);
 
@@ -335,7 +336,7 @@ private ArrayList<Double> oldQuantitaIngredienti = new ArrayList<>();
             @Override
             public void actionPerformed(ActionEvent e)
             {
-                if(oldIngredientiCards.isEmpty() || newIngredientiCards.isEmpty())
+                if(oldIngredientiCards.isEmpty() && newIngredientiCards.isEmpty())
                 {
                     JOptionPane.showMessageDialog(ChangeRecipeDialog.this, "Devi aggiungere almeno un ingrediente.", "Errore", JOptionPane.ERROR_MESSAGE);
                     return;

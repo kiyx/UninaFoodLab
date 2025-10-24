@@ -349,9 +349,11 @@ public class CreateUtilizzoPanel extends JXPanel {
 	    	r.setEnabled(false);
 	    }
 	    	    
-	    quantitaField.setText(String.valueOf(quantitaIngrediente));
+	    quantitaField.setValue(quantitaIngrediente);
+	    quantitaField.setEnabled(true);
 	    
 	    misuraList.setSelectedItem(udmIngrediente);
+	    misuraList.setEnabled(true);
     }
     
     public void disabilitaIngrediente(String oldIng, String newIng)

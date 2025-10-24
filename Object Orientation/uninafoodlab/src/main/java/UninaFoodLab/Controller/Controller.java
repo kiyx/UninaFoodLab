@@ -1475,7 +1475,7 @@ public class Controller
 		new CreateRecipesDialog(parent).setVisible(true);
 	}
 	
-	public void showChangeRecipeDialog(DetailedRecipeDialog currDialog, MyRecipesFrame parent, int idRicetta, String nomeRicetta, String provenienzaRicetta, int calorieRicetta, String difficoltaRicetta, String allergeniRicetta, int tempoRicetta, ArrayList<String> nomiIngredienti, ArrayList<Double> quantitaIngredienti, ArrayList<String> udmIngredienti)
+	public void showChangeRecipeDialog(DetailedRecipeDialog currDialog, JXFrame parent, int idRicetta, String nomeRicetta, String provenienzaRicetta, int calorieRicetta, String difficoltaRicetta, String allergeniRicetta, int tempoRicetta, ArrayList<String> nomiIngredienti, ArrayList<Double> quantitaIngredienti, ArrayList<String> udmIngredienti)
 	{
 		currDialog.dispose();				
 		new ChangeRecipeDialog(parent, idRicetta, nomeRicetta, provenienzaRicetta, calorieRicetta, difficoltaRicetta, allergeniRicetta, tempoRicetta, nomiIngredienti, quantitaIngredienti, udmIngredienti).setVisible(true);
@@ -1515,29 +1515,34 @@ public class Controller
 		}
 	}
 	
-	public void deleteRicetta(MyRecipesFrame parent,DetailedRecipeDialog currDialog, int id)
+	public void deleteRicetta(JXFrame parent,DetailedRecipeDialog currDialog, int id)
 	{
-		currDialog.dispose();
-		try
+		if(parent instanceof MyRecipesFrame)
 		{
-			getRicettaDAO().delete(id);
-			LOGGER.log(Level.INFO, "Ricetta eliminata con successo");
-			parent.showSuccess("Ricetta eliminata con successo");
-			for(Ricetta r: ricette)
+			currDialog.dispose();
+			try
 			{
-				if(r.getId()==id)
+				getRicettaDAO().delete(id);
+				LOGGER.log(Level.INFO, "Ricetta eliminata con successo");
+				((MyRecipesFrame)parent).showSuccess("Ricetta eliminata con successo");
+				for(Ricetta r: ricette)
 				{
-					ricette.remove(r);
-					break;
+					if(r.getId()==id)
+					{
+						ricette.remove(r);
+						break;
+					}
 				}
+				((MyRecipesFrame)parent).deleteCard(id);
 			}
-			parent.deleteCard(id);
+			catch(DAOException e)
+			{
+				LOGGER.log(Level.SEVERE, "Errore durante l'eliminazione nel DB della ricetta", e);
+				((MyRecipesFrame)parent).showError("Errore durante l'eliminazione nel DB della ricetta");
+			}
 		}
-		catch(DAOException e)
-		{
-			LOGGER.log(Level.SEVERE, "Errore durante l'eliminazione nel DB della ricetta", e);
-			parent.showError("Errore durante l'eliminazione nel DB della ricetta");
-		}
+		else
+			LOGGER.log(Level.SEVERE, "Questo metodo può essere chiamato solo da un MyRecipesFrame");
 	}
 	
 	
@@ -1647,106 +1652,151 @@ public class Controller
 			
 		}
 		
-		public void changeRicetta(MyRecipesFrame parent, ChangeRecipeDialog currDialog,  int idRicetta, String nameRicetta, String provenienzaRicetta, int tempoRicetta, int calorieRicetta,
+		public void changeRicetta(JXFrame parent, ChangeRecipeDialog currDialog,  int idRicetta, String nameRicetta, String provenienzaRicetta, int tempoRicetta, int calorieRicetta,
 				String difficoltaRicetta, String allergeniRicetta, ArrayList<Integer> newIdIngredienti, ArrayList<Double> newQuantitaIngredienti, ArrayList<String> newUdmIngredienti,
 				ArrayList<Integer> oldIdIngredienti, ArrayList<Double> oldQuantitaIngredienti, ArrayList<String> oldUdmIngredienti, ArrayList<Integer> idIngredientiDeleted)
 		{
-			ArrayList<Utilizzo> newUtilizziRicetta = new ArrayList<>();
-			ArrayList<Utilizzo> oldUtilizziRicetta = new ArrayList<>();
-			ArrayList<Utilizzo> toDeleteUtilizzi = new ArrayList<>();
+			ArrayList<Utilizzo> toAddUtilizzi = new ArrayList<>();   // Corrisponde a newUtilizziRicetta
+			ArrayList<Utilizzo> toUpdateUtilizzi = new ArrayList<>(); // I vecchi ingredienti con valori cambiati
+			ArrayList<Utilizzo> toDeleteUtilizzi = new ArrayList<>(); // Gli ingredienti originali da eliminare
+			
+			ArrayList<Utilizzo> oldUtilizziInput = new ArrayList<>(); // La nuova versione degli ingredienti non eliminati
+			ArrayList<Utilizzo> allUtilizzi = new ArrayList<>();      // La lista completa per l'oggetto 'toChangeRicetta'
 			
 			Ingrediente ingredienteUtil=null;
 			Ricetta original=null;
 			
+			// ricerco la ricetta nella lista del controller
 			for(Ricetta r: ricette) {
-				if(r.getId()==idRicetta)
+				if(r.getId()==idRicetta) {
 					original=r;
+					break; 
+				}
 			}
 			
+			if (original == null) {
+				currDialog.showError("Ricetta originale non trovata.");
+				return;
+			}
+			
+			// prendo gli utilizzi da eliminare
 			for(Utilizzo u: original.getUtilizzi())
 			{
-				for(int i=0; i<idIngredientiDeleted.size(); i++)
+				for(int idDeleted : idIngredientiDeleted)
 				{
-					if(u.getIdIngrediente()==idIngredientiDeleted.get(i))
+					if(u.getIngrediente().getId() == idDeleted)
 					{
-						toDeleteUtilizzi.add(u);
+						toDeleteUtilizzi.add(u); 
 						break;
 					}					
 				}				
 			}
 			
+			// prendo gli utilizzi nuovi
 			for(int i=0; i<newIdIngredienti.size(); i++)
 			{
-	                boolean trovato = false;
-	
-	                for(Ingrediente u : ingredienti)
-	                {
-	                    if(u.getId() == newIdIngredienti.get(i))
-	                    {
-	                    	ingredienteUtil=u;
-	                        trovato = true;
-	                        break;
-	                    }
-	                if(!trovato)
-	                	ingredienteUtil = getIngredienteDAO().getIngredienteById(newIdIngredienti.get(i));
-	                }
-	                
+				ingredienteUtil = findOrCreateIngrediente(newIdIngredienti.get(i)); // Uso una funzione helper
+					
 				Utilizzo u = new Utilizzo(newQuantitaIngredienti.get(i), UnitaDiMisura.valueOf(newUdmIngredienti.get(i)),
 						ingredienteUtil);
-				newUtilizziRicetta.add(u);
+				toAddUtilizzi.add(u);
 			}
 			
+			// prendo gli utilizzi vecchi che non sono stati eliminati, con i nuovi valori
 			for(int i=0; i<oldIdIngredienti.size(); i++)
 			{
-	                boolean trovato = false;
-	
-	                for(Ingrediente u : ingredienti)
-	                {
-	                    if(u.getId() == oldIdIngredienti.get(i))
-	                    {
-	                    	ingredienteUtil=u;
-	                        trovato = true;
-	                        break;
-	                    }
-	                if(!trovato)
-	                	ingredienteUtil = getIngredienteDAO().getIngredienteById(oldIdIngredienti.get(i));
-	                }
-	                
+				ingredienteUtil = findOrCreateIngrediente(oldIdIngredienti.get(i)); // Uso una funzione helper
+				
 				Utilizzo u = new Utilizzo(oldQuantitaIngredienti.get(i), UnitaDiMisura.valueOf(oldUdmIngredienti.get(i)),
 						ingredienteUtil);
-				oldUtilizziRicetta.add(u);
+				oldUtilizziInput.add(u);
+			}
+			
+			//confronto utilizzi da aggiornare
+			
+			for(Utilizzo newU : oldUtilizziInput)
+			{
+				for(Utilizzo oldU : original.getUtilizzi())
+				{
+					// Troviamo la corrispondenza
+					if(newU.getIngrediente().getId() == oldU.getIngrediente().getId())
+					{
+						// E ora confrontiamo i valori per vedere se l'aggiornamento è necessario
+						boolean quantitaChanged = newU.getQuantita() != oldU.getQuantita();
+						boolean udmChanged = !newU.getUdm().equals(oldU.getUdm());
+						
+						if(quantitaChanged || udmChanged)
+						{
+							// Se almeno un campo è cambiato, questo Utilizzo deve essere aggiornato
+							// Assegniamo l'IdRicetta e lo aggiungiamo alla lista 'toUpdateUtilizzi'
+							newU.setIdRicetta(original.getId()); 
+							toUpdateUtilizzi.add(newU);
+						}
+						break;
+					}
+				}
 			}
 			
 			try
 			{
-				newUtilizziRicetta.addAll(oldUtilizziRicetta);
-				Ricetta toChangeRicetta = new Ricetta(nameRicetta, provenienzaRicetta, tempoRicetta, calorieRicetta,LivelloDifficolta.valueOf(difficoltaRicetta), allergeniRicetta, (Chef)getLoggedUser(), newUtilizziRicetta);
-				if(original.getNome()!=toChangeRicetta.getNome()&& getRicettaDAO().existsRicettaByNome(toChangeRicetta, ((Chef)getLoggedUser()).getId()))
-				{
-					currDialog.showError(ERR_RECIPE_EXISTING);
-					LOGGER.log(Level.SEVERE, "Ricetta con lo stesso nome per lo stesso chef");
+				// Costruiamo la lista completa per l'oggetto DTO 'toChangeRicetta'
+				allUtilizzi.addAll(toAddUtilizzi); 
+				allUtilizzi.addAll(oldUtilizziInput); // I vecchi utilizzi (anche se non aggiornati)
+				
+				Ricetta toChangeRicetta = new Ricetta(nameRicetta, provenienzaRicetta, tempoRicetta, calorieRicetta,LivelloDifficolta.valueOf(difficoltaRicetta), allergeniRicetta, (Chef)getLoggedUser(), allUtilizzi);
+				toChangeRicetta.setId(original.getId()); 
+				
+				Ricetta existingRicetta = getRicettaDAO().getRicettaByNome(toChangeRicetta, ((Chef)getLoggedUser()).getId());
+				
+				if (!original.getNome().equals(toChangeRicetta.getNome()) && existingRicetta != null && existingRicetta.getId() != original.getId()) {
+				    
+				    currDialog.showError(ERR_RECIPE_EXISTING);
+				    LOGGER.log(Level.SEVERE, "Ricetta con lo stesso nome per lo stesso chef");
 				}
 				else
 				{
-					getRicettaDAO().update(original, toChangeRicetta);
+					// *** CHIAMATA CORRETTA AL DAO CON TUTTI I PARAMETRI ***
+					getRicettaDAO().update(original, toChangeRicetta, toAddUtilizzi, toUpdateUtilizzi, toDeleteUtilizzi);
+		
+					// Le operazioni DB di delete e update sugli utilizzi sono ora all'interno del DAO e transazionali.
+					// Il codice di delete e update sui Utilizzi è stato Rimosso da qui.
+					
 					LOGGER.log(Level.INFO, "Ricetta salvata con successo");	
 					currDialog.showSuccess("Ricetta salvata con successo");
 					currDialog.dispose();
 					
-					//parent.updateRecipeCard(new RecipeCardPanel(toChangeRicetta.getId(), toChangeRicetta.getNome(), toChangeRicetta .getDifficolta().toString(), toSaveRicetta.getCalorie()));
-					//ricette.add(toSaveRicetta);
+					// Aggiornamento della UI e della lista locale (ricette)
+					((MyRecipesFrame)parent).updateRecipeCard(idRicetta, new RecipeCardPanel(idRicetta, toChangeRicetta.getNome(), toChangeRicetta .getDifficolta().toString(), toChangeRicetta.getCalorie()));
+					ricette.remove(original);
+					ricette.add(toChangeRicetta);
 				}
 				
 			}
 			catch(DAOException e)
 			{
 				LOGGER.log(Level.SEVERE, "Errore salvataggio ricetta nel DB", e);	
+				// Il rollback avviene nel DAO se è stato implementato correttamente
 				currDialog.showError("Errore salvataggio ricetta nel DB");
 			}
-			
 		}
 		
-		public void saveRicettaUtilizzi(MyRecipesFrame parent, CreateRecipesDialog currDialog,  String nameRicetta, String provenienzaRicetta, int tempoRicetta, int calorieRicetta,
+		private Ingrediente findOrCreateIngrediente(int idIngrediente) throws DAOException {
+		    Ingrediente ingredienteUtil = null;
+		    
+		    // Cerca prima nella lista locale (più veloce)
+		    for (Ingrediente u : ingredienti) {
+		        if (u.getId() == idIngrediente) {
+		            ingredienteUtil = u;
+		            return ingredienteUtil;
+		        }
+		    }
+		
+		    // Se non trovato localmente, lo cerca nel DB e lo restituisce
+		    ingredienteUtil = getIngredienteDAO().getIngredienteById(idIngrediente);   
+		    return ingredienteUtil;
+		}
+		
+		public void saveRicettaUtilizzi(JXFrame parent, CreateRecipesDialog currDialog,  String nameRicetta, String provenienzaRicetta, int tempoRicetta, int calorieRicetta,
 				String difficoltaRicetta, String allergeniRicetta, ArrayList<Integer> idIngredientiRicetta, ArrayList<Double> quantitaIngredienti, ArrayList<String> udmIngredienti)
 		{
 			ArrayList<Utilizzo> utilizziRicetta = new ArrayList<>();
@@ -1774,23 +1824,27 @@ public class Controller
 			}
 			try
 			{
-				Ricetta toSaveRicetta = new Ricetta(nameRicetta, provenienzaRicetta, tempoRicetta, calorieRicetta, 	LivelloDifficolta.valueOf(difficoltaRicetta), allergeniRicetta, (Chef)getLoggedUser(), utilizziRicetta);
-				if(getRicettaDAO().existsRicettaByNome(toSaveRicetta, ((Chef)getLoggedUser()).getId()))
-				{
-					currDialog.showError(ERR_RECIPE_EXISTING);
-					LOGGER.log(Level.SEVERE, "Ricetta con lo stesso nome per lo stesso chef");
+				if (parent instanceof MyRecipesFrame)
+					{
+					Ricetta toSaveRicetta = new Ricetta(nameRicetta, provenienzaRicetta, tempoRicetta, calorieRicetta, 	LivelloDifficolta.valueOf(difficoltaRicetta), allergeniRicetta, (Chef)getLoggedUser(), utilizziRicetta);
+					if(getRicettaDAO().existsRicettaByNome(toSaveRicetta, ((Chef)getLoggedUser()).getId()))
+					{
+						currDialog.showError(ERR_RECIPE_EXISTING);
+						LOGGER.log(Level.SEVERE, "Ricetta con lo stesso nome per lo stesso chef");
+					}
+					else
+					{
+						getRicettaDAO().save(toSaveRicetta, getLoggedUser().getId());
+						LOGGER.log(Level.INFO, "Ricetta salvata con successo");	
+						currDialog.showSuccess("Ricetta salvata con successo");
+						currDialog.dispose();
+						
+						((MyRecipesFrame)parent).newRecipeCard(new RecipeCardPanel(toSaveRicetta.getId(), toSaveRicetta.getNome(), toSaveRicetta.getDifficolta().toString(), toSaveRicetta.getCalorie()));
+						ricette.add(toSaveRicetta);
+					}
 				}
 				else
-				{
-					getRicettaDAO().save(toSaveRicetta, getLoggedUser().getId());
-					LOGGER.log(Level.INFO, "Ricetta salvata con successo");	
-					currDialog.showSuccess("Ricetta salvata con successo");
-					currDialog.dispose();
-					
-					parent.newRecipeCard(new RecipeCardPanel(toSaveRicetta.getId(), toSaveRicetta.getNome(), toSaveRicetta.getDifficolta().toString(), toSaveRicetta.getCalorie()));
-					ricette.add(toSaveRicetta);
-				}
-				
+					LOGGER.log(Level.SEVERE, "Questo metodo può essere chiamato solo da un MyRecipesFrame");
 			}
 			catch(DAOException e)
 			{

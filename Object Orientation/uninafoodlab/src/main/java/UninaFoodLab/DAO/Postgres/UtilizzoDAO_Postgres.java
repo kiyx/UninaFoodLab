@@ -3,6 +3,7 @@ package UninaFoodLab.DAO.Postgres;
 import UninaFoodLab.DAO.UtilizzoDAO;
 import UninaFoodLab.DTO.Ingrediente;
 import UninaFoodLab.DTO.NaturaIngrediente;
+import UninaFoodLab.DTO.Ricetta;
 import UninaFoodLab.DTO.UnitaDiMisura;
 import UninaFoodLab.DTO.Utilizzo;
 import UninaFoodLab.Exceptions.DAOException;
@@ -33,6 +34,7 @@ public class UtilizzoDAO_Postgres implements UtilizzoDAO
 	    }
     }
 	
+	
 	@Override
     public List<Utilizzo> getUtilizziByIdRicetta(int idRicetta)
     {
@@ -58,58 +60,73 @@ public class UtilizzoDAO_Postgres implements UtilizzoDAO
     }
 
 	@Override
-	public void update(Utilizzo previousUtilizzo, Utilizzo updatedUtilizzo)
+	public void update(Utilizzo updatedUtilizzo, Connection conn) throws DAOException 
 	{
-	    String sql = "UPDATE Utilizzi SET ";
-	    List<Object> param = new ArrayList<>();
-
-	    if (previousUtilizzo.getQuantita() != updatedUtilizzo.getQuantita())
+	    // Aggiungiamo il cast esplicito ::unitadimisura alla placeholder UDM = ?
+	    String sql = "UPDATE Utilizzi SET Quantita = ?, UDM = ?::unitadimisura WHERE IdRicetta = ? AND IdIngrediente = ?";
+	    
+	    try(PreparedStatement s = conn.prepareStatement(sql))
 	    {
-	        sql += "Quantita = ?, ";
-	        param.add(updatedUtilizzo.getQuantita());
-	    }
+	        // 1. Quantita (Double)
+	        s.setDouble(1, updatedUtilizzo.getQuantita());
+	        
+	        // 2. UDM (ENUM): Passiamo la Stringa del valore ENUM Java
+	        s.setString(2, updatedUtilizzo.getUdm().toString()); 
+	        
+	        // 3. IdRicetta (per la clausola WHERE)
+	        s.setInt(3, updatedUtilizzo.getIdRicetta()); 
+	        
+	        // 4. IdIngrediente (per la clausola WHERE)
+	        s.setInt(4, updatedUtilizzo.getIngrediente().getId()); 
 
-	    if (!previousUtilizzo.getUdm().equals(updatedUtilizzo.getUdm()))
-	    {
-	        sql += "UDM = ?";
-	        param.add(updatedUtilizzo.getUdm().toString());
-	    }
-
-	    if (!param.isEmpty())
-	    {
-	        if (sql.endsWith(", "))
-	            sql = sql.substring(0, sql.length() - 2);
-
-	        sql += " WHERE IdRicetta = ? AND IdIngrediente = ?";
-	        param.add(previousUtilizzo.getIdRicetta());
-	        param.add(previousUtilizzo.getIdIngrediente());
-
-	        try(Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
-	        {
-	            for (int i = 0; i < param.size(); i++)
-	                s.setObject(i + 1, param.get(i));
-
-	            s.executeUpdate();
+	        int rowsAffected = s.executeUpdate();
+	        
+	        // Aggiungi un controllo per debug/log:
+	        if (rowsAffected == 0) {
+	            // Questo potrebbe accadere se la riga non esiste o se gli ID sono errati.
+	            System.err.println("AVVISO: Aggiornamento Utilizzo non ha modificato alcuna riga. ID Ricetta: " + updatedUtilizzo.getIdRicetta());
 	        }
-	        catch (SQLException e)
-	        {
-	            throw new DAOException("Errore DB durante aggiornamento Utilizzo", e);
-	        }
+	    }
+	    catch (SQLException e)
+	    {
+	        // L'eccezione ora dovrebbe riguardare solo problemi di connessione o integrità dei dati.
+	        throw new DAOException("Errore DB durante aggiornamento Utilizzo", e);
 	    }
 	}
 
-    @Override
-    public void delete(int idRicetta, int idIngrediente)
+	@Override
+	public void delete(int idRicetta, int idIngrediente, Connection conn) throws DAOException 
+	{
+	    String sql = 
+	                 "DELETE "
+	               + "FROM Utilizzi "
+	               + "WHERE IdRicetta = ? AND IdIngrediente = ?";
+
+	    // NOTA: Usiamo la connessione 'conn' passata e non apriamo/chiudiamo nulla
+	    try(PreparedStatement s = conn.prepareStatement(sql))
+	    {
+	        s.setInt(1, idRicetta);
+	        s.setInt(2, idIngrediente);
+	        s.executeUpdate();
+	    }
+	    catch(SQLException e)
+	    {
+	        // Se si verifica un errore SQL qui, l'eccezione viene catturata dal RicettaDAO,
+	        // che eseguirà il rollback per l'intera transazione.
+	        throw new DAOException("Errore DB durante delete di Utilizzo", e);
+	    }
+	}
+    
+    public void deleteUtilizziRicetta(Ricetta toDeleteRicetta, Connection conn)
     {
         String sql = 
         			 "DELETE "
         		   + "FROM Utilizzi "
-        		   + "WHERE IdRicetta = ? AND IdIngrediente = ?";
+        		   + "WHERE IdRicetta = ? ";
 
-        try(Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
+        try(PreparedStatement s = conn.prepareStatement(sql))
         {
-            s.setInt(1, idRicetta);
-            s.setInt(2, idIngrediente);
+            s.setInt(1, toDeleteRicetta.getId());
             s.executeUpdate();
         }
         catch(SQLException e)

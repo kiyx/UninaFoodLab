@@ -9,6 +9,7 @@ public interface UtilizzoDAO
 {
 	void save(Utilizzo toSaveUtilizzo, Connection conn);
     List<Utilizzo> getUtilizziByIdRicetta(int idRicetta);
-    void update(Utilizzo previousUtilizzo, Utilizzo updatedUtilizzo);
-    void delete(int idRicetta, int idIngrediente);
+    //void update(Utilizzo previousUtilizzo, Utilizzo updatedUtilizzo, Connection conn);
+    void update(Utilizzo updatedUtilizzo, Connection conn);
+    void delete(int idRicetta, int idIngrediente, Connection conn);
 }

@@ -28,6 +28,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
 import org.jdesktop.swingx.JXButton;
+import org.jdesktop.swingx.JXFrame;
 import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTextArea;
@@ -84,7 +85,7 @@ public class CreateRecipesDialog extends JDialog
     private ArrayList<Double> quantitaIngredienti = new ArrayList<>();
     private ArrayList<String> udmIngredienti = new ArrayList<>();
     
-    private MyRecipesFrame parent;
+    private JXFrame parent;
 	public CreateRecipesDialog(MyRecipesFrame parent)
 	{
         super(parent, "Crea nuova ricetta", true);
