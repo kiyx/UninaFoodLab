@@ -256,11 +256,14 @@ public class MyCoursesFrame extends JXFrame implements ArgumentFilterable
     public void updateCourseCard(CourseCardPanel updatedCard)
     {
         boolean cardReplaced = false;
+        updatedCard.addCourseClickListener(cardClickListener);
 
         for(int i = 0; i < allCourseCards.size(); i++)
         {
-             if(allCourseCards.get(i).getId() == updatedCard.getId())
+             CourseCardPanel oldCard = allCourseCards.get(i);
+             if(oldCard.getId() == updatedCard.getId())
              {
+                oldCard.removeCourseClickListener(cardClickListener);
                 allCourseCards.set(i, updatedCard);
                 break;
             }
@@ -268,14 +271,14 @@ public class MyCoursesFrame extends JXFrame implements ArgumentFilterable
 
         for(int i = 0; i < filteredCourseCards.size(); i++)
         {
-            if(filteredCourseCards.get(i).getId() == updatedCard.getId())
+            CourseCardPanel oldCard = filteredCourseCards.get(i);
+            if(oldCard.getId() == updatedCard.getId())
             {
                 filteredCourseCards.set(i, updatedCard);
                 cardReplaced = true;
                 break;
             }
         }
-
         if(cardReplaced)
             loadPage(currentPage);
     }

@@ -79,16 +79,31 @@ public class Corso
         this.nome = nome;
     }
     
+    public void setDataInizio(LocalDate dataInizio)
+    {
+    	this.dataInizio = dataInizio;
+    }
+    
     public Date getDataInizio()
     {
         return Date.valueOf(dataInizio);
     }
 
+    public void setNumeroSessioni(int numeroSessioni)
+    {
+    	this.numeroSessioni = numeroSessioni;
+    }
+    
     public int getNumeroSessioni()
     {
         return numeroSessioni;
     }
 
+    public void setFrequenzaSessioni(FrequenzaSessioni frequenzaSessioni)
+    {
+    	this.frequenzaSessioni = frequenzaSessioni;
+    }
+    
     public FrequenzaSessioni getFrequenzaSessioni()
     {
         return frequenzaSessioni;

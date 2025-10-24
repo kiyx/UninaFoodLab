@@ -638,20 +638,34 @@ public class CreateCourseDialog extends JDialog
      * Popola i campi principali del corso con dati.
      * Chiamato dal Controller.
      */
-    public void popolaDatiCorso(int idCorso, String nome, String descrizione, LocalDate dataInizio, double costo, String frequenza, boolean isPratico, int limite, List<Integer> idArgomentiSelezionati, boolean canChangeFreq) // canChangeFreq è true se NON ci sono sessioni passate
+    public void popolaDatiCorso(int idCorso, String nome, String descrizione, LocalDate dataInizio, double costo, String frequenza, boolean isPratico, int limite, List<Integer> idArgomentiSelezionati, boolean canChangeStartDate) // canChangeFreq è true se NON ci sono sessioni passate
     {
         this.idCorsoDaModificare = idCorso;
 
         nameField.setText(nome);
         descrizioneArea.setText(descrizione);
         dataInizioField.setDate(dataInizio);
-        dataInizioField.setEnabled(false);
-        if(dataInizioListener != null) 
-        	dataInizioField.removeDateChangeListener(dataInizioListener);
-        dataInizioField.getSettings().setVetoPolicy(date -> date != null && date.equals(dataInizio));
+        
+        if(canChangeStartDate)
+        {
+            dataInizioField.setEnabled(true);
+            DateVetoPolicy vetoPolicy = new DateVetoPolicyMinimumMaximumDate(LocalDate.now().plusDays(1), null);
+            dataInizioField.getSettings().setVetoPolicy(vetoPolicy);
 
+            if(dataInizio.isBefore(LocalDate.now().plusDays(1)))
+                dataInizioField.setDate(LocalDate.now().plusDays(1));
+        }
+        else
+        {
+            dataInizioField.setEnabled(false);
+            if(dataInizioListener != null) 
+                dataInizioField.removeDateChangeListener(dataInizioListener);
+            dataInizioField.getSettings().setVetoPolicy(date -> date != null && date.equals(dataInizio));
+        }
+        
         costSpinner.setValue(costo);
         costSpinner.setEnabled(false);
+        
         praticoCheck.setSelected(isPratico);
         praticoCheck.setEnabled(false);
         if(isPratico)
@@ -659,11 +673,12 @@ public class CreateCourseDialog extends JDialog
             limitSpinner.setValue(limite);
             togglePartecipantiLimit(true);
         }
+        
         limitSpinner.setEnabled(false);
         limitLabel.setEnabled(false);
 
         aggiungiSessioneLabel.setVisible(true);
-        frequencyList.setEnabled(canChangeFreq);
+        frequencyList.setEnabled(canChangeStartDate);
         frequencyList.setSelectedItem(frequenza);
 
         idsSelectedArguments.clear();

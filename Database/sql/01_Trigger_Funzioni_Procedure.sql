@@ -907,6 +907,7 @@ BEGIN
 		-- Blocca l'update della data di inizio
 		RAISE EXCEPTION 'Il corso e'' già iniziato!! non puoi spostare la data di inizio corso';
 	END IF;
+	RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 

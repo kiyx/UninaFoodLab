@@ -952,30 +952,24 @@ public class CreateSessionPanel extends JXPanel
      */
     public void setPanelEnabled(boolean enabled)
     {
-        // Componenti comuni
         datePicker.setEnabled(enabled);
         timePicker.setEnabled(enabled);
         oreSpinner.setEnabled(enabled);
         minutiSpinner.setEnabled(enabled);
-        removeBtn.setEnabled(enabled); // Bottone per rimuovere la sessione
+        removeBtn.setEnabled(enabled);
 
-        // Componenti specifici (online/pratica)
-        if (addressField != null) // Sessione pratica
+        if(addressField != null)
         {
             addressField.setEnabled(enabled);
             ricercaRicetteField.setEnabled(enabled);
-            scrollRicette.setEnabled(enabled); // Abilita/disabilita lo scroll
-            ricettePanel.setEnabled(enabled); // Abilita/disabilita il pannello interno
-            for (JCheckBox cb : ricettaChecks)
-            {
-                cb.setEnabled(enabled); // Disabilita le singole checkbox
-            }
-            if (clearButton != null)
-            {
-                clearButton.setEnabled(enabled); // Bottone per pulire la ricerca ricette
-            }
+            scrollRicette.setEnabled(enabled);
+            ricettePanel.setEnabled(enabled);
+            for(JCheckBox cb : ricettaChecks)
+                cb.setEnabled(enabled);
+            if(clearButton != null)
+                clearButton.setEnabled(enabled);
         }
-        else if (linkField != null) // Sessione online
+        else if (linkField != null)
         {
             linkField.setEnabled(enabled);
         }
