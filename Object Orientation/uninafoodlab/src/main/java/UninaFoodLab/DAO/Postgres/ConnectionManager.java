@@ -22,6 +22,6 @@ public class ConnectionManager
 
      public static Connection getConnection() throws SQLException
     {
-        return DriverManager.getConnection(URL, USER, PASSWORD);
+        return DriverManager.getConnection(url + "?currentSchema=UninaFoodLab" , user, password);
     }
 }
