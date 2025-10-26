@@ -154,22 +154,22 @@ public class SessioneOnlineDAO_Postgres implements SessioneOnlineDAO
 		}
 	}
 
-	@Override
-    public void delete(int IdSessioneOnline)
+    @Override
+    public void delete(int idSessioneOnline)
     {
-        String sql = 
-        			"DELETE "
-        		  + "FROM SessioneOnline "
-        		  + "WHERE IdSessioneOnline = ?";
-        
-        try(Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
+        String sql =
+            "DELETE FROM SessioneOnline " +
+            "WHERE IdSessioneOnline = ? " +
+            "  AND Data > CURRENT_DATE"; // non toccare oggi o passato
+
+        try (Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
         {
-            s.setInt(1, IdSessioneOnline);
-            s.executeUpdate();
+            s.setInt(1, idSessioneOnline);
+            s.executeUpdate(); // 0 righe se non consentito: nessuna eccezione
         }
-        catch(SQLException e)
+        catch (SQLException e)
         {
-        	throw new DAOException("Errore DB durante eliminazione SessioneOnline", e);
+            throw new DAOException("Errore DB durante eliminazione SessioneOnline", e);
         }
     }
 	

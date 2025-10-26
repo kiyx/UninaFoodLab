@@ -737,109 +737,120 @@ public class CreateSessionPanel extends JXPanel
 	    }
 	}
 	
-	public void popolaDatiSessione(LocalDate dataSessione, LocalTime orario, int durataMinuti, String link, String indirizzo, List<Integer> idRicetteSelezionate)
-	{
-	    LocalDate today = LocalDate.now();
-	    boolean isPassedOrToday = dataSessione != null && !dataSessione.isAfter(today);
+	// ...existing code...
+    public void popolaDatiSessione(LocalDate dataSessione, LocalTime orario, int durataMinuti, String link, String indirizzo, List<Integer> idRicetteSelezionate)
+    {
+        LocalDate today = LocalDate.now();
+        boolean isPassedOrToday = dataSessione != null && !dataSessione.isAfter(today);
 
-	    datePicker.setDate(dataSessione);
-	    timePicker.setTime(orario);
-	    oreSpinner.setValue(durataMinuti / 60);
-	    minutiSpinner.setValue(durataMinuti % 60);
+        // Accetta sempre la data caricata dal DB (anche se la VetoPolicy corrente la vieterebbe)
+        DatePickerSettings s = datePicker.getSettings();
+        DateVetoPolicy oldVeto = s.getVetoPolicy();
+        s.setVetoPolicy(null);
+        datePicker.setDate(dataSessione);
+        // Ripristineremo la policy più sotto in base a isPassedOrToday
 
-	    if(isPassedOrToday)
-	    {
-	        datePicker.setEnabled(false);
-	        timePicker.setEnabled(false);
-	        oreSpinner.setEnabled(false);
-	        minutiSpinner.setEnabled(false);
-	        removeBtn.setVisible(false);
+        timePicker.setTime(orario);
+        oreSpinner.setValue(durataMinuti / 60);
+        minutiSpinner.setValue(durataMinuti % 60);
 
-	        if(pratica)
-	        {
-	            if(addressField != null) 
-	            	addressField.setEnabled(false);
-	            
-	            if(ricercaRicetteField != null) 
-	            	ricercaRicetteField.setEnabled(false);
-	            
-	            idsSelectedRecipes.clear();
-	             if(idRicetteSelezionate != null)
-	             {
-	                 for(int i = 0; i < idsRecipes.size(); i++)
-	                 {
-	                    JCheckBox cb = ricettaChecks.get(i);
-	                     cb.setEnabled(false);
-	                     
-	                     if(idRicetteSelezionate.contains(idsRecipes.get(i)))
-	                     {
-	                         cb.setSelected(true);
-	                         idsSelectedRecipes.add(idsRecipes.get(i));
-	                     }
-	                     else
-	                         cb.setSelected(false);
-	                 }
-	             }
-	             else
-	             {
-	                  for(JCheckBox cb : ricettaChecks) 
-	                  { 
-	                	  cb.setEnabled(false); 
-	                	  cb.setSelected(false); 
-	                  }
-	             }
-	             if(addressField != null) addressField.setText(indirizzo);
-	        }
-	        else
-	        {
-	            if(linkField != null)
-	            {
-	                 linkField.setEnabled(false);
-	                 linkField.setText(link);
-	            }
-	        }
-	        
-	        if(dateChangeListener != null)
-	            datePicker.removeDateChangeListener(dateChangeListener);
-	    }
-	    else
-	    {
-	    	datePicker.setEnabled(true);
-	        timePicker.setEnabled(true);
-	        oreSpinner.setEnabled(true);
-	        minutiSpinner.setEnabled(true);
-	        removeBtn.setVisible(true);
+        if(isPassedOrToday)
+        {
+            // Sessione passata: blocca tutto e consenti solo la data storica
+            datePicker.setEnabled(false);
+            timePicker.setEnabled(false);
+            oreSpinner.setEnabled(false);
+            minutiSpinner.setEnabled(false);
+            removeBtn.setVisible(false);
 
-	        if(pratica)
-	        {
-	            if(addressField != null) 
-	            	addressField.setEnabled(true);
-	            
-	            if(ricercaRicetteField != null) 	           
-	            	ricercaRicetteField.setEnabled(true);
-	            
-	            idsSelectedRecipes.clear();
-	            for(int i = 0; i < idsRecipes.size(); i++)
-	            {
-	                JCheckBox cb = ricettaChecks.get(i);
-	                cb.setEnabled(true);
-	                if(idRicetteSelezionate != null && idRicetteSelezionate.contains(idsRecipes.get(i)))
-	                    cb.setSelected(true);
-	                else
-	                    cb.setSelected(false);
-	            }
-	            if(addressField != null) addressField.setText(indirizzo);
-	        }
-	        else
-	        {
-	             if(linkField != null)
-	             {
-	                 linkField.setEnabled(true);
-	                 linkField.setText(link);
-	             }
-	        }
-	    }
-	}
+            s.setVetoPolicy(d -> d != null && dataSessione != null && d.equals(dataSessione));
+
+            if(pratica)
+            {
+                if(addressField != null) addressField.setEnabled(false);
+                if(ricercaRicetteField != null) ricercaRicetteField.setEnabled(false);
+
+                idsSelectedRecipes.clear();
+                if(idRicetteSelezionate != null)
+                {
+                    for(int i = 0; i < idsRecipes.size(); i++)
+                    {
+                        JCheckBox cb = ricettaChecks.get(i);
+                        cb.setEnabled(false);
+                        if(idRicetteSelezionate.contains(idsRecipes.get(i)))
+                        {
+                            cb.setSelected(true);
+                            idsSelectedRecipes.add(idsRecipes.get(i));
+                        }
+                        else cb.setSelected(false);
+                    }
+                }
+                else
+                {
+                    for(JCheckBox cb : ricettaChecks)
+                    {
+                        cb.setEnabled(false);
+                        cb.setSelected(false);
+                    }
+                }
+                if(addressField != null) addressField.setText(indirizzo);
+            }
+            else
+            {
+                if(linkField != null)
+                {
+                    linkField.setEnabled(false);
+                    linkField.setText(link);
+                }
+            }
+
+            if(dateChangeListener != null)
+                datePicker.removeDateChangeListener(dateChangeListener);
+        }
+        else
+        {
+            // Sessione futura: riabilita input e ripristina la VetoPolicy preesistente
+            datePicker.setEnabled(true);
+            timePicker.setEnabled(true);
+            oreSpinner.setEnabled(true);
+            minutiSpinner.setEnabled(true);
+            removeBtn.setVisible(true);
+
+            // Se la policy originale non ammette la data impostata, lascia senza veto:
+            // il dialog applicherà la sua policy corretta in reschedule.
+            if (oldVeto == null || dataSessione == null || oldVeto.isDateAllowed(dataSessione))
+                s.setVetoPolicy(oldVeto);
+            else
+                s.setVetoPolicy(null);
+
+            if(pratica)
+            {
+                if(addressField != null) addressField.setEnabled(true);
+                if(ricercaRicetteField != null) ricercaRicetteField.setEnabled(true);
+
+                idsSelectedRecipes.clear();
+                for(int i = 0; i < idsRecipes.size(); i++)
+                {
+                    JCheckBox cb = ricettaChecks.get(i);
+                    cb.setEnabled(true);
+                    if(idRicetteSelezionate != null && idRicetteSelezionate.contains(idsRecipes.get(i)))
+                        cb.setSelected(true);
+                    else
+                        cb.setSelected(false);
+                }
+                if(addressField != null) addressField.setText(indirizzo);
+            }
+            else
+            {
+                if(linkField != null)
+                {
+                    linkField.setEnabled(true);
+                    linkField.setText(link);
+                }
+            }
+        }
+    }
+// ...existing code...
 
 	/**
 	 * Controlla se la data della sessione è uguale o precedente ad oggi.

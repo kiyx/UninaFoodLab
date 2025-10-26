@@ -20,19 +20,8 @@ public class ConnectionManager
         return instance;
     }
 
-    public static Connection getConnection() throws SQLException
+     public static Connection getConnection() throws SQLException
     {
-        try
-        {
-            if(conn == null || conn.isClosed())
-                conn = DriverManager.getConnection(url + "?currentSchema=UninaFoodLab", user, password);
-        }
-        catch (SQLException ex)
-        {
-            ex.printStackTrace();
-            throw ex;
-        }
-
-        return conn;
+        return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 }

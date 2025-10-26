@@ -29,45 +29,51 @@ public class SessionInfoPanel extends JPanel
     private ActionListener adesioneListener;
 
     public SessionInfoPanel(int idSession, int number, boolean pratica, LocalDate dataStr, LocalTime orarioStr, int durata, List<String> ricette, String luogo
-    						, String linkRiunione)
-    {
-        this.idSession = idSession;
-        this.number = number;
-        this.pratica = pratica;
-        this.dataStr = dataStr;
-        this.orarioStr = orarioStr;
-        this.durata = durata;
-        this.ricette = ricette;
-        this.luogo = luogo;
-        this.linkRiunione = linkRiunione;
-        
-        setLayout(new MigLayout("fill, insets 10", "[grow, fill][pref!]", "[][][][][][][][]"));
-        setBackground(dataStr.isBefore(LocalDate.now()) ? new Color(245, 245, 245) : new Color(255, 250, 240));
-        setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(255, 152, 0)),
-            BorderFactory.createEmptyBorder(10, 10, 10, 10)));
-
-        initComponents();
-        initListeners();
-    }
+			, String linkRiunione)
+	{
+		this.idSession = idSession;
+		this.number = number;
+		this.pratica = pratica;
+		this.dataStr = dataStr;
+		this.orarioStr = orarioStr;
+		this.durata = durata;
+		this.ricette = ricette;
+		this.luogo = luogo;
+		this.linkRiunione = linkRiunione;
+		
+		setLayout(new MigLayout("fillx, insets 10", "[pref!][grow, fill]", "[][][][][][][][]"));
+		
+		boolean isPast = dataStr.isBefore(LocalDate.now());
+		setBackground(isPast ? new Color(248, 248, 248) : Color.WHITE);
+		
+		Color topBorderColor = isPast ? new Color(224, 224, 224) : new Color(255, 152, 0);
+		setBorder(BorderFactory.createCompoundBorder(
+		BorderFactory.createMatteBorder(2, 0, 0, 0, topBorderColor), 
+		BorderFactory.createEmptyBorder(10, 10, 10, 10))); 
+		
+		initComponents();
+		initListeners();
+	}
 
     private void initComponents()
     {
+        boolean isPast = dataStr.isBefore(LocalDate.now());
+
         titleLbl = new JXLabel(String.format("Sessione %d - %s", number, pratica ? "Pratica" : "Online"));
         titleLbl.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        titleLbl.setForeground(dataStr.isAfter(LocalDate.now()) ? Color.GRAY : new Color(255, 87, 34));
+        titleLbl.setForeground(isPast ? Color.GRAY : new Color(255, 87, 34));
         add(titleLbl, "span 2, wrap");
 
         dataLbl = new JXLabel(dataStr.toString());
-        add(new JLabel("Data:"), "right");
+        add(new JLabel("Data:"), "align right");
         add(dataLbl, "wrap");
 
         orarioLabel = new JXLabel(orarioStr.toString());
-        add(new JLabel("Orario:"), "right");
+        add(new JLabel("Orario:"), "align right");
         add(orarioLabel, "wrap");
 
         durataLabel = new JXLabel(String.valueOf(durata));
-        add(new JLabel("Durata (minuti):"), "right");
+        add(new JLabel("Durata (minuti):"), "align right");
         add(durataLabel, "wrap");
 
         if(pratica)
@@ -76,18 +82,18 @@ public class SessionInfoPanel extends JPanel
             luogoLabel = new JXLabel(luogo != null ? luogo : "-");
             adesioniLabel = new JXLabel(String.valueOf(Controller.getController().getNumeroAdesioni(idSession)));
 
-            add(new JLabel("Ricette:"), "right");
+            add(new JLabel("Ricette:"), "align right");
             add(ricetteLabel, "wrap");
 
-            add(new JLabel("Luogo:"), "right");
+            add(new JLabel("Luogo:"), "align right");
             add(luogoLabel, "wrap");
 
-            add(new JLabel("Numero di Adesioni:"), "right");
+            add(new JLabel("Numero di Adesioni:"), "align right");
             add(adesioniLabel, "wrap");
         }
         else
         {
-            add(new JLabel("Link Riunione:"), "right");
+            add(new JLabel("Link Riunione:"), "align right");
             linkLabel = new JXLabel("<html><a href='" + linkRiunione + "'>" + linkRiunione + "</a></html>");
             linkLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
             linkLabel.setForeground(new Color(255, 87, 34));
@@ -97,19 +103,18 @@ public class SessionInfoPanel extends JPanel
         btnPanel = new JXPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         btnPanel.setOpaque(false);
 
-        // Mostra pulsante adesione solo se:
-        // - è pratica
-        // - non è uno Chef
-        // - il contesto è MyCourses
-        // - la sessione non è passata
-        if(pratica && !Controller.getController().isChefLogged() && !dataStr.isBefore(LocalDate.now()))
+        if(pratica && !Controller.getController().isChefLogged() && !isPast)
         {
             boolean alreadyAdesione = Controller.getController().checkAdesione(idSession);
             
             if(alreadyAdesione)
+            {
                 createAdesioneButton("Elimina adesione", new Color(244, 67, 54), MaterialDesign.MDI_CLOSE);
+            }
             else
+            {
                 createAdesioneButton("Aderisci", new Color(76, 175, 80), MaterialDesign.MDI_CHECK);
+            }
 
             btnPanel.add(btnAdesione);
         }
@@ -122,8 +127,9 @@ public class SessionInfoPanel extends JPanel
         btnAdesione = new JXButton(text, FontIcon.of(icon, 16));
         btnAdesione.setBackground(baseColor);
         btnAdesione.setForeground(Color.WHITE);
+        btnAdesione.setBorderPainted(false); 
+        btnAdesione.setFocusable(false);     
 
-        // Hover effect
         btnAdesione.addMouseListener(new MouseAdapter()
         {
             @Override

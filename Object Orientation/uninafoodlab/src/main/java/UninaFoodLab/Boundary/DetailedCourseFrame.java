@@ -48,7 +48,8 @@ public class DetailedCourseFrame extends JDialog
 
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setMinimumSize(new Dimension(900, 650));
-        setLayout(new MigLayout("fill, insets 15", "[grow]", "[][grow][pref!]"));
+        setLayout(new MigLayout("fill, insets 15, gapy 10", "[grow]", "[][grow]"));
+        getContentPane().setBackground(Color.WHITE);
 
         initComponents();
         initListeners();
@@ -56,75 +57,83 @@ public class DetailedCourseFrame extends JDialog
 
     private void initComponents()
     {
-        // ---------- INFO CORSO ----------
-        courseInfoPanel = new JPanel(new MigLayout("wrap 2, ins 15", "[][grow]", "[][][][][][][][][grow][pref!]"));
+        courseInfoPanel = new JPanel(new MigLayout("wrap 2, ins 15, fillx", 
+                                                   "[pref!][grow, fill]", 
+                                                   "[pref!][grow, 60:120][pref!][pref!][pref!][pref!][pref!][pref!][pref!][pref!]"));
         courseInfoPanel.setBackground(new Color(255, 249, 240));
-        courseInfoPanel.setBorder(new TitledBorder(BorderFactory.createLineBorder(new Color(255, 152, 0), 2),
+        courseInfoPanel.setBorder(new TitledBorder(BorderFactory.createLineBorder(new Color(255, 183, 77), 1), 
                                                   "Informazioni Corso",
                                                   TitledBorder.LEFT,
                                                   TitledBorder.TOP,
                                                   new Font("Segoe UI", Font.BOLD, 16),
                                                   new Color(255, 87, 34)));
 
-        courseInfoPanel.add(new JXLabel("Nome:"), "right");
+        courseInfoPanel.add(new JXLabel("Nome:"), "align right");
         lblNome = new JXLabel();
         lblNome.setFont(lblNome.getFont().deriveFont(Font.BOLD));
         courseInfoPanel.add(lblNome, "growx");
 
-        courseInfoPanel.add(new JXLabel("Descrizione:"), "top, right");
+        courseInfoPanel.add(new JXLabel("Descrizione:"), "top, align right");
         txtDescrizione = new JTextArea();
         txtDescrizione.setLineWrap(true);
         txtDescrizione.setWrapStyleWord(true);
         txtDescrizione.setEditable(false);
         txtDescrizione.setFocusable(false);
-        txtDescrizione.setBackground(courseInfoPanel.getBackground());
         txtDescrizione.setFont(txtDescrizione.getFont().deriveFont(13f));
         txtDescrizione.setBorder(BorderFactory.createEmptyBorder(2, 4, 2, 4));
-        courseInfoPanel.add(txtDescrizione, "growx, h 80!");
+        txtDescrizione.setBackground(courseInfoPanel.getBackground());
+        courseInfoPanel.add(txtDescrizione, "growx, growy"); 
 
-        courseInfoPanel.add(new JXLabel("Data Inizio:"), "right");
+        courseInfoPanel.add(new JXLabel("Data Inizio:"), "align right");
         lblDataInizio = new JXLabel();
         courseInfoPanel.add(lblDataInizio);
 
-        courseInfoPanel.add(new JXLabel("Numero Sessioni:"), "right");
+        courseInfoPanel.add(new JXLabel("Numero Sessioni:"), "align right");
         lblNumeroSessioni = new JXLabel();
         courseInfoPanel.add(lblNumeroSessioni);
 
-        courseInfoPanel.add(new JXLabel("Frequenza Sessioni:"), "right");
+        courseInfoPanel.add(new JXLabel("Frequenza Sessioni:"), "align right");
         lblFrequenza = new JXLabel();
         courseInfoPanel.add(lblFrequenza);
 
-        courseInfoPanel.add(new JXLabel("Limite Partecipanti (solo pratico):"), "right");
+        courseInfoPanel.add(new JXLabel("Limite Partecipanti (solo pratico):"), "align right");
         lblLimitePartecipanti = new JXLabel();
         courseInfoPanel.add(lblLimitePartecipanti);
 
-        courseInfoPanel.add(new JXLabel("Numero Iscritti Attuali:"), "right");
+        courseInfoPanel.add(new JXLabel("Numero Iscritti Attuali:"), "align right");
         lblNumeroIscritti = new JXLabel();
         courseInfoPanel.add(lblNumeroIscritti);
         
-        courseInfoPanel.add(new JLabel("Costo (€):"), "right");
+        courseInfoPanel.add(new JLabel("Costo (€):"), "align right");
         lblCosto = new JXLabel();
         courseInfoPanel.add(lblCosto);
 
-        // ---------- BOTTONI ----------
         buttonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         buttonsPanel.setOpaque(false);
 
         btnEditCourse = new JXButton("Modifica", FontIcon.of(MaterialDesign.MDI_PENCIL, 16));
         btnEditCourse.setBackground(new Color(255, 152, 0));
         btnEditCourse.setForeground(Color.WHITE);
+        btnEditCourse.setBorderPainted(false); 
+        btnEditCourse.setFocusable(false);     
 
         btnDeleteCourse = new JXButton("Elimina", FontIcon.of(MaterialDesign.MDI_DELETE, 16));
         btnDeleteCourse.setBackground(new Color(244, 67, 54));
         btnDeleteCourse.setForeground(Color.WHITE);
+        btnDeleteCourse.setBorderPainted(false);
+        btnDeleteCourse.setFocusable(false);
 
         btnIscrivitiCorso = new JXButton("Iscriviti", FontIcon.of(MaterialDesign.MDI_ACCOUNT_PLUS, 16));
         btnIscrivitiCorso.setBackground(new Color(255, 152, 0));
         btnIscrivitiCorso.setForeground(Color.WHITE);
+        btnIscrivitiCorso.setBorderPainted(false);
+        btnIscrivitiCorso.setFocusable(false);
 
         btnDisiscrivitiCorso = new JXButton("Disiscriviti", FontIcon.of(MaterialDesign.MDI_DELETE_SWEEP, 16));
         btnDisiscrivitiCorso.setBackground(new Color(244, 67, 54));
         btnDisiscrivitiCorso.setForeground(Color.WHITE);
+        btnDisiscrivitiCorso.setBorderPainted(false);
+        btnDisiscrivitiCorso.setFocusable(false);
 
         buttonsPanel.add(btnIscrivitiCorso);
         buttonsPanel.add(btnDisiscrivitiCorso);
@@ -138,17 +147,15 @@ public class DetailedCourseFrame extends JDialog
         lblIscrizioneStatus.setForeground(new Color(244, 67, 54)); 
         lblIscrizioneStatus.setVisible(false); 
 
-        // icona "X rossa"
         lblIscrizioneStatus.setIcon(FontIcon.of(MaterialDesign.MDI_CLOSE_CIRCLE, 18, new Color(244, 67, 54)));
 
         courseInfoPanel.add(lblIscrizioneStatus, "span, growx, wrap");
 
         add(courseInfoPanel, "growx, wrap");
 
-        // ---------- SESSIONI ----------
         sessionsPanel = new JPanel(new MigLayout("wrap 1, insets 5, gapy 10", "[grow]"));
         sessionsPanel.setBackground(Color.WHITE);
-        sessionsPanel.setBorder(new TitledBorder(BorderFactory.createLineBorder(new Color(255, 152, 0)),
+        sessionsPanel.setBorder(new TitledBorder(BorderFactory.createLineBorder(new Color(255, 183, 77), 1),
                 "Dettaglio Sessioni",
                 TitledBorder.LEFT,
                 TitledBorder.TOP,
@@ -158,10 +165,10 @@ public class DetailedCourseFrame extends JDialog
         sessionsScrollPane = new JScrollPane(sessionsPanel,
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        sessionsScrollPane.setPreferredSize(new Dimension(860, 350));
+        sessionsScrollPane.setBorder(BorderFactory.createEmptyBorder()); 
         sessionsScrollPane.getVerticalScrollBar().setUnitIncrement(25);
 
-        add(sessionsScrollPane, "growx, pushy, wrap");
+        add(sessionsScrollPane, "grow, pushy, wrap"); 
     }
 
     private void initListeners()
@@ -228,8 +235,8 @@ public class DetailedCourseFrame extends JDialog
         {
         	if(userContext.equals("MyCourses"))
         	{
-        		btnEditCourse.setVisible(!corsoIniziato);
-                btnDeleteCourse.setVisible(!corsoIniziato);
+        		btnEditCourse.setVisible(true);
+                btnDeleteCourse.setVisible(true);
         	}   
         }
         else

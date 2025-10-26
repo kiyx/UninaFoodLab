@@ -434,7 +434,6 @@ public class CreateCourseDialog extends JDialog
          * ActionListener per il pulsante "Crea Corso".
          * Valida i campi, raccoglie i dati delle sessioni e invoca il controller per la creazione del corso.
          */
-     // In CreateCourseDialog.java -> initListeners()
 
         confirmBtnListener = new ActionListener()
         {
@@ -638,34 +637,44 @@ public class CreateCourseDialog extends JDialog
      * Popola i campi principali del corso con dati.
      * Chiamato dal Controller.
      */
-    public void popolaDatiCorso(int idCorso, String nome, String descrizione, LocalDate dataInizio, double costo, String frequenza, boolean isPratico, int limite, List<Integer> idArgomentiSelezionati, boolean canChangeStartDate) // canChangeFreq è true se NON ci sono sessioni passate
+    public void popolaDatiCorso(int idCorso, String nome, String descrizione, LocalDate dataInizio, double costo, String frequenza, boolean isPratico, int limite, List<Integer> idArgomentiSelezionati, boolean canChangeStartDate)
     {
         this.idCorsoDaModificare = idCorso;
 
+        if(dataInizioListener != null) 
+            dataInizioField.removeDateChangeListener(dataInizioListener);
+        if(frequencyListListener != null) 
+            frequencyList.removeItemListener(frequencyListListener);
+
         nameField.setText(nome);
         descrizioneArea.setText(descrizione);
-        dataInizioField.setDate(dataInizio);
-        
+
         if(canChangeStartDate)
         {
+            // Edit con modifica data: carico la data DB e consento la modifica
             dataInizioField.setEnabled(true);
-            DateVetoPolicy vetoPolicy = new DateVetoPolicyMinimumMaximumDate(LocalDate.now().plusDays(1), null);
+            DateVetoPolicy vetoPolicy = new DateVetoPolicyMinimumMaximumDate(LocalDate.now(), null);
             dataInizioField.getSettings().setVetoPolicy(vetoPolicy);
+            dataInizioField.setDate(dataInizio);
+            frequencyList.setEnabled(true);
 
-            if(dataInizio.isBefore(LocalDate.now().plusDays(1)))
-                dataInizioField.setDate(LocalDate.now().plusDays(1));
+            if(dataInizioListener != null)
+                dataInizioField.addDateChangeListener(dataInizioListener);
+            if(frequencyListListener != null)
+                frequencyList.addItemListener(frequencyListListener);
         }
         else
         {
+            // Edit read-only: mostra la data DB senza VetoPolicy (nessuna invalidazione)
             dataInizioField.setEnabled(false);
-            if(dataInizioListener != null) 
-                dataInizioField.removeDateChangeListener(dataInizioListener);
-            dataInizioField.getSettings().setVetoPolicy(date -> date != null && date.equals(dataInizio));
+            dataInizioField.getSettings().setVetoPolicy(null);
+            dataInizioField.setDate(dataInizio);
+            frequencyList.setEnabled(false);
         }
-        
+
         costSpinner.setValue(costo);
         costSpinner.setEnabled(false);
-        
+
         praticoCheck.setSelected(isPratico);
         praticoCheck.setEnabled(false);
         if(isPratico)
@@ -673,12 +682,11 @@ public class CreateCourseDialog extends JDialog
             limitSpinner.setValue(limite);
             togglePartecipantiLimit(true);
         }
-        
+
         limitSpinner.setEnabled(false);
         limitLabel.setEnabled(false);
 
         aggiungiSessioneLabel.setVisible(true);
-        frequencyList.setEnabled(canChangeStartDate);
         frequencyList.setSelectedItem(frequenza);
 
         idsSelectedArguments.clear();
@@ -686,7 +694,7 @@ public class CreateCourseDialog extends JDialog
         {
             int idArgomentoAttuale = idsArguments.get(i);
             JCheckBox cb = argumentsCheck.get(i);
-            
+
             if(idArgomentiSelezionati.contains(idArgomentoAttuale))
             {
                 cb.setSelected(true);
@@ -696,7 +704,7 @@ public class CreateCourseDialog extends JDialog
                  cb.setSelected(false);
             cb.setEnabled(false);
         }
-        
+
         sessionCards.clear();
         sessionsContainer.removeAll();
     }
@@ -742,47 +750,46 @@ public class CreateCourseDialog extends JDialog
      * @param frequenza Stringa che rappresenta la frequenza.
      */
     private void rescheduleFissa(LocalDate dataInizioCorso, String frequenza)
+{
+    int giorniFrequenza = switch (frequenza) {
+        case "Giornaliera" -> 1;
+        case "Settimanale" -> 7;
+        case "Bisettimanale" -> 14;
+        case "Mensile" -> 30;
+        default -> 0;
+    };
+    if (giorniFrequenza <= 0) return;
+
+    for (int i = 0; i < sessionCards.size(); i++)
     {
-        int giorniFrequenza = switch(frequenza)
-                              {
-                                  case "Giornaliera" -> 1;
-                                  case "Settimanale" -> 7;
-                                  case "Bisettimanale" -> 14;
-                                  case "Mensile" -> 30;
-                                  default -> 0;
-                              };
+        CreateSessionPanel panel = sessionCards.get(i);
 
-        if(giorniFrequenza > 0)
+        if (panel.isPassed())
         {
-            int sessionIndex = 0;
-            for(int i = 0; i < sessionCards.size(); i++)
+            // Lock sulla data storica, nessun listener
+            LocalDate fixed = panel.getDatePicker().getDate();
+            panel.getDatePicker().getSettings().setVetoPolicy(d -> d != null && d.equals(fixed));
+            panel.getDatePicker().setEnabled(false);
+            if (panel.getDateChangeListener() != null)
             {
-                CreateSessionPanel panel = sessionCards.get(i);
+                panel.getDatePicker().removeDateChangeListener(panel.getDateChangeListener());
+                panel.setDateChangeListener(null);
+            }
+        }
+        else
+        {
+            // Usa l'indice globale per mantenere la sequenza 25..30
+            LocalDate dataPrevista = dataInizioCorso.plusDays((long) giorniFrequenza * i);
+            panel.setDataPrevista(dataPrevista, null, true);
 
-                if(!panel.isPassed())
-                {
-                    LocalDate dataPrevista = dataInizioCorso.plusDays((long)giorniFrequenza * sessionIndex);
-                    panel.setDataPrevista(dataPrevista, null, true);
-
-                     if(panel.getDateChangeListener() != null)
-                     {
-                         panel.getDatePicker().removeDateChangeListener(panel.getDateChangeListener());
-                         panel.setDateChangeListener(null);
-                     }
-                    sessionIndex++;
-                }
-                 else
-                 {
-                     panel.getDatePicker().setEnabled(false);
-                     if(panel.getDateChangeListener() != null)
-                     {
-                         panel.getDatePicker().removeDateChangeListener(panel.getDateChangeListener());
-                         panel.setDateChangeListener(null);
-                     }
-                 }
+            if (panel.getDateChangeListener() != null)
+            {
+                panel.getDatePicker().removeDateChangeListener(panel.getDateChangeListener());
+                panel.setDateChangeListener(null);
             }
         }
     }
+}
     
     /**
      * Abilita la selezione manuale delle date delle sessioni (frequenza libera)
@@ -803,21 +810,14 @@ public class CreateCourseDialog extends JDialog
             }
             else
             {
+                LocalDate fixed = panel.getDatePicker().getDate();
+                panel.getDatePicker().getSettings().setVetoPolicy(d -> d != null && d.equals(fixed));
                 panel.getDatePicker().setEnabled(false);
-                 if(panel.getDateChangeListener() != null)
-                 {
-                     panel.getDatePicker().removeDateChangeListener(panel.getDateChangeListener());
-                     panel.setDateChangeListener(null);
-                 }
-            }
-        }
-
-        for(CreateSessionPanel panel : sessionCards)
-        {
-            if(!panel.isPassed())
-            {
-                panel.getDatePicker().getSettings().setVetoPolicy(getVetoPolicy(dataInizioCorso, panel));
-                updateSelectedDate(panel, dataInizioCorso);
+                if(panel.getDateChangeListener() != null)
+                {
+                    panel.getDatePicker().removeDateChangeListener(panel.getDateChangeListener());
+                    panel.setDateChangeListener(null);
+                }
             }
         }
     }
@@ -831,26 +831,21 @@ public class CreateCourseDialog extends JDialog
     private DateVetoPolicy getVetoPolicy(final LocalDate dataInizio, final CreateSessionPanel currentPanel)
     {
         return new DateVetoPolicy()
-			       {
-			           @Override
-			           public boolean isDateAllowed(LocalDate date)
-			           {
-			               if(date == null || date.isBefore(dataInizio.plusDays(1)))
-			                   return false;
-			
-			               for(CreateSessionPanel other : sessionCards)
-			               {
-			                   if(other == currentPanel)
-			                       continue;
-			
-			                   LocalDate selected = other.getDatePicker().getDate();
-			                   if(selected != null && selected.equals(date))
-			                       return false;
-			                }
-			
-			               return true;
-			            }
-			        };
+        {
+            @Override
+            public boolean isDateAllowed(LocalDate date)
+            {
+                if (date == null || date.isBefore(dataInizio)) return false;
+
+                for (CreateSessionPanel other : sessionCards)
+                {
+                    if (other == currentPanel || other.isPassed()) continue;
+                    LocalDate selected = other.getDatePicker().getDate();
+                    if (selected != null && selected.equals(date)) return false;
+                }
+                return true;
+            }
+        };
     }
     
     /**
@@ -863,9 +858,18 @@ public class CreateCourseDialog extends JDialog
     private void updateSelectedDate(CreateSessionPanel panel, LocalDate dataInizio)
     {
         LocalDate selected = panel.getDatePicker().getDate();
-        
-        if(selected == null || selected.isBefore(dataInizio.plusDays(1)))
-            panel.getDatePicker().setDate(dataInizio.plusDays(1));
+
+        if(selected == null || selected.isBefore(dataInizio))
+        {
+            DateChangeListener listener = panel.getDateChangeListener();
+            if(listener != null)
+                panel.getDatePicker().removeDateChangeListener(listener);
+
+            panel.getDatePicker().setDate(dataInizio);
+
+            if(listener != null)
+                panel.getDatePicker().addDateChangeListener(listener);
+        }
     }
 
     /**
