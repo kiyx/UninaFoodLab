@@ -25,11 +25,12 @@ public class SessionInfoPanel extends JPanel
     private final LocalTime orarioStr;
     private final String luogo, linkRiunione;
     private final List<String> ricette;
+    private final int idCorso; 
     
     private ActionListener adesioneListener;
 
     public SessionInfoPanel(int idSession, int number, boolean pratica, LocalDate dataStr, LocalTime orarioStr, int durata, List<String> ricette, String luogo
-			, String linkRiunione)
+			, String linkRiunione, int idCorso)
 	{
 		this.idSession = idSession;
 		this.number = number;
@@ -40,7 +41,8 @@ public class SessionInfoPanel extends JPanel
 		this.ricette = ricette;
 		this.luogo = luogo;
 		this.linkRiunione = linkRiunione;
-		
+		this.idCorso = idCorso;
+
 		setLayout(new MigLayout("fillx, insets 10", "[pref!][grow, fill]", "[][][][][][][][]"));
 		
 		boolean isPast = dataStr.isBefore(LocalDate.now());
@@ -103,18 +105,19 @@ public class SessionInfoPanel extends JPanel
         btnPanel = new JXPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         btnPanel.setOpaque(false);
 
-        if(pratica && !Controller.getController().isChefLogged() && !isPast)
+        boolean canShowAdesione = pratica
+                && !Controller.getController().isChefLogged()
+                && !isPast
+                && Boolean.TRUE.equals(Controller.getController().checkIscritto(idCorso));
+
+        if (canShowAdesione)
         {
             boolean alreadyAdesione = Controller.getController().checkAdesione(idSession);
-            
+
             if(alreadyAdesione)
-            {
                 createAdesioneButton("Elimina adesione", new Color(244, 67, 54), MaterialDesign.MDI_CLOSE);
-            }
             else
-            {
                 createAdesioneButton("Aderisci", new Color(76, 175, 80), MaterialDesign.MDI_CHECK);
-            }
 
             btnPanel.add(btnAdesione);
         }

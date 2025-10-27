@@ -5,7 +5,6 @@ import java.sql.*;
 public class ConnectionManager
 {
     private static ConnectionManager instance = null;
-    private static Connection conn = null;
 
     private static final String url = "jdbc:postgresql://localhost:5432/UninaFoodLab";
     private static final String user = "postgres";

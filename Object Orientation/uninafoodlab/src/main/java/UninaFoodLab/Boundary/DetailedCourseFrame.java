@@ -318,7 +318,7 @@ public class DetailedCourseFrame extends JDialog
 
                 sessionsPanel.add(new SessionInfoPanel(s.getId(), i++, pratica, s.getData().toLocalDate(), s.getOrario().toLocalTime(), s.getDurata(), recipes,
                         (pratica) ? ((SessionePratica) s).getIndirizzo() : null,
-                        (!pratica) ? ((SessioneOnline) s).getLinkRiunione() : null), "growx");
+                        (!pratica) ? ((SessioneOnline) s).getLinkRiunione() : null, this.idCorso), "growx");
             }
         }
 

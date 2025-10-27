@@ -103,7 +103,7 @@ public class CreateCourseDialog extends JDialog
             title.setText("Inserisci i dettagli del nuovo corso");
         }
        
-        setMinimumSize(new Dimension(1670, 725));
+        setMinimumSize(new Dimension(1750, 725));
         setPreferredSize(new Dimension(1200, 700));
         setLocationRelativeTo(parentFrame);
         setResizable(true);
