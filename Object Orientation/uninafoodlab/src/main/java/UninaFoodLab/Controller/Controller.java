@@ -1089,7 +1089,7 @@ public class Controller
 	        sessioni.addAll(online);
 	        sessioni.addAll(pratiche);
 	        sessioni.sort(Comparator.comparing(Sessione::getData).thenComparing(Sessione::getOrario));
-
+			sessioni.sort(Comparator.comparing(Sessione::getData).thenComparing(Sessione::getOrario).thenComparing(s -> (s instanceof SessionePratica) ? 0 : 1));
 	        LocalDate today = LocalDate.now();
 	        hasPastSessions = sessioni.stream().anyMatch(s -> s.getData().toLocalDate().isBefore(today));
 
@@ -1165,7 +1165,7 @@ public class Controller
 	        );
 	    }
 
-	    System.out.print(corso.getDataInizio());
+
 	    editDialog.triggerInitialReschedule();
 	    editDialog.setVisible(true);
 	}

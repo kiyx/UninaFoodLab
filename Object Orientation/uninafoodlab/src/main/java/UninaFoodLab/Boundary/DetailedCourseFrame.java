@@ -300,6 +300,12 @@ public class DetailedCourseFrame extends JDialog
 
         if(sessioni != null)
         {
+            sessioni.sort(java.util.Comparator
+                .comparing(Sessione::getData)
+                .thenComparing(Sessione::getOrario)
+                .thenComparing(s -> (s instanceof SessionePratica) ? 0 : 1)
+            );
+            
             int i = 1;
             for(Sessione s : sessioni)
             {
