@@ -64,14 +64,10 @@ public class CorsoDAO_Postgres implements CorsoDAO
 	    {
 	        conn = ConnectionManager.getConnection();
 	        conn.setAutoCommit(false);
-
-	        // salva solo il corso, con connessione esterna
 	        save(corso, conn);
 
-	        // salva gli argomenti
 	        new ArgomentoDAO_Postgres().saveArgomentiCorso(corso.getId(), corso.getArgomenti(), conn);
-	        
-	        // salva tutte le sessioni collegate, sempre con la stessa connessione
+	       
 	        for(Sessione s : corso.getSessioni())
 	        {
 	            if(s instanceof SessioneOnline)
@@ -305,8 +301,6 @@ public class CorsoDAO_Postgres implements CorsoDAO
             param.add(newCorso.getDataInizio());
         }
         
-        // Rule 4: Modifica Frequenza
-        // Questo viene impostato a 'Libera' dalla GUI se l'utente cancella una sessione.
         if(!oldCorso.getFrequenzaSessioni().equals(newCorso.getFrequenzaSessioni()))
         {
             sql += "FrequenzaSessioni = ?::frequenza, ";

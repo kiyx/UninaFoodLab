@@ -160,12 +160,12 @@ public class SessioneOnlineDAO_Postgres implements SessioneOnlineDAO
         String sql =
             "DELETE FROM SessioneOnline " +
             "WHERE IdSessioneOnline = ? " +
-            "  AND Data > CURRENT_DATE"; // non toccare oggi o passato
+            "  AND Data > CURRENT_DATE";
 
         try (Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
         {
             s.setInt(1, idSessioneOnline);
-            s.executeUpdate(); // 0 righe se non consentito: nessuna eccezione
+            s.executeUpdate();
         }
         catch (SQLException e)
         {

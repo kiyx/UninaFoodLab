@@ -233,113 +233,129 @@ public class RicettaDAO_Postgres implements RicettaDAO
 	    List<Object> param = new ArrayList<>();
 	    Connection conn = null;
 
-	    if (!java.util.Objects.equals(previousRicetta.getNome(), updatedRicetta.getNome())) {
+	    if (!java.util.Objects.equals(previousRicetta.getNome(), updatedRicetta.getNome())) 
+	    {
 	        sql.append("Nome = ?, ");
 	        param.add(updatedRicetta.getNome());
 	    }
 
-	    if (!java.util.Objects.equals(previousRicetta.getProvenienza(), updatedRicetta.getProvenienza())) {
+	    if (!java.util.Objects.equals(previousRicetta.getProvenienza(), updatedRicetta.getProvenienza())) 
+	    {
 	        sql.append("Provenienza = ?, ");
 	        param.add(updatedRicetta.getProvenienza());
 	    }
 
-	    if (previousRicetta.getTempo() != updatedRicetta.getTempo()) {
+	    if (previousRicetta.getTempo() != updatedRicetta.getTempo()) 
+	    {
 	        sql.append("Tempo = ?, ");
 	        param.add(updatedRicetta.getTempo());
 	    }
 
-	    if (previousRicetta.getCalorie() != updatedRicetta.getCalorie()) {
+	    if (previousRicetta.getCalorie() != updatedRicetta.getCalorie()) 
+	    {
 	        sql.append("Calorie = ?, ");
 	        param.add(updatedRicetta.getCalorie());
 	    }
 
-	    if (!java.util.Objects.equals(previousRicetta.getDifficolta(), updatedRicetta.getDifficolta())) {
+	    if(!java.util.Objects.equals(previousRicetta.getDifficolta(), updatedRicetta.getDifficolta())) 
+	    {
 	        sql.append("Difficolta = ?::livellodifficolta, ");
 	        param.add(updatedRicetta.getDifficolta().toString()); 
 	    }
 
-	    if (!java.util.Objects.equals(previousRicetta.getAllergeni(), updatedRicetta.getAllergeni())) {
+	    if(!java.util.Objects.equals(previousRicetta.getAllergeni(), updatedRicetta.getAllergeni())) 
+	    {
 	        sql.append("Allergeni = ? ");
 	        param.add(updatedRicetta.getAllergeni());
 	    }
 	    
-	    if (param.isEmpty()) {
-	        // Nessun campo della ricetta principale è cambiato.
-	    } else {
-	        
-	        // Rimuove l'ultima virgola e lo spazio
-	        if (sql.charAt(sql.length() - 2) == ',') {
+	    if(param.isEmpty()) 
+	    {
+
+	    } 
+	    else
+	    {	        
+	        if(sql.charAt(sql.length() - 2) == ',')
 	             sql.setLength(sql.length() - 2);
-	        }
 
 	        sql.append(" WHERE IdRicetta = ?");
 	        param.add(previousRicetta.getId());
 	    }
 
-	    try {
+	    try 
+	    {
 	        conn = ConnectionManager.getConnection();
-	        conn.setAutoCommit(false); // Inizio della transazione
+	        conn.setAutoCommit(false);
 
-	        // 1. UPDATE della Ricetta (se ci sono parametri da aggiornare)
-	        if (!param.isEmpty()) {
-	            try (PreparedStatement s = conn.prepareStatement(sql.toString())) {
-	                for (int i = 0; i < param.size(); i++) {
+
+	        if(!param.isEmpty()) 
+	        {
+	            try(PreparedStatement s = conn.prepareStatement(sql.toString())) 
+	            {
+	                for(int i = 0; i < param.size(); i++) 
 	                    s.setObject(i + 1, param.get(i));
-	                }
+
 	                s.executeUpdate();
 	            }
 	        }
 	        
-	        // --- 2. OPERAZIONI SU UTILIZZI (Ingredienti) ---
 	        
-	        // 2a. DELETE: Eliminazione degli Utilizzi rimossi
-	        for (Utilizzo util : toDeleteUtilizzi) {
-	            // Si assume che il metodo delete del UtilizzoDAO sia transazionale (accetti la conn)
+	        for(Utilizzo util : toDeleteUtilizzi) 
 	             new UtilizzoDAO_Postgres().delete(util.getIdRicetta(), util.getIngrediente().getId(), conn);
-	        }
 	        
-	        // 2b. UPDATE: Aggiornamento degli Utilizzi esistenti che sono stati modificati
-	        for (Utilizzo util : toUpdateUtilizzi) {
-	            // Si assume che il metodo update del UtilizzoDAO sia transazionale (accetti la conn)
-	            // e che 'util' contenga i nuovi valori da salvare.
+	        for(Utilizzo util : toUpdateUtilizzi) 
 	        	new UtilizzoDAO_Postgres().update(util, conn); 
-	        }
 	        
-	        // 2c. INSERT: Inserimento dei nuovi Utilizzi aggiunti
-	        for (Utilizzo util : toAddUtilizzi) {
+	        for(Utilizzo util : toAddUtilizzi) 
+	        {
 	            util.setIdRicetta(previousRicetta.getId());
-	            // Si assume che il metodo save del UtilizzoDAO sia transazionale (accetti la conn)
 	            new UtilizzoDAO_Postgres().save(util, conn); 
 	        }
 
-	        // --- FINE TRANSAZIONE ---
-	        conn.commit(); // Conferma tutte le modifiche se non ci sono state eccezioni
+	        conn.commit();
 
-	    } catch (SQLException e) {
-	        if (conn != null) {
-	            try {
-	                conn.rollback(); // Annulla tutte le modifiche
-	            } catch (SQLException ex) {
+	    } 
+	    catch(SQLException e) 
+	    {
+	        if(conn != null) 
+	        {
+	            try 
+	            {
+	                conn.rollback();
+	            } 
+	            catch (SQLException ex) 
+	            {
 	                throw new DAOException("Errore durante rollback transazionale Ricetta/Utilizzi", ex);
 	            }
 	        }
 	        throw new DAOException("Errore DB durante update Ricetta/Utilizzi", e);
-	    } catch (DAOException e) { 
-	        // Cattura eccezioni dal metodo utilizzoDAO.save/update/delete(...)
-	        if (conn != null) {
-	            try {
+	    } 
+	    catch(DAOException e) 
+	    {     
+	        if(conn != null) 
+	        {
+	            try 
+	            {
 	                conn.rollback(); 
-	            } catch (SQLException ex) {
+	            } 
+	            catch(SQLException ex) 
+	            {
 	                throw new DAOException("Errore durante rollback transazionale Ricetta/Utilizzi", ex);
 	            }
 	        }
 	        throw e; 
-	    } finally {
-	        if (conn != null) {
-	            try {
+	    } 
+	    finally 
+	    {
+	        if(conn != null) 
+	        {
+	            try 
+	            {
 	                conn.setAutoCommit(true);
 	                conn.close();
-	            } catch (SQLException ex) {
+	            } 
+	            catch(SQLException ex) 
+	            {
 	                throw new DAOException("Errore chiusura connessione Ricetta/Utilizzi", ex);
 	            }
 	        }

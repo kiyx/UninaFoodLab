@@ -8,6 +8,7 @@ import UninaFoodLab.Exceptions.SessioneNotFoundException;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 public class SessionePraticaDAO_Postgres implements SessionePraticaDAO
@@ -134,46 +135,48 @@ public class SessionePraticaDAO_Postgres implements SessionePraticaDAO
         return sessions;
     }
 
-    // ...existing code...
     @Override
     public void update(SessionePratica oldS, SessionePratica newS)
     {
         String sql = "UPDATE SessionePratica SET ";
         List<Object> parametri = new ArrayList<>();
 
-        if (oldS.getDurata() != newS.getDurata()) {
+        if(oldS.getDurata() != newS.getDurata()) 
+        {
             sql += "Durata = ?, ";
             parametri.add(newS.getDurata());
         }
-        if (!oldS.getOrario().equals(newS.getOrario())) {
+        if(!oldS.getOrario().equals(newS.getOrario())) 
+        {
             sql += "Orario = ?, ";
             parametri.add(newS.getOrario());
         }
-        if (!oldS.getData().equals(newS.getData())) {
+        if(!oldS.getData().equals(newS.getData())) 
+        {
             sql += "Data = ?, ";
             parametri.add(newS.getData());
         }
-        if (!oldS.getIndirizzo().equals(newS.getIndirizzo())) {
+        if(!oldS.getIndirizzo().equals(newS.getIndirizzo())) 
+        {
             sql += "Luogo = ?, ";
             parametri.add(newS.getIndirizzo());
         }
 
-        // Confronto robusto: per ID ricetta (ignora ordine/istanze)
         boolean ricetteCambiate = false;
         {
-            java.util.Set<Integer> oldIds = new java.util.HashSet<>();
+            java.util.Set<Integer> oldIds = new HashSet<>();
             for (Ricetta r : oldS.getRicette()) oldIds.add(r.getId());
-            java.util.Set<Integer> newIds = new java.util.HashSet<>();
+            java.util.Set<Integer> newIds = new HashSet<>();
             for (Ricetta r : newS.getRicette()) newIds.add(r.getId());
             ricetteCambiate = !oldIds.equals(newIds);
         }
 
-        // Se non c'è nulla da fare, esci
         if(parametri.isEmpty() && !ricetteCambiate) 
 			return;
 
         Connection conn = null;
-        try {
+        try 
+        {
             conn = ConnectionManager.getConnection();
             conn.setAutoCommit(false);
 
@@ -195,14 +198,18 @@ public class SessionePraticaDAO_Postgres implements SessionePraticaDAO
 
             conn.commit();
         }
-        catch (Exception e) {
-            if (conn != null) {
+        catch (Exception e) 
+        {
+            if(conn != null) 
+            {
                 try { conn.rollback(); } catch (SQLException ex) { throw new DAOException("Errore durante rollback update SessionePratica", ex); }
             }
             throw new DAOException("Errore durante update SessionePratica", e);
         }
-        finally {
-            if (conn != null) {
+        finally 
+        {
+            if(conn != null) 
+            {
                 try { conn.setAutoCommit(true); conn.close(); } catch (SQLException ex) { throw new DAOException("Errore durante chiusura connessione in update sessionepratica", ex); }
             }
         }
@@ -234,7 +241,7 @@ public class SessionePraticaDAO_Postgres implements SessionePraticaDAO
         String sql =
             "DELETE FROM SessionePratica " +
             "WHERE IdSessionePratica = ? " +
-            "  AND Data > CURRENT_DATE"; // non toccare oggi o passato
+            "  AND Data > CURRENT_DATE";
 
         try (Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
         {
