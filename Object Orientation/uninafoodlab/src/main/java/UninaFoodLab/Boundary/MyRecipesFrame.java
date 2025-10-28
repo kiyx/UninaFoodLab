@@ -146,12 +146,8 @@ public class MyRecipesFrame extends JXFrame implements SearchFilterable
      	navPanel.add(rightArrow, "aligny center");
      	mainContentPanel.add(navPanel, "gaptop 10, center");
      	
-        Controller.getController().loadAllRicette(nomiRicette, difficoltaRicette, calorieRicette, idRicette);
-        
-        
+        Controller.getController().loadAllRicette(nomiRicette, difficoltaRicette, calorieRicette, idRicette);     
     }
- 
- 
     
     private void initListeners()
     {
@@ -299,10 +295,11 @@ public class MyRecipesFrame extends JXFrame implements SearchFilterable
     public void deleteCard(int id) {
 
 
-        for (int i = allRecipeCards.size() - 1; i >= 0; i--) {
+        for(int i = allRecipeCards.size() - 1; i >= 0; i--) 
+        {
             RecipeCardPanel card = allRecipeCards.get(i);
-            if (card.getId() == id) {
-                // Rimuovi la card dalla lista principale
+            if(card.getId() == id) 
+            {
                 allRecipeCards.remove(i);
               
                     idRicette.remove(i);               
@@ -315,8 +312,10 @@ public class MyRecipesFrame extends JXFrame implements SearchFilterable
 
 
         filteredRecipeCards.clear(); 
-        for (RecipeCardPanel card : allRecipeCards) {
-            if (card.matchesText(currentSearchText)) {
+        for(RecipeCardPanel card : allRecipeCards) 
+        {
+            if(card.matchesText(currentSearchText)) 
+            {
                 filteredRecipeCards.add(card);
             }
         }
@@ -329,22 +328,21 @@ public class MyRecipesFrame extends JXFrame implements SearchFilterable
         int indexInModel = -1;
         int indexInFiltered = -1;
 
-        // Aggiungo il listener alla nuova card
         cardToAdd.addRecipeClickListener(cardClickListener);
 
-        // trova l'indice nel modello principale (allRecipeCards)
-        for (int i = 0; i < allRecipeCards.size(); i++) {
-            if (allRecipeCards.get(i).getId() == id) {
+        for(int i = 0; i < allRecipeCards.size(); i++) 
+        {
+            if(allRecipeCards.get(i).getId() == id) 
+            {
                 indexInModel = i;
                 break;
             }
         }
         
-        if (indexInModel != -1) {
-            // Sostituzione nell'ArrayList principale
+        if(indexInModel != -1) 
+        {
             allRecipeCards.set(indexInModel, cardToAdd);
-            
-            // Sincronizzazione delle liste parallele
+
             idRicette.remove(indexInModel);               
             calorieRicette.remove(indexInModel);            
             difficoltaRicette.remove(indexInModel);                
@@ -354,14 +352,17 @@ public class MyRecipesFrame extends JXFrame implements SearchFilterable
             calorieRicette.add(indexInModel, cardToAdd.getCalorie());
             difficoltaRicette.add(indexInModel, cardToAdd.getDifficolta());
             nomiRicette.add(indexInModel, cardToAdd.getNome());
-        } else {
+        } 
+        else 
+        {
             System.err.println("Errore: Card con ID " + id + " non trovata nella lista modello.");
             return;
         }
         
-        // Cerchiamo l'indice nella lista filtrata
-        for (int i = 0; i < filteredRecipeCards.size(); i++) {
-            if (((RecipeCardPanel)filteredRecipeCards.get(i)).getId() == id) {
+        for (int i = 0; i < filteredRecipeCards.size(); i++) 
+        {
+            if(((RecipeCardPanel)filteredRecipeCards.get(i)).getId() == id) 
+            {
                  indexInFiltered = i;
                  filteredRecipeCards.set(indexInFiltered, cardToAdd);
                  break;
@@ -432,6 +433,4 @@ public class MyRecipesFrame extends JXFrame implements SearchFilterable
 	{
         JOptionPane.showMessageDialog(this, msg, "Successo", JOptionPane.INFORMATION_MESSAGE);
     }
-	
-
 }

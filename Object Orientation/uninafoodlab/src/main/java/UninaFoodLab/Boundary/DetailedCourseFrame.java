@@ -182,8 +182,6 @@ public class DetailedCourseFrame extends JDialog
             lblNumeroIscritti.setText(String.valueOf(Controller.getController().getNumeroIscritti(idCorso)));
         });
 
-
-        // Hover: da Iscritto → mostra Disiscriviti
         btnIscrivitiCorso.addMouseListener(new MouseAdapter()
 									       {
 									           @Override
@@ -225,7 +223,6 @@ public class DetailedCourseFrame extends JDialog
         boolean corsoIniziato = courseStartDate != null && courseStartDate.isBefore(today);
         boolean isChef = Controller.getController().isChefLogged();
 
-        // Default nascondo tutto
         btnIscrivitiCorso.setVisible(false);
         btnDisiscrivitiCorso.setVisible(false);
         btnEditCourse.setVisible(false);
@@ -241,7 +238,6 @@ public class DetailedCourseFrame extends JDialog
         }
         else
         {
-            // Utente
         	if("Homepage".equals(userContext))
         	{
         	    boolean canIscriviti = !corsoIniziato &&
@@ -278,7 +274,6 @@ public class DetailedCourseFrame extends JDialog
         }
     }
     
-    // ---------- SET DATA ----------
     public void setCourseData(int courseId, String nome, String descrizione, LocalDate dataInizio, int numeroSessioni,
                               String frequenza, Integer limitePartecipanti, BigDecimal costo, String nomeChef, String cognomeChef, String userContext)
     {
@@ -299,7 +294,6 @@ public class DetailedCourseFrame extends JDialog
         updateButtonsVisibility();
     }
 
-    // ---------- SESSIONI ----------
     public void setSessions(List<Sessione> sessioni)
     {
         sessionsPanel.removeAll();
@@ -326,7 +320,6 @@ public class DetailedCourseFrame extends JDialog
         sessionsPanel.repaint();
     }
 
-    // ---------- ACTIONS ----------
     private void onIscrivitiCorso()
     {
         Controller.getController().registerIscrizione(idCorso);

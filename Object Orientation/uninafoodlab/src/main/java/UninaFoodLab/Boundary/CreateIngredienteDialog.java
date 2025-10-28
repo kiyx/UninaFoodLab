@@ -25,7 +25,8 @@ import org.jdesktop.swingx.JXPanel;
 import UninaFoodLab.Controller.Controller;
 import net.miginfocom.swing.MigLayout;
 
-public class CreateIngredienteDialog extends JDialog {
+public class CreateIngredienteDialog extends JDialog 
+{
 
 	private static final long serialVersionUID = 1L;
 	
@@ -136,11 +137,16 @@ public class CreateIngredienteDialog extends JDialog {
 					boolean nomeValid = checkNome();
 					boolean origineValid = checkOrigine();
 
-					if (!nomeValid) {
+					if(!nomeValid)
+					{
 						nomeField.requestFocus();
-					} else if (!origineValid) {
+					} 
+					else if(!origineValid) 
+					{
 						origineList.requestFocus();
-					} else {
+					} 
+					else 
+					{
 			        	conferma.setEnabled(false);
 			        	Controller.getController().createNewIngredient(CreateIngredienteDialog.this, parent, nomeField.getText(), (String)origineList.getSelectedItem());
 			        }
@@ -154,7 +160,7 @@ public class CreateIngredienteDialog extends JDialog {
 	    if(nomeField != null && nomeListener != null)
 			nomeField.getDocument().removeDocumentListener(nomeListener);
 
-        if (conferma != null && ConfermaBtnActionListener != null)
+        if(conferma != null && ConfermaBtnActionListener != null)
         	conferma.removeActionListener(ConfermaBtnActionListener);
 		
     }
@@ -168,7 +174,7 @@ public class CreateIngredienteDialog extends JDialog {
     private boolean checkNome()
     {
     	boolean ret = true;
-    	if( nomeField.getText().trim().isEmpty())
+    	if(nomeField.getText().trim().isEmpty())
     	{
     		nomeField.setBorder(errorBorder);
     		showError( "Nome obbligatorio");
@@ -183,7 +189,7 @@ public class CreateIngredienteDialog extends JDialog {
     private boolean checkOrigine()
     {
     	boolean ret = true;
-    	if( origineList.getSelectedItem()==null)
+    	if(origineList.getSelectedItem()==null)
     	{
     		showError( "Natura dell'ingrediente obbligatoria");
     		ret = false;
@@ -197,6 +203,4 @@ public class CreateIngredienteDialog extends JDialog {
 		JOptionPane.showMessageDialog(this, msg, "Errore", JOptionPane.ERROR_MESSAGE);
 		conferma.setEnabled(true);
 	}
-
-
 }

@@ -194,8 +194,6 @@ public class CreateCourseDialog extends JDialog
                 @Override
                 public void itemStateChanged(ItemEvent e)
                 {
-                    // Questo listener è attivo solo in modalità CREAZIONE,
-                    // perché in EDIT le checkbox sono disabilitate da popolaDatiCorso.
                     if(!editMode)
                     {
                         int argumentId = idsArguments.get(j);
@@ -211,7 +209,6 @@ public class CreateCourseDialog extends JDialog
                                 idsSelectedArguments.remove(index);
                         }
 
-                        // Se raggiungo il limite (5) disabilito quelle non selezionate
                         for(JCheckBox otherCb : argumentsCheck)
                             if(!otherCb.isSelected())
                                otherCb.setEnabled(!(idsSelectedArguments.size() >= 5));
@@ -289,7 +286,6 @@ public class CreateCourseDialog extends JDialog
         formPanel.add(detailPanel, "growx");
         leftPanel.add(formPanel, "grow, pushy");
         
-        // Pulsanti
         buttons = new JXPanel();
         buttons.setLayout(new MigLayout("fillx, insets 0", "[grow][grow]", "[]"));
         buttons.setBackground(BACKGROUND_COLOR);
@@ -453,7 +449,6 @@ public class CreateCourseDialog extends JDialog
                          return;
                     }
 
-                    // Raccolta dati dalle sessioni presenti nella GUI
                     List<Integer> durateOnline = new ArrayList<>();
                     List<Time> orariOnline = new ArrayList<>();
                     List<LocalDate> dateOnline = new ArrayList<>();
@@ -493,10 +488,8 @@ public class CreateCourseDialog extends JDialog
                         }
                     } 
 
-                    // Procedi solo se le sessioni future sono valide
                     if(checkSessionValidity)
                     {
-                        // Controlla il vincolo della sessione pratica (se corso pratico)
                         if(!praticoCheck.isSelected() || (praticoCheck.isSelected() && !duratePratiche.isEmpty()))
                         {
                             if(editMode)
@@ -519,7 +512,7 @@ public class CreateCourseDialog extends JDialog
                                     orariPratiche, datePratiche, indirizziPratiche, ricettePratiche
                                 );
                             }
-                            else // Modalità Creazione
+                            else 
                             {
                                 Controller.getController().createCourse(
                                     parentFrame, CreateCourseDialog.this, nameField.getText().trim(), dataInizioField.getDate(),
@@ -613,7 +606,6 @@ public class CreateCourseDialog extends JDialog
             argomentiCheckBoxListener = null;
         }
 
-        // Rimuovi i listener dei pannelli sessione
         for(CreateSessionPanel card : sessionCards)
         {
         	card.setDateChangeListener(null);
@@ -651,7 +643,6 @@ public class CreateCourseDialog extends JDialog
 
         if(canChangeStartDate)
         {
-            // Edit con modifica data: carico la data DB e consento la modifica
             dataInizioField.setEnabled(true);
             DateVetoPolicy vetoPolicy = new DateVetoPolicyMinimumMaximumDate(LocalDate.now(), null);
             dataInizioField.getSettings().setVetoPolicy(vetoPolicy);
@@ -665,7 +656,6 @@ public class CreateCourseDialog extends JDialog
         }
         else
         {
-            // Edit read-only: mostra la data DB senza VetoPolicy (nessuna invalidazione)
             dataInizioField.setEnabled(false);
             dataInizioField.getSettings().setVetoPolicy(null);
             dataInizioField.setDate(dataInizio);
@@ -750,46 +740,45 @@ public class CreateCourseDialog extends JDialog
      * @param frequenza Stringa che rappresenta la frequenza.
      */
     private void rescheduleFissa(LocalDate dataInizioCorso, String frequenza)
-{
-    int giorniFrequenza = switch (frequenza) {
-        case "Giornaliera" -> 1;
-        case "Settimanale" -> 7;
-        case "Bisettimanale" -> 14;
-        case "Mensile" -> 30;
-        default -> 0;
-    };
-    if (giorniFrequenza <= 0) return;
-
-    for (int i = 0; i < sessionCards.size(); i++)
     {
-        CreateSessionPanel panel = sessionCards.get(i);
-
-        if (panel.isPassed())
-        {
-            // Lock sulla data storica, nessun listener
-            LocalDate fixed = panel.getDatePicker().getDate();
-            panel.getDatePicker().getSettings().setVetoPolicy(d -> d != null && d.equals(fixed));
-            panel.getDatePicker().setEnabled(false);
-            if (panel.getDateChangeListener() != null)
-            {
-                panel.getDatePicker().removeDateChangeListener(panel.getDateChangeListener());
-                panel.setDateChangeListener(null);
-            }
-        }
-        else
-        {
-            // Usa l'indice globale per mantenere la sequenza 25..30
-            LocalDate dataPrevista = dataInizioCorso.plusDays((long) giorniFrequenza * i);
-            panel.setDataPrevista(dataPrevista, null, true);
-
-            if (panel.getDateChangeListener() != null)
-            {
-                panel.getDatePicker().removeDateChangeListener(panel.getDateChangeListener());
-                panel.setDateChangeListener(null);
-            }
-        }
+	    int giorniFrequenza = switch (frequenza) 
+					    	  {
+						        case "Giornaliera" -> 1;
+						        case "Settimanale" -> 7;
+						        case "Bisettimanale" -> 14;
+						        case "Mensile" -> 30;
+						        default -> 0;
+					    	  };
+	    if(giorniFrequenza <= 0) return;
+	
+	    for(int i = 0; i < sessionCards.size(); i++)
+	    {
+	        CreateSessionPanel panel = sessionCards.get(i);
+	
+	        if(panel.isPassed())
+	        {
+	            LocalDate fixed = panel.getDatePicker().getDate();
+	            panel.getDatePicker().getSettings().setVetoPolicy(d -> d != null && d.equals(fixed));
+	            panel.getDatePicker().setEnabled(false);
+	            if (panel.getDateChangeListener() != null)
+	            {
+	                panel.getDatePicker().removeDateChangeListener(panel.getDateChangeListener());
+	                panel.setDateChangeListener(null);
+	            }
+	        }
+	        else
+	        {
+	            LocalDate dataPrevista = dataInizioCorso.plusDays((long) giorniFrequenza * i);
+	            panel.setDataPrevista(dataPrevista, null, true);
+	
+	            if(panel.getDateChangeListener() != null)
+	            {
+	                panel.getDatePicker().removeDateChangeListener(panel.getDateChangeListener());
+	                panel.setDateChangeListener(null);
+	            }
+	        }
+	    }
     }
-}
     
     /**
      * Abilita la selezione manuale delle date delle sessioni (frequenza libera)
@@ -943,7 +932,6 @@ public class CreateCourseDialog extends JDialog
         addSessionDialog.setResizable(false);
         addSessionDialog.setLayout(new MigLayout("wrap 2", "[right][grow,fill]"));
 
-        // Rimuovi vecchi listener se ci sono
         removeDialogListeners();
 
         windowListener = new WindowAdapter() 
@@ -973,13 +961,11 @@ public class CreateCourseDialog extends JDialog
             addSessionDialog.add(praticheSpinner);
         }
 
-        // Pulsanti
         addBtn = new JXButton("Aggiungi");
         cancelBtn = new JXButton("Annulla");
         addSessionDialog.add(addBtn, "span 1, split 2, right");
         addSessionDialog.add(cancelBtn);
 
-        // LISTENER: Aggiungi sessioni
         addSessionsListener = new ActionListener()
         {
             @Override
@@ -1000,7 +986,6 @@ public class CreateCourseDialog extends JDialog
         };
         addBtn.addActionListener(addSessionsListener);
 
-        // LISTENER: Annulla
         cancelAddSessionsListener = new ActionListener()
         {
             @Override
@@ -1039,7 +1024,6 @@ public class CreateCourseDialog extends JDialog
     {
         boolean hasPratiche = false;
 
-        // Controlla se esistono sessioni pratiche
         for(CreateSessionPanel card : sessionCards)
         {
             if("Pratica".equals(card.getTipo()))

@@ -21,17 +21,14 @@ public class LoginFrame extends JXFrame
 {
 	private static final long serialVersionUID = 1L;
 	
-	// Costanti di controllo
 	private static final int USERNAME_MIN_LENGTH = 4;
 	private static final int USERNAME_MAX_LENGTH = 20;
 	private static final int PASSWORD_MIN_LENGTH = 8;
 	private static final int PASSWORD_MAX_LENGTH = 30;
-	
-	// Icone 
+
 	private FontIcon eyeIcon = FontIcon.of(MaterialDesign.MDI_EYE, 18);
 	private FontIcon eyeOffIcon = FontIcon.of(MaterialDesign.MDI_EYE_OFF, 18);
 	
-	// Componenti Swing e Bordi
 	private JXPanel panel;
 	private CompoundBorder defaultBorder = BorderFactory.createCompoundBorder(
 				new LineBorder(Color.LIGHT_GRAY, 1), 

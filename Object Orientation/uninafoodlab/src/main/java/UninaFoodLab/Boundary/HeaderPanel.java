@@ -100,8 +100,7 @@ public class HeaderPanel extends JXPanel
         updateVisibility();
         
         parentFrame.getRootPane().setDefaultButton(searchBtn);
-        
-        // Setto il focus iniziale sul bottone search (prima era sul menu hamburger)
+
         EventQueue.invokeLater(() -> searchField.requestFocusInWindow());
 	}
 

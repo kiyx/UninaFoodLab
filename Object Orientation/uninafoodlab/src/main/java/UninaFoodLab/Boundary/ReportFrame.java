@@ -82,8 +82,6 @@ public class ReportFrame extends JXFrame
 
     public void setReportData(int totCorsi, int totOnline, int totPratiche, int minRicette, int maxRicette, double avgRicette) 
     {
-        // --- CORSI ---
-    	
         if(totCorsi <= 0) 
         {
             panelCorsi.setChart(null);
@@ -104,7 +102,6 @@ public class ReportFrame extends JXFrame
             lblInfoCorsi.setText(String.format("Corsi: %d   |   Online: %d   |   In presenza: %d", totCorsi, totOnline, totPratiche));
         }
 
-        // --- RICETTE ---
         if(totPratiche <= 0) 
         {
             panelRicette.setChart(null);
@@ -124,7 +121,6 @@ public class ReportFrame extends JXFrame
         lblInfoRicette.setIcon(FontIcon.of(MaterialDesign.MDI_SILVERWARE_FORK, 24, COLOR_RICETTE));
         lblInfoRicette.setText(String.format("Minimo: %d   |   Massimo: %d   |   Media: %.2f", minRicette, maxRicette, avgRicette));
     }
-
 
     private JXLabel createTextLabel() 
     {

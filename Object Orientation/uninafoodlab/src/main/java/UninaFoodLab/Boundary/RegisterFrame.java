@@ -350,25 +350,20 @@ public class RegisterFrame extends JXFrame
 			{
 
 		        fileChooser = new JFileChooser();
-
-		        // Opzionale: Filtro per specificare i tipi di file da visualizzare
 		        FileNameExtensionFilter filter = new FileNameExtensionFilter("Pdf file(.pdf)", "pdf");
 		        fileChooser.setFileFilter(filter);
 
-
 		        int returnValue = fileChooser.showOpenDialog(RegisterFrame.this);
 
-		        if (returnValue == JFileChooser.APPROVE_OPTION) {
-		        	selectedFile = fileChooser.getSelectedFile();		        	
-
-		            
-		            fileLabel.setText(selectedFile.getName());
-		            
-		            
-		        } else {
+		        if(returnValue == JFileChooser.APPROVE_OPTION) 
+		        {	        	
+		        	selectedFile = fileChooser.getSelectedFile();		        	            
+		            fileLabel.setText(selectedFile.getName());           
+		        } 
+		        else 
+		        {
 		            System.out.println("Selezione annullata.");
 		        }
-
 			}				
 		  };
 		scegliBtn.addActionListener(scegliBtnActionListener);
@@ -508,8 +503,7 @@ public class RegisterFrame extends JXFrame
 			{ 
 				if(!luogoField.getText().isEmpty())
 				    luogoField.selectAll();
-			}
-			
+			}	
 		   };
 		  
 		luogoField.addFocusListener(luogoFieldFocusListener);
@@ -953,4 +947,3 @@ public class RegisterFrame extends JXFrame
         super.dispose();
     }
 }
-

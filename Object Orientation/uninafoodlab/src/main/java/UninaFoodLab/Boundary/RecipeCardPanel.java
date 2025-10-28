@@ -19,7 +19,8 @@ import org.kordamp.ikonli.swing.FontIcon;
 
 import net.miginfocom.swing.MigLayout;
 
-public class RecipeCardPanel extends JXPanel {
+public class RecipeCardPanel extends JXPanel 
+{
 	private static final long serialVersionUID = 1L;
 
     private final int id;

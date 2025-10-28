@@ -185,36 +185,43 @@ public class ChangePasswordDialog extends JDialog {
 		  };
 		showNewPassBtn.addActionListener(showNewPassBtnActionListener);
 
-		oldPassFieldDocumentListener = new DocumentListener() {
+		oldPassFieldDocumentListener = new DocumentListener() 
+		{
             @Override
-            public void insertUpdate(DocumentEvent e) {
+            public void insertUpdate(DocumentEvent e) 
+            {
                 checkOldPass();
             }
 
             @Override
-            public void removeUpdate(DocumentEvent e) {
+            public void removeUpdate(DocumentEvent e) 
+            {
                 checkOldPass();
             }
 
             @Override
-            public void changedUpdate(DocumentEvent e) {
+            public void changedUpdate(DocumentEvent e) 
+            {
             }
         };
         oldPasswordField.getDocument().addDocumentListener(oldPassFieldDocumentListener);
 
         newPassFieldDocumentListener = new DocumentListener() {
             @Override
-            public void insertUpdate(DocumentEvent e) {
+            public void insertUpdate(DocumentEvent e) 
+            {
                 checkNewPass();
             }
 
             @Override
-            public void removeUpdate(DocumentEvent e) {
+            public void removeUpdate(DocumentEvent e) 
+            {
                 checkNewPass();
             }
 
             @Override
-            public void changedUpdate(DocumentEvent e) {
+            public void changedUpdate(DocumentEvent e) 
+            {
             }
         };
         newPasswordField.getDocument().addDocumentListener(newPassFieldDocumentListener);
@@ -227,11 +234,16 @@ public class ChangePasswordDialog extends JDialog {
 				boolean oldPassValid = checkOldPass();
 				boolean newPassValid = checkNewPass();
 
-				if (!oldPassValid) {
+				if(!oldPassValid) 
+				{
 					oldPasswordField.requestFocus();
-				} else if (!newPassValid) {
+				} 
+				else if(!newPassValid) 
+				{
 					newPasswordField.requestFocus();
-				} else {
+				} 
+				else 
+				{
 		        	conferma.setEnabled(false);
 		        	Controller.getController().checkNewPassword(ChangePasswordDialog.this, parent, oldPasswordField.getPassword(), newPasswordField.getPassword());
 		        }
@@ -240,19 +252,25 @@ public class ChangePasswordDialog extends JDialog {
 		conferma.addActionListener(ConfermaBtnActionListener);
 	}
 
-	private boolean checkOldPass() {
+	private boolean checkOldPass() 
+	{
 	    boolean check = true;
 	    String text = new String(oldPasswordField.getPassword()).trim();
 
-	    if (text.isEmpty()) {
+	    if(text.isEmpty()) 
+	    {
 	    	oldPasswordField.setBorder(errorBorder);
 	    	oldPasswordErrorLabel.setText("La vecchia password non può essere vuota.");
 	        check = false;
-	    } else if (text.length() < 8 || text.length() > 30) {
+	    } 
+	    else if (text.length() < 8 || text.length() > 30)
+	    {
 	    	oldPasswordField.setBorder(errorBorder);
 	    	oldPasswordErrorLabel.setText("La vecchia password deve essere tra 8 e 30 caratteri.");
 	        check = false;
-	    } else {
+	    }
+	    else 
+	    {
 	    	oldPasswordField.setBorder(defaultBorder);
 	    	oldPasswordErrorLabel.setText(" ");
 	    }
@@ -265,11 +283,13 @@ public class ChangePasswordDialog extends JDialog {
 		boolean check = true;
 		String text = new String(newPasswordField.getPassword()).trim();
 
-	    if (text.isEmpty()) {
+	    if(text.isEmpty()) 
+	    {
 	    	newPasswordField.setBorder(errorBorder);
 	    	newPasswordErrorLabel.setText("La nuova password non può essere vuota.");
 	        check = false;
-	    } else if (text.length() < 8 || text.length() > 30)
+	    } 
+	    else if(text.length() < 8 || text.length() > 30)
 	    {
 	    	newPasswordField.setBorder(errorBorder);
 	    	newPasswordErrorLabel.setText("La password deve essere tra 8 e 30 caratteri.");
@@ -290,7 +310,8 @@ public class ChangePasswordDialog extends JDialog {
 		conferma.setEnabled(true);
 	}
 
-	public void showSuccess(String msg) {
+	public void showSuccess(String msg) 
+	{
         JOptionPane.showMessageDialog(this, msg, "Successo", JOptionPane.INFORMATION_MESSAGE);
         conferma.setEnabled(true);
         dispose(); 
@@ -299,13 +320,13 @@ public class ChangePasswordDialog extends JDialog {
 	   private void disposeListeners() 
 	    {
 		   
-			 if (showOldPassBtn != null && showOldPassBtnActionListener != null)
+			if(showOldPassBtn != null && showOldPassBtnActionListener != null)
 				 showOldPassBtn.removeActionListener(showOldPassBtnActionListener);
 			  
-	        if (conferma != null && ConfermaBtnActionListener != null)
+	        if(conferma != null && ConfermaBtnActionListener != null)
 	        	conferma.removeActionListener(ConfermaBtnActionListener);
 			
-	        if (showNewPassBtn != null && showNewPassBtnActionListener != null)
+	        if(showNewPassBtn != null && showNewPassBtnActionListener != null)
 	        	showNewPassBtn.removeActionListener(showNewPassBtnActionListener);
 
 	        if(oldPasswordField != null && oldPassFieldDocumentListener != null)

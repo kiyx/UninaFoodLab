@@ -309,10 +309,13 @@ public class CreateUtilizzoPanel extends JXPanel {
         return formatter;
     }
     
-    public String getSelectedRadioText(ButtonGroup group) {
-        for (java.util.Enumeration<AbstractButton> buttons = group.getElements(); buttons.hasMoreElements();) {
+    public String getSelectedRadioText(ButtonGroup group) 
+    {
+        for(java.util.Enumeration<AbstractButton> buttons = group.getElements(); buttons.hasMoreElements();) 
+        {
             AbstractButton button = buttons.nextElement();
-            if (button.isSelected()) {
+            if(button.isSelected()) 
+            {
                 return button.getText();
             }
         }
@@ -402,6 +405,5 @@ public class CreateUtilizzoPanel extends JXPanel {
  	           }
  	           
  	        });
-        }
-        
+        }     
 }

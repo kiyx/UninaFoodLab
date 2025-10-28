@@ -23,7 +23,8 @@ import org.jdesktop.swingx.JXFrame;
 import UninaFoodLab.Controller.Controller;
 import net.miginfocom.swing.MigLayout;
 
-public class DetailedRecipeDialog extends JDialog {
+public class DetailedRecipeDialog extends JDialog 
+{
 
     private static final long serialVersionUID = 1L;
 
@@ -34,7 +35,7 @@ public class DetailedRecipeDialog extends JDialog {
     private JTextArea allergeniTextArea;
     private JButton modificaButton, eliminaButton;
     private JXFrame parent;
-    private ActionListener modificaListener, eliminaListener; // Aggiunto eliminaListener
+    private ActionListener modificaListener, eliminaListener;
 
     private String nomeRicetta;
     private String provenienzaRicetta;
@@ -47,7 +48,8 @@ public class DetailedRecipeDialog extends JDialog {
     private ArrayList<Double> quantitaIngredienti;
     private ArrayList<String> udmIngredienti;
 
-    public DetailedRecipeDialog(JXFrame parent, int idRicetta,  String nomeRicetta, String provenienzaRicetta, int calorieRicetta, String difficoltaRicetta, String allergeniRicetta, int tempoRicetta, ArrayList<String> nomiIngredienti, ArrayList<Double> quantitaIngredienti, ArrayList<String> udmIngredienti) {
+    public DetailedRecipeDialog(JXFrame parent, int idRicetta,  String nomeRicetta, String provenienzaRicetta, int calorieRicetta, String difficoltaRicetta, String allergeniRicetta, int tempoRicetta, ArrayList<String> nomiIngredienti, ArrayList<Double> quantitaIngredienti, ArrayList<String> udmIngredienti) 
+    {
         super(parent, "Dettagli Ricetta", true);
         this.parent = parent;
         this.nomeRicetta = nomeRicetta;
@@ -71,21 +73,22 @@ public class DetailedRecipeDialog extends JDialog {
         pack();
     }
 
-    private void initComponents() {
-        // Vincoli di riga aggiornati: l'ultima riga ora contiene un pannello orizzontale per i bottoni.
+    private void initComponents() 
+    {
+      
         panel = new JPanel(new MigLayout(
             "wrap, fill",
             "[grow, fill]",
-            "[]18" +          // nomeLabel
-            "[]10" +           // provenienzaLabel
-            "[]10" +           // calorieLabel
-            "[]10" +           // difficoltaLabel
-            "[]10" +           // tempoPreparazioneLabel
-            "[]10" +           // Etichetta "Allergeni:"
-            "[grow 1, push, 60:pref:100]10" + // JScrollPane allergeni
-            "[]10" +           // ingredientiLabel
-            "[grow 2, push, 80:pref:200]35" + // JScrollPane ingredienti (Min 80 per gli ingredienti)
-            "[]"));            // NUOVO: riga per il pannello dei bottoni (pref!)
+            "[]18" +          
+            "[]10" +     
+            "[]10" +  
+            "[]10" +     
+            "[]10" +          
+            "[]10" +           
+            "[grow 1, push, 60:pref:100]10" + 
+            "[]10" +       
+            "[grow 2, push, 80:pref:200]35" + 
+            "[]"));           
 
         panel.setBackground(new Color(245, 245, 245));
         panel.setBorder(new EmptyBorder(30, 40, 30, 40));
@@ -95,7 +98,7 @@ public class DetailedRecipeDialog extends JDialog {
         Font sectionHeaderFont = new Font("Segoe UI", Font.BOLD, 17);
         Font labelFont = new Font("Segoe UI", Font.PLAIN, 16);
         Color primaryTextColor = new Color(30, 30, 30);
-        Color accentColor = new Color(225, 126, 47); // Arancione per Modifica
+        Color accentColor = new Color(225, 126, 47);
 
         nomeLabel = new JLabel(nomeRicetta);
         nomeLabel.setFont(headerFont);
@@ -176,7 +179,7 @@ public class DetailedRecipeDialog extends JDialog {
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         scrollPane.getHorizontalScrollBar().setUnitIncrement(16);
 
-        panel.add(scrollPane, "grow, pushy, height 80:pref:200"); // Min 80, Pref, Max 200
+        panel.add(scrollPane, "grow, pushy, height 80:pref:200"); 
 
         
         JPanel buttonPanel = new JPanel(new MigLayout("insets 0, align center", "[grow, fill][15][grow, fill]", "[]"));
@@ -217,29 +220,37 @@ public class DetailedRecipeDialog extends JDialog {
         	//buttonPanel.setVisible(false);
     }
 
-    private void initListeners() {
-        modificaListener = new ActionListener() {
+    private void initListeners() 
+    {
+        modificaListener = new ActionListener() 
+        {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(ActionEvent e) 
+            {
                 Controller.getController().showChangeRecipeDialog(DetailedRecipeDialog.this, parent,idRicetta,  nomeRicetta, provenienzaRicetta, calorieRicetta, difficoltaRicetta, allergeniRicetta, tempoRicetta, nomiIngredienti, quantitaIngredienti, udmIngredienti);
             }
         };
         modificaButton.addActionListener(modificaListener);
 
-        eliminaListener = new ActionListener() {
+        eliminaListener = new ActionListener() 
+        {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(ActionEvent e) 
+            {
                 Controller.getController().deleteRicetta(parent,DetailedRecipeDialog.this, idRicetta);
             }
         };
         eliminaButton.addActionListener(eliminaListener);
     }
 
-    private void disposeListeners() {
-        if (modificaButton != null && modificaListener != null) {
+    private void disposeListeners() 
+    {
+        if(modificaButton != null && modificaListener != null) 
+        {
             modificaButton.removeActionListener(modificaListener);
         }
-        if (eliminaButton != null && eliminaListener != null) { // Rimuovi anche il listener di elimina
+        if(eliminaButton != null && eliminaListener != null) 
+        { 
             eliminaButton.removeActionListener(eliminaListener);
         }
     }

@@ -37,7 +37,8 @@ import org.jdesktop.swingx.JXTextField;
 import UninaFoodLab.Controller.Controller;
 import net.miginfocom.swing.MigLayout;
 
-public class ChangeRecipeDialog extends JDialog {
+public class ChangeRecipeDialog extends JDialog 
+{
 	private static final long serialVersionUID = 1L;
 
     private JPanel  scrollContentWrapper;
@@ -92,7 +93,7 @@ public class ChangeRecipeDialog extends JDialog {
     private ArrayList<String> newUdmIngredienti = new ArrayList<>();
     
     private ArrayList<Integer> oldIdIngredienti = new ArrayList<>();
-private ArrayList<Double> oldQuantitaIngredienti = new ArrayList<>();
+    private ArrayList<Double> oldQuantitaIngredienti = new ArrayList<>();
     private ArrayList<String> oldUdmIngredienti = new ArrayList<>();
     //private ArrayList<Integer> idIngredientiRicetta = new ArrayList<>();
     //private ArrayList<Double> quantitaIngredienti = new ArrayList<>();
@@ -217,12 +218,8 @@ private ArrayList<Double> oldQuantitaIngredienti = new ArrayList<>();
 	        calorieSpinner.setValue(calorieRicetta);
 	        infoPanel.add(calorieSpinner, "h 36!, growx, split 2");
 	        kcalLabel = new JXLabel(" kcal");
-	        infoPanel.add(kcalLabel);
-	        
-	        
-
+	        infoPanel.add(kcalLabel);	        	       
 	        leftPanel.add(infoPanel);
-
 
 	        buttons = new JXPanel(new MigLayout("center", "[]20[]"));
 	        buttons.setBackground(BACKGROUND_COLOR);

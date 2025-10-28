@@ -138,11 +138,9 @@ public class FilterPanel extends JXPanel
 					          @Override
 					          public void actionPerformed(ActionEvent e)
 					          {
-					              // Deseleziona tutte le checkbox
 					              for(JCheckBox cb : checkboxes)
 					                  cb.setSelected(false);
 					
-					              // Applica filtro vuoto (nessun argomento selezionato)
 					              filterable.filterByArgumentsIds(new ArrayList<>());
 					          }
 					      };

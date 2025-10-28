@@ -49,7 +49,6 @@ public class CreateSessionPanel extends JXPanel
 	private boolean pratica;
 	private CreateCourseDialog parent;
 
-	// Componenti principali UI
 	private JXPanel durataPanel;
 	private JXLabel numeroLabel, clearButton;
 	private DatePicker datePicker;
@@ -59,7 +58,6 @@ public class CreateSessionPanel extends JXPanel
 	private JXTextField addressField, linkField;
 	private boolean focusSet = false;
 
-	// Listeners sui campi e di validazione
 	private ActionListener removeBtnActionListener;
 	private DocumentListener addressListener, linkListener, ricercaRicetteFieldListener;
 	private ChangeListener durataChangeListener;
@@ -69,7 +67,6 @@ public class CreateSessionPanel extends JXPanel
 						  oreFocusListener, minutiFocusListener;
 	private MouseAdapter clearButtonListener;
 
-	// Componenti per show + gestione dinamica filtrata delle ricette
 	private JPanel ricettePanel;
 	private JScrollPane scrollRicette;
 	private JXTextField ricercaRicetteField;
@@ -213,7 +210,6 @@ public class CreateSessionPanel extends JXPanel
      */
 	private void initComponents()
 	{
-		// Inizializza il layout e lo stile del pannello
 		setLayout(new MigLayout("wrap 2, insets 15, gap 10 15", "[right][grow,fill]"));
 		setBackground(Color.WHITE);
 		setBorder(BorderFactory.createCompoundBorder(
@@ -225,7 +221,6 @@ public class CreateSessionPanel extends JXPanel
 			));
 			setOpaque(true);
 
-		// Label con numero sessione
 		numeroLabel = createLabel("Sessione #" + numero);
 		numeroLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
 		add(numeroLabel, "span 2, center");
@@ -246,19 +241,16 @@ public class CreateSessionPanel extends JXPanel
 		timePicker.setFont(fieldFont);
 		add(timePicker, "h 30!");
 
-		// Spinner per ore e minuti della durata con formattazione centrata
 		oreSpinner = new JSpinner(new SpinnerNumberModel(1, 0, 23, 1));
 		oreSpinner.setFont(fieldFont);
 		((JSpinner.DefaultEditor) oreSpinner.getEditor()).getTextField().setHorizontalAlignment(SwingConstants.CENTER);
 		oreSpinner.setToolTipText("Ore di durata");
 
-		// Spinner per minuti 
 		minutiSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 59, 5));
 		((JSpinner.DefaultEditor) minutiSpinner.getEditor()).getTextField().setHorizontalAlignment(SwingConstants.CENTER);
 		minutiSpinner.setFont(fieldFont);
 		minutiSpinner.setToolTipText("Minuti di durata");
 
-		// Costruzione del pannello durata con etichette "h" e "m"
 		durataPanel = new JXPanel(new MigLayout("insets 0", "[]5[]5[]", "[]"));
 		durataPanel.setBackground(Color.WHITE);
 		durataPanel.add(oreSpinner, "w 50!");
@@ -277,7 +269,6 @@ public class CreateSessionPanel extends JXPanel
 		    addressField.putClientProperty("JTextField.placeholderText", "Inserisci indirizzo...");
 		    add(addressField, "h 30!");
 
-		    // Campo ricerca sopra la lista ricette
 		    ricercaRicetteField = new JXTextField();
 		    ricercaRicetteField.setFont(fieldFont);
 		    ricercaRicetteField.putClientProperty("JTextField.placeholderText", "Cerca ricetta...");
@@ -296,7 +287,6 @@ public class CreateSessionPanel extends JXPanel
 		    ricettePanel.setOpaque(false);
 		    ricettePanel.setBackground(Color.WHITE);
 
-		    // Inizializzazione e popolamento lista stringhe  ricette (solo se pratica)
 		    Controller.getController().loadRicette(idsRecipes, namesRecipes);
 
 		    for(int i = 0; i < idsRecipes.size(); i++) 
@@ -737,18 +727,15 @@ public class CreateSessionPanel extends JXPanel
 	    }
 	}
 	
-	// ...existing code...
     public void popolaDatiSessione(LocalDate dataSessione, LocalTime orario, int durataMinuti, String link, String indirizzo, List<Integer> idRicetteSelezionate)
     {
         LocalDate today = LocalDate.now();
         boolean isPassedOrToday = dataSessione != null && !dataSessione.isAfter(today);
 
-        // Accetta sempre la data caricata dal DB (anche se la VetoPolicy corrente la vieterebbe)
         DatePickerSettings s = datePicker.getSettings();
         DateVetoPolicy oldVeto = s.getVetoPolicy();
         s.setVetoPolicy(null);
         datePicker.setDate(dataSessione);
-        // Ripristineremo la policy più sotto in base a isPassedOrToday
 
         timePicker.setTime(orario);
         oreSpinner.setValue(durataMinuti / 60);
@@ -756,7 +743,6 @@ public class CreateSessionPanel extends JXPanel
 
         if(isPassedOrToday)
         {
-            // Sessione passata: blocca tutto e consenti solo la data storica
             datePicker.setEnabled(false);
             timePicker.setEnabled(false);
             oreSpinner.setEnabled(false);
@@ -809,16 +795,13 @@ public class CreateSessionPanel extends JXPanel
         }
         else
         {
-            // Sessione futura: riabilita input e ripristina la VetoPolicy preesistente
             datePicker.setEnabled(true);
             timePicker.setEnabled(true);
             oreSpinner.setEnabled(true);
             minutiSpinner.setEnabled(true);
             removeBtn.setVisible(true);
 
-            // Se la policy originale non ammette la data impostata, lascia senza veto:
-            // il dialog applicherà la sua policy corretta in reschedule.
-            if (oldVeto == null || dataSessione == null || oldVeto.isDateAllowed(dataSessione))
+            if(oldVeto == null || dataSessione == null || oldVeto.isDateAllowed(dataSessione))
                 s.setVetoPolicy(oldVeto);
             else
                 s.setVetoPolicy(null);
@@ -850,7 +833,6 @@ public class CreateSessionPanel extends JXPanel
             }
         }
     }
-// ...existing code...
 
 	/**
 	 * Controlla se la data della sessione è uguale o precedente ad oggi.
@@ -899,7 +881,6 @@ public class CreateSessionPanel extends JXPanel
 	            }
 	        }
 	        
-	        // Se la data è cambiata, forza un reschedule per aggiornare le veto policy delle altre schede
 	       if(changed && parent != null && dateChangeListener != null) 
 	            SwingUtilities.invokeLater(() -> parent.rescheduleSessions());
 	    }
@@ -1122,7 +1103,6 @@ public class CreateSessionPanel extends JXPanel
 
 	    if(errore && !focusSet)
 	    {
-	        // Cerca la prima checkbox visibile e non selezionata
 	        for(JCheckBox cb : ricettaChecks)
 	        {
 	            if(cb.isVisible() && !cb.isSelected())
@@ -1134,7 +1114,6 @@ public class CreateSessionPanel extends JXPanel
 	            }
 	        }
 	        
-	        // Fallback: campo ricerca
 	        if(!focusSet && ricercaRicetteField != null)
 	        {
 	            ricercaRicetteField.requestFocusInWindow();

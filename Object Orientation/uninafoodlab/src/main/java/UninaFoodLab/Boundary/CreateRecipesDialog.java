@@ -133,7 +133,6 @@ public class CreateRecipesDialog extends JDialog
 	        title.setFont(new Font("Segoe UI", Font.BOLD, 20));
 	        leftPanel.add(title, "align center");
 
-	        // Info panel
 	        infoPanel = new JXPanel(new MigLayout("wrap 2", "[grow,fill][grow,fill]","[][][][][][][]"));
 	        infoPanel.setBackground(Color.WHITE);
 	        infoPanel.setBorder(mainBorder);

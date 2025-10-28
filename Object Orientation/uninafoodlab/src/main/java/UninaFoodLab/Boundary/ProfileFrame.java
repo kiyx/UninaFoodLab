@@ -293,7 +293,7 @@ public class ProfileFrame extends JXFrame
     	scegliCurriculumBtn = new JXButton("Cambia curriculum");
     	scegliCurriculumBtn.setFont(new Font("SansSerif", Font.BOLD, 15));
     	scegliCurriculumBtn.setPreferredSize(new Dimension(150, 35));
-    	scegliCurriculumBtn.setBackground(new Color(0xFF9800)); // Orange for action buttons
+    	scegliCurriculumBtn.setBackground(new Color(0xFF9800));
     	scegliCurriculumBtn.setForeground(Color.WHITE);
     	scegliCurriculumBtn.setOpaque(true);
     	scegliCurriculumBtn.setFocusPainted(false);
@@ -363,27 +363,23 @@ public class ProfileFrame extends JXFrame
     {
         nomeField.setEditable(editable);
         nomeField.setFocusable(editable);
-        //NomeField.setBorder(editable ? new LineBorder(new Color(0xFF9800)) : BorderFactory.createCompoundBorder(new LineBorder(new Color(0xFFDAB9)), BorderFactory.createEmptyBorder(5, 10, 5, 10)));
+        
         nomeField.setBackground(editable ? Color.WHITE : new Color(0xFFFBF5));
 
         cognomeField.setEditable(editable);
         cognomeField.setFocusable(editable);
-        //CognomeField.setBorder(editable ? new LineBorder(new Color(0xFF9800)) : BorderFactory.createCompoundBorder(new LineBorder(new Color(0xFFDAB9)), BorderFactory.createEmptyBorder(5, 10, 5, 10)));
         cognomeField.setBackground(editable ? Color.WHITE : new Color(0xFFFBF5));
         
         luogoField.setEditable(editable);
         luogoField.setFocusable(editable);
-        //CognomeField.setBorder(editable ? new LineBorder(new Color(0xFF9800)) : BorderFactory.createCompoundBorder(new LineBorder(new Color(0xFFDAB9)), BorderFactory.createEmptyBorder(5, 10, 5, 10)));
         luogoField.setBackground(editable ? Color.WHITE : new Color(0xFFFBF5));
         
         emailField.setEditable(editable);
         emailField.setFocusable(editable);
-        //EmailField.setBorder(editable ? new LineBorder(new Color(0xFF9800)) : BorderFactory.createCompoundBorder(new LineBorder(new Color(0xFFDAB9)), BorderFactory.createEmptyBorder(5, 10, 5, 10)));
         emailField.setBackground(editable ? Color.WHITE : new Color(0xFFFBF5));
         
         usernameField.setEditable(editable);
         usernameField.setFocusable(editable);
-        //UsernameField.setBorder(editable ? new LineBorder(new Color(0xFF9800)) : BorderFactory.createCompoundBorder(new LineBorder(new Color(0xFFDAB9)), BorderFactory.createEmptyBorder(5, 10, 5, 10)));
         usernameField.setBackground(editable ? Color.WHITE : new Color(0xFFFBF5));
         
         modifyBtn.setVisible(!editable);
@@ -529,7 +525,6 @@ public class ProfileFrame extends JXFrame
 									   {
 									       fileChooser = new JFileChooser();
 						
-									       // Opzionale: Filtro per specificare i tipi di file da visualizzare
 									       FileNameExtensionFilter filter = new FileNameExtensionFilter("Pdf file(.pdf)", "pdf");
 									       fileChooser.setFileFilter(filter);
 						
@@ -891,6 +886,4 @@ public class ProfileFrame extends JXFrame
         confermaBtn.setEnabled(true);
 	    annullaBtn.setEnabled(true);
     }
-	
-    
 }

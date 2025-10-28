@@ -42,7 +42,7 @@ public class ConfirmEliminationDialog extends JDialog {
 	    private JXPanel panel;
 	    private ActionListener confirmButtonListener;
 	    ActionListener showPassBtnActionListener;
-	    DocumentListener passwordFieldDocumentListener; // Dichiarazione del DocumentListener
+	    DocumentListener passwordFieldDocumentListener;
 	    private JXLabel passwordLabel;
 	    
 		private CompoundBorder defaultBorder = BorderFactory.createCompoundBorder(
@@ -66,28 +66,26 @@ public class ConfirmEliminationDialog extends JDialog {
 		}
 		
 
-	    private void initComponents() {
-	        setTitle("Conferma Eliminazione Profilo"); // Imposta il titolo come nell'altro dialog
-	        // MigLayout con wrap 2 (2 colonne per riga) e spaziatura simile all'altro dialog
+	    private void initComponents() 
+	    {
+	        setTitle("Conferma Eliminazione Profilo");
 	        panel = new JXPanel(new MigLayout("wrap 2", "[grow, fill]5[]", "[]10[]10[]10[]10[]30[]"));
-	        panel.setBackground(Color.WHITE); // Colore di sfondo bianco come nell'altro dialog
-	        setContentPane(panel); // Imposta il panel come content pane
-
-	        // Etichetta errore: dimensione e posizione per massima visibilità
+	        panel.setBackground(Color.WHITE);
+	        setContentPane(panel);
 	        passwordErrorLabel = new JXLabel(" ");
 	        passwordErrorLabel.setFont(new Font("SansSerif", Font.BOLD, 13));
 	        passwordErrorLabel.setForeground(Color.RED);
-	        passwordErrorLabel.setPreferredSize(new Dimension(300, 20)); // Aumenta la dimensione preferita
+	        passwordErrorLabel.setPreferredSize(new Dimension(300, 20));
 			panel.add(passwordErrorLabel, "span 2, align center, h 20!");	
        
 	        passwordLabel = new JXLabel("Inserisci password per eliminare il profilo:");
 	        passwordLabel.setFont(new Font("SansSerif", Font.BOLD, 15));
-		    panel.add(passwordLabel, "span 2, wrap, left"); // wrap per andare a capo
+		    panel.add(passwordLabel, "span 2, wrap, left"); 
 	        
-	        passwordField = new JPasswordField(); // Rimosso 20 come argomento, usa preferedSize
+	        passwordField = new JPasswordField();
 	        passwordField.setPreferredSize(new Dimension(200, 30));
-	        passwordField.setBorder(defaultBorder); // Applica il bordo di default
-	        panel.add(passwordField, "growx"); // growx per espandersi orizzontalmente
+	        passwordField.setBorder(defaultBorder); 
+	        panel.add(passwordField, "growx"); 
 
 	        showPassBtn= new JToggleButton();
 	    	showPassBtn.setIcon(eyeOffIcon);
@@ -96,17 +94,17 @@ public class ConfirmEliminationDialog extends JDialog {
 	    	showPassBtn.setToolTipText("Mostra/Nascondi password");
 	    	showPassBtn.setBorderPainted(false);
 	    	showPassBtn.setContentAreaFilled(false);
-			panel.add(showPassBtn, "w 30!, h 25!, wrap, gapleft 5"); // wrap per andare a capo
+			panel.add(showPassBtn, "w 30!, h 25!, wrap, gapleft 5"); 
 			        
 	        confirmButton = new JButton("Conferma");
-	        confirmButton.setFont(new Font("SansSerif", Font.BOLD, 18)); // Stile del font
-	        confirmButton.setPreferredSize(new Dimension(120, 30)); // Dimensione preferita
-			confirmButton.setBackground(new Color(225, 126, 47, 220)); // Colore di sfondo
-			confirmButton.setForeground(Color.WHITE); // Colore del testo
-			confirmButton.setOpaque(true); // Rende lo sfondo visibile
-			confirmButton.setFocusPainted(false); // Rimuove il bordo focus
-			confirmButton.setCursor(new Cursor(Cursor.HAND_CURSOR)); // Cursore a mano
-	        panel.add(confirmButton, "span 2, align center"); // Posizione al centro, su due colonne
+	        confirmButton.setFont(new Font("SansSerif", Font.BOLD, 18));
+	        confirmButton.setPreferredSize(new Dimension(120, 30)); 
+			confirmButton.setBackground(new Color(225, 126, 47, 220)); 
+			confirmButton.setForeground(Color.WHITE); 
+			confirmButton.setOpaque(true); 
+			confirmButton.setFocusPainted(false); 
+			confirmButton.setCursor(new Cursor(Cursor.HAND_CURSOR)); 
+	        panel.add(confirmButton, "span 2, align center");
 	    }
 	    
 	    private void initListeners() {
@@ -117,33 +115,37 @@ public class ConfirmEliminationDialog extends JDialog {
 				{
 					if(showPassBtn.isSelected())
 					{
-				    	passwordField.setEchoChar((char)0); // Mostra la password
+				    	passwordField.setEchoChar((char)0); 
 				    	showPassBtn.setIcon(eyeIcon);
 				    } 
 				    else
 				    {
-				    	passwordField.setEchoChar('•'); // Nasconde la password
+				    	passwordField.setEchoChar('•'); 
 				    	showPassBtn.setIcon(eyeOffIcon);
 				    }
 				}				
 			  };
 			showPassBtn.addActionListener(showPassBtnActionListener);
 			
-			// DocumentListener per la validazione in tempo reale
-	        passwordFieldDocumentListener = new DocumentListener() {
+
+	        passwordFieldDocumentListener = new DocumentListener() 
+	        {
 	            @Override
-	            public void insertUpdate(DocumentEvent e) {
+	            public void insertUpdate(DocumentEvent e) 
+	            {
 	                checkPassword();
 	            }
 
 	            @Override
-	            public void removeUpdate(DocumentEvent e) {
+	            public void removeUpdate(DocumentEvent e) 
+	            {
 	                checkPassword();
 	            }
 
 	            @Override
-	            public void changedUpdate(DocumentEvent e) {
-	                // Non usato per PlainDocument
+	            public void changedUpdate(DocumentEvent e) 
+	            {
+
 	            }
 	        };
 	        passwordField.getDocument().addDocumentListener(passwordFieldDocumentListener);
@@ -153,12 +155,11 @@ public class ConfirmEliminationDialog extends JDialog {
 				@Override 
 				public void actionPerformed(ActionEvent e)
 				{
-					if(!checkPassword()) // Usa il metodo di controllo rinominato
+					if(!checkPassword())
 						passwordField.requestFocus();
 			        else
 			        {
-			        	confirmButton.setEnabled(false);
-			        	
+			        	confirmButton.setEnabled(false);        	
 			        	Controller.getController().checkDelete(parent, ConfirmEliminationDialog.this, passwordField.getPassword());
 			        }
 			    }
@@ -166,16 +167,18 @@ public class ConfirmEliminationDialog extends JDialog {
 			confirmButton.addActionListener(confirmButtonListener);
 		}
 		
-		private boolean checkPassword() // Rinominato da checkNewPass() per chiarezza
+		private boolean checkPassword() 
 		{
 			boolean check = true;
 			String text = new String(passwordField.getPassword()).trim();
 
-		    if (text.isEmpty()) { // Aggiunto controllo per password vuota
+		    if(text.isEmpty()) 
+		    { 
 		    	passwordField.setBorder(errorBorder);
 		    	passwordErrorLabel.setText("La password non può essere vuota.");
 		        check = false;
-		    } else if (text.length() < 8 || text.length() > 30)
+		    } 
+		    else if(text.length() < 8 || text.length() > 30)
 		    {
 		    	passwordField.setBorder(errorBorder);
 		    	passwordErrorLabel.setText("La password deve essere tra 8 e 30 caratteri.");
@@ -184,7 +187,7 @@ public class ConfirmEliminationDialog extends JDialog {
 		    else
 		    {
 		    	passwordField.setBorder(defaultBorder);
-		    	passwordErrorLabel.setText(" "); // Pulisce il messaggio di errore
+		    	passwordErrorLabel.setText(" ");
 		    }
 		    
 		    return check; 
@@ -193,22 +196,23 @@ public class ConfirmEliminationDialog extends JDialog {
 		public void showError(String msg)
 		{
 			JOptionPane.showMessageDialog(this, msg, "Errore", JOptionPane.ERROR_MESSAGE);
-			confirmButton.setEnabled(true); // Riabilita il pulsante dopo un errore dal controller
+			confirmButton.setEnabled(true);
 		}	
 		
-	    // Aggiunto metodo per gestione successo per coerenza con l'altro dialog
-	    public void showSuccess(String msg) {
+
+	    public void showSuccess(String msg) 
+	    {
 	        JOptionPane.showMessageDialog(this, msg, "Successo", JOptionPane.INFORMATION_MESSAGE);
-	        confirmButton.setEnabled(true); // Riabilita il pulsante
-	        dispose(); // Chiude il dialog al successo
+	        confirmButton.setEnabled(true);
+	        dispose();
 	    }
 	    
 	    private void disposeListeners() 
 	    {		   
-			 if (confirmButton != null && confirmButtonListener != null)
+			if(confirmButton != null && confirmButtonListener != null)
 				 confirmButton.removeActionListener(confirmButtonListener);
 			  
-	        if (showPassBtn != null && showPassBtnActionListener != null)
+	        if(showPassBtn != null && showPassBtnActionListener != null)
 	        	showPassBtn.removeActionListener(showPassBtnActionListener);
 
 	        if(passwordField != null && passwordFieldDocumentListener != null)
