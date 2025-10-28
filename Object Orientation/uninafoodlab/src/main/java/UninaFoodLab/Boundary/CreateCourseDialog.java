@@ -81,7 +81,8 @@ public class CreateCourseDialog extends JDialog
     private JFrame parentFrame;
     private boolean editMode;
     private int idCorsoDaModificare;
-    
+    private boolean canChangeStartDate = true;
+
     public CreateCourseDialog(JFrame parentFrame, boolean editMode)
     {
         super(parentFrame, true);
@@ -632,6 +633,7 @@ public class CreateCourseDialog extends JDialog
     public void popolaDatiCorso(int idCorso, String nome, String descrizione, LocalDate dataInizio, double costo, String frequenza, boolean isPratico, int limite, List<Integer> idArgomentiSelezionati, boolean canChangeStartDate)
     {
         this.idCorsoDaModificare = idCorso;
+        this.canChangeStartDate = canChangeStartDate;
 
         if(dataInizioListener != null) 
             dataInizioField.removeDateChangeListener(dataInizioListener);
@@ -741,44 +743,46 @@ public class CreateCourseDialog extends JDialog
      */
     private void rescheduleFissa(LocalDate dataInizioCorso, String frequenza)
     {
-	    int giorniFrequenza = switch (frequenza) 
-					    	  {
-						        case "Giornaliera" -> 1;
-						        case "Settimanale" -> 7;
-						        case "Bisettimanale" -> 14;
-						        case "Mensile" -> 30;
-						        default -> 0;
-					    	  };
-	    if(giorniFrequenza <= 0) return;
-	
-	    for(int i = 0; i < sessionCards.size(); i++)
-	    {
-	        CreateSessionPanel panel = sessionCards.get(i);
-	
-	        if(panel.isPassed())
-	        {
-	            LocalDate fixed = panel.getDatePicker().getDate();
-	            panel.getDatePicker().getSettings().setVetoPolicy(d -> d != null && d.equals(fixed));
-	            panel.getDatePicker().setEnabled(false);
-	            if (panel.getDateChangeListener() != null)
-	            {
-	                panel.getDatePicker().removeDateChangeListener(panel.getDateChangeListener());
-	                panel.setDateChangeListener(null);
-	            }
-	        }
-	        else
-	        {
-	            LocalDate dataPrevista = dataInizioCorso.plusDays((long) giorniFrequenza * i);
-	            panel.setDataPrevista(dataPrevista, null, true);
-	
-	            if(panel.getDateChangeListener() != null)
-	            {
-	                panel.getDatePicker().removeDateChangeListener(panel.getDateChangeListener());
-	                panel.setDateChangeListener(null);
-	            }
-	        }
-	    }
+        int giorniFrequenza = switch (frequenza) 
+                              {
+                                case "Giornaliera" -> 1;
+                                case "Settimanale" -> 7;
+                                case "Bisettimanale" -> 14;
+                                case "Mensile" -> 30;
+                                default -> 0;
+                              };
+        if(giorniFrequenza <= 0) return;
+
+        LocalDate today = LocalDate.now();
+        LocalDate baseStart = canChangeStartDate ? dataInizioCorso : today.plusDays(1);
+
+        for(int i = 0; i < sessionCards.size(); i++)
+        {
+            CreateSessionPanel panel = sessionCards.get(i);
+            if(panel.isPassed())
+            {
+                LocalDate fixed = panel.getDatePicker().getDate();
+                panel.getDatePicker().getSettings().setVetoPolicy(d -> d != null && d.equals(fixed));
+                panel.getDatePicker().setEnabled(false);
+                if (panel.getDateChangeListener() != null)
+                {
+                    panel.getDatePicker().removeDateChangeListener(panel.getDateChangeListener());
+                    panel.setDateChangeListener(null);
+                }
+            }
+            else
+            {
+                LocalDate dataPrevista = baseStart.plusDays((long) giorniFrequenza * i);
+                panel.setDataPrevista(dataPrevista, null, true);
+                if(panel.getDateChangeListener() != null)
+                {
+                    panel.getDatePicker().removeDateChangeListener(panel.getDateChangeListener());
+                    panel.setDateChangeListener(null);
+                }
+            }
+        }
     }
+
     
     /**
      * Abilita la selezione manuale delle date delle sessioni (frequenza libera)
@@ -788,13 +792,16 @@ public class CreateCourseDialog extends JDialog
 
     private void rescheduleLibera(LocalDate dataInizioCorso)
     {
+        LocalDate today = LocalDate.now();
+        LocalDate baseStart = canChangeStartDate ? dataInizioCorso : today.plusDays(1);
+
         for(CreateSessionPanel panel : sessionCards)
         {
             if(!panel.isPassed())
             {
                 panel.getDatePicker().setEnabled(true);
-                panel.getDatePicker().getSettings().setVetoPolicy(getVetoPolicy(dataInizioCorso, panel));
-                updateSelectedDate(panel, dataInizioCorso);
+                panel.getDatePicker().getSettings().setVetoPolicy(getVetoPolicy(baseStart, panel));
+                updateSelectedDate(panel, baseStart);
                 updateSessionListener(panel);
             }
             else
