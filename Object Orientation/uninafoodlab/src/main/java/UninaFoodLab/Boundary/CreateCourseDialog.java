@@ -82,6 +82,7 @@ public class CreateCourseDialog extends JDialog
     private boolean editMode;
     private int idCorsoDaModificare;
     private boolean canChangeStartDate = true;
+    private boolean canAddSessions = true;
 
     public CreateCourseDialog(JFrame parentFrame, boolean editMode)
     {
@@ -371,13 +372,21 @@ public class CreateCourseDialog extends JDialog
          * Al click mostra il dialog per selezionare il numero di sessioni.
          */
         aggiungiSessioniMouseListener = new MouseAdapter()
-								        {
-								            @Override
-								            public void mouseClicked(MouseEvent e)
-								            {
-								                showAddSessionsDialog();
-								            }
-								        };
+        {
+            @Override
+            public void mouseClicked(MouseEvent e)
+            {
+                if(!canAddSessions)
+                {
+                    JOptionPane.showMessageDialog(CreateCourseDialog.this,
+                        "Il corso è già iniziato: non è possibile aggiungere nuove sessioni.",
+                        "Operazione non consentita",
+                        JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                }
+                showAddSessionsDialog();
+            }
+        };
         aggiungiSessioneLabel.addMouseListener(aggiungiSessioniMouseListener);
 
         /**
@@ -634,6 +643,7 @@ public class CreateCourseDialog extends JDialog
     {
         this.idCorsoDaModificare = idCorso;
         this.canChangeStartDate = canChangeStartDate;
+        this.canAddSessions = canChangeStartDate;
 
         if(dataInizioListener != null) 
             dataInizioField.removeDateChangeListener(dataInizioListener);
@@ -678,7 +688,11 @@ public class CreateCourseDialog extends JDialog
         limitSpinner.setEnabled(false);
         limitLabel.setEnabled(false);
 
-        aggiungiSessioneLabel.setVisible(true);
+        aggiungiSessioneLabel.setEnabled(canAddSessions);
+        if(!canAddSessions)
+            aggiungiSessioneLabel.setToolTipText("Il corso è già iniziato: non è possibile aggiungere nuove sessioni.");
+        else
+            aggiungiSessioneLabel.setToolTipText(null);
         frequencyList.setSelectedItem(frequenza);
 
         idsSelectedArguments.clear();
@@ -896,6 +910,8 @@ public class CreateCourseDialog extends JDialog
      */
     private void addNewSessionCard(boolean pratica)
     {
+        if(!canAddSessions) 
+            return;
         CreateSessionPanel card = new CreateSessionPanel(sessionCards.size() + 1, pratica, this);
         sessionCards.add(card);
         sessionsContainer.add(card, "growx, growy, w 33%");
@@ -935,6 +951,15 @@ public class CreateCourseDialog extends JDialog
      */
     private void showAddSessionsDialog()
     {
+        if(!canAddSessions)
+        {
+            JOptionPane.showMessageDialog(this,
+                "Il corso è già iniziato: non è possibile aggiungere nuove sessioni.",
+                "Operazione non consentita",
+                JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
         addSessionDialog = new JDialog(this, "Seleziona numero sessioni", true);
         addSessionDialog.setResizable(false);
         addSessionDialog.setLayout(new MigLayout("wrap 2", "[right][grow,fill]"));

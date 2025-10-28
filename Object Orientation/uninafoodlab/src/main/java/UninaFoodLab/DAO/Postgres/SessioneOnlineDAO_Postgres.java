@@ -125,31 +125,36 @@ public class SessioneOnlineDAO_Postgres implements SessioneOnlineDAO
         String sql = "UPDATE SessioneOnline SET ";
         List<Object> param = new ArrayList<>();
 
-        if (oldSessione.getDurata() != newSessione.getDurata()) {
+        if(oldSessione.getDurata() != newSessione.getDurata()) 
+		{
             sql += "Durata = ?, ";
             param.add(newSessione.getDurata());
         }
-        if (!oldSessione.getOrario().equals(newSessione.getOrario())) {
+        if(!oldSessione.getOrario().equals(newSessione.getOrario())) 
+		{
             sql += "Orario = ?, ";
             param.add(newSessione.getOrario());
         }
-        if (!oldSessione.getData().equals(newSessione.getData())) {
+        if(!oldSessione.getData().equals(newSessione.getData())) {
+
             sql += "Data = ?, ";
             param.add(newSessione.getData());
         }
-        if (!oldSessione.getLinkRiunione().equals(newSessione.getLinkRiunione())) {
+        if(!oldSessione.getLinkRiunione().equals(newSessione.getLinkRiunione())) 
+		{
             sql += "LinkRiunione = ?, ";
             param.add(newSessione.getLinkRiunione());
         }
 
-        if (param.isEmpty()) return;
+        if(param.isEmpty()) 
+		return;
 
         if(sql.endsWith(", ")) 
         	sql = sql.substring(0, sql.length() - 2);
         sql += " WHERE IdSessioneOnline = ?";
         param.add(newSessione.getId() != 0 ? newSessione.getId() : oldSessione.getId());
 
-        try (PreparedStatement ps = conn.prepareStatement(sql))
+        try(PreparedStatement ps = conn.prepareStatement(sql))
         {
             for (int i = 0; i < param.size(); i++)
                 ps.setObject(i + 1, param.get(i));
@@ -161,57 +166,6 @@ public class SessioneOnlineDAO_Postgres implements SessioneOnlineDAO
         }
     }
 	
-	/*
-	@Override
-	public void update(SessioneOnline oldSessione, SessioneOnline newSessione)
-	{
-		String sql = "UPDATE SessioneOnline SET ";
-		List<Object> param = new ArrayList<>();
-
-		if(oldSessione.getDurata() != newSessione.getDurata())
-		{
-			sql += "Durata = ?, ";
-			param.add(newSessione.getDurata());
-		}
-		
-		if(!oldSessione.getOrario().equals(newSessione.getOrario()))
-		{
-			sql += "Orario = ?, ";
-			param.add(newSessione.getOrario());
-		}
-		
-		if(!oldSessione.getData().equals(newSessione.getData()))
-		{
-			sql += "Data = ?, ";
-			param.add(newSessione.getData());
-		}
-		
-		if(!oldSessione.getLinkRiunione().equals(newSessione.getLinkRiunione()))
-		{
-			sql += "LinkRiunione = ?, ";
-			param.add(newSessione.getLinkRiunione());
-		}
-
-		if(!param.isEmpty())
-		{
-			sql = sql.substring(0, sql.length() - 2);
-			sql += " WHERE IdSessioneOnline = ?";
-			param.add(newSessione.getId());
-
-			try (Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
-			{
-				for (int i = 0; i < param.size(); i++)
-					s.setObject(i + 1, param.get(i));
-
-				s.executeUpdate();
-			}
-			catch (SQLException e)
-			{
-				throw new DAOException("Errore DB durante update SessioneOnline", e);
-			}
-		}
-	}*/
-
     @Override
     public void delete(int idSessioneOnline)
     {
