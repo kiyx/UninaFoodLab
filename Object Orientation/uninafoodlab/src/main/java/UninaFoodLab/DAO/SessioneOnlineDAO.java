@@ -12,5 +12,6 @@ public interface SessioneOnlineDAO
     SessioneOnline getSessioneOnlineById(int idSessioneOnline);
     List<SessioneOnline> getSessioniOnlineByIdCorso(int idCorso);
     void update(SessioneOnline oldSessione, SessioneOnline newSessione);
+    void update(SessioneOnline oldSessione, SessioneOnline newSessione, Connection conn);
     void delete(int IdSessioneOnline);
 }

@@ -10,6 +10,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class SessionePraticaDAO_Postgres implements SessionePraticaDAO
 {
@@ -135,6 +136,100 @@ public class SessionePraticaDAO_Postgres implements SessionePraticaDAO
         return sessions;
     }
 
+	@Override
+    public void update(SessionePratica oldS, SessionePratica newS)
+    {
+        Connection conn = null;
+        try
+        {
+            conn = ConnectionManager.getConnection();
+            conn.setAutoCommit(false);
+
+            update(oldS, newS, conn);
+
+            conn.commit();
+        }
+        catch (Exception e)
+        {
+            if (conn != null)
+            {
+                try { conn.rollback(); } catch (SQLException ex) { throw new DAOException("Errore durante rollback update SessionePratica", ex); }
+            }
+            throw new DAOException("Errore durante update SessionePratica", e);
+        }
+        finally
+        {
+            if (conn != null)
+            {
+                try { conn.setAutoCommit(true); conn.close(); } catch (SQLException ex) { throw new DAOException("Errore durante chiusura connessione in update sessionepratica", ex); }
+            }
+        }
+    }
+	
+	@Override
+    public void update(SessionePratica oldS, SessionePratica newS, Connection conn)
+    {
+        String sql = "UPDATE SessionePratica SET ";
+        List<Object> parametri = new ArrayList<>();
+
+        if(oldS.getDurata() != newS.getDurata()) 
+        {
+            sql += "Durata = ?, ";
+            parametri.add(newS.getDurata());
+        }
+        if(!oldS.getOrario().equals(newS.getOrario())) 
+        {
+            sql += "Orario = ?, ";
+            parametri.add(newS.getOrario());
+        }
+        if(!oldS.getData().equals(newS.getData())) 
+        {
+            sql += "Data = ?, ";
+            parametri.add(newS.getData());
+        }
+        if(!oldS.getIndirizzo().equals(newS.getIndirizzo())) 
+        {       	
+            sql += "Luogo = ?, ";
+            parametri.add(newS.getIndirizzo());
+        }
+
+        boolean ricetteCambiate = ricetteCambiate(oldS, newS);
+
+        if(parametri.isEmpty() && !ricetteCambiate) 
+        	return;
+
+        try
+        {
+            if(!parametri.isEmpty())
+            {
+                if(sql.endsWith(", ")) sql = sql.substring(0, sql.length() - 2);
+                sql += " WHERE IdSessionePratica = ?";
+
+                int targetId = (newS.getId() != 0) ? newS.getId() : oldS.getId();
+                parametri.add(targetId);
+
+                try(PreparedStatement ps = conn.prepareStatement(sql))
+                {
+                    for(int i = 0; i < parametri.size(); i++)
+                        ps.setObject(i + 1, parametri.get(i));
+                    ps.executeUpdate();
+                }
+            }
+
+            if(ricetteCambiate)
+            {
+                if(newS.getId() == 0) 
+                	newS.setId(oldS.getId());
+                aggiornaRicette(newS, conn);
+            }
+        }
+        catch (SQLException e)
+        {
+            throw new DAOException("Errore durante update SessionePratica (conn esterna)", e);
+        }
+    }
+	
+	/*
     @Override
     public void update(SessionePratica oldS, SessionePratica newS)
     {
@@ -214,8 +309,27 @@ public class SessionePraticaDAO_Postgres implements SessionePraticaDAO
             }
         }
     }
+*/
+    @Override
+    public void delete(int idSessionePratica)
+    {
+        String sql =
+            "DELETE FROM SessionePratica " +
+            "WHERE IdSessionePratica = ? " +
+            "  AND Data > CURRENT_DATE";
 
-	private void aggiornaRicette(SessionePratica sp, Connection conn) throws SQLException
+        try (Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
+        {
+            s.setInt(1, idSessionePratica);
+            s.executeUpdate();
+        }
+        catch (SQLException e)
+        {
+            throw new DAOException("Errore DB durante eliminazione SessionePratica", e);
+        }
+    }
+    
+    private void aggiornaRicette(SessionePratica sp, Connection conn) throws SQLException
 	{
 	    try(PreparedStatement delete = conn.prepareStatement("DELETE FROM Preparazioni WHERE IdSessionePratica = ?"))
 	    {
@@ -234,24 +348,21 @@ public class SessionePraticaDAO_Postgres implements SessionePraticaDAO
 	        insert.executeBatch();
 	    }
 	}
-
-    @Override
-    public void delete(int idSessionePratica)
+    
+    private boolean ricetteCambiate(SessionePratica oldS, SessionePratica newS)
     {
-        String sql =
-            "DELETE FROM SessionePratica " +
-            "WHERE IdSessionePratica = ? " +
-            "  AND Data > CURRENT_DATE";
+        List<Ricetta> oldList = (oldS != null && oldS.getRicette() != null) ? oldS.getRicette() : List.of();
+        List<Ricetta> newList = (newS != null && newS.getRicette() != null) ? newS.getRicette() : List.of();
 
-        try (Connection conn = ConnectionManager.getConnection(); PreparedStatement s = conn.prepareStatement(sql))
-        {
-            s.setInt(1, idSessionePratica);
-            s.executeUpdate();
-        }
-        catch (SQLException e)
-        {
-            throw new DAOException("Errore DB durante eliminazione SessionePratica", e);
-        }
+        Set<Integer> oldIds = new HashSet<>();
+        for(Ricetta r : oldList) 
+        	oldIds.add(r.getId());
+
+        Set<Integer> newIds = new HashSet<>();
+        for(Ricetta r : newList) 
+        	newIds.add(r.getId());
+
+        return !oldIds.equals(newIds);
     }
 	
 	private SessionePratica mapResultSetToSessionePratica(ResultSet rs) throws SQLException 

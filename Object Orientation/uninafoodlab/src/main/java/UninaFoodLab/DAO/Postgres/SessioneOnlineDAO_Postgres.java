@@ -105,6 +105,64 @@ public class SessioneOnlineDAO_Postgres implements SessioneOnlineDAO
     }
 	
 	@Override
+    public void update(SessioneOnline oldSessione, SessioneOnline newSessione)
+    {
+        try (Connection conn = ConnectionManager.getConnection())
+        {
+            conn.setAutoCommit(false);
+            update(oldSessione, newSessione, conn);
+            conn.commit();
+        }
+        catch (SQLException e)
+        {
+            throw new DAOException("Errore DB durante update SessioneOnline", e);
+        }
+    }
+	
+	@Override
+    public void update(SessioneOnline oldSessione, SessioneOnline newSessione, Connection conn)
+    {
+        String sql = "UPDATE SessioneOnline SET ";
+        List<Object> param = new ArrayList<>();
+
+        if (oldSessione.getDurata() != newSessione.getDurata()) {
+            sql += "Durata = ?, ";
+            param.add(newSessione.getDurata());
+        }
+        if (!oldSessione.getOrario().equals(newSessione.getOrario())) {
+            sql += "Orario = ?, ";
+            param.add(newSessione.getOrario());
+        }
+        if (!oldSessione.getData().equals(newSessione.getData())) {
+            sql += "Data = ?, ";
+            param.add(newSessione.getData());
+        }
+        if (!oldSessione.getLinkRiunione().equals(newSessione.getLinkRiunione())) {
+            sql += "LinkRiunione = ?, ";
+            param.add(newSessione.getLinkRiunione());
+        }
+
+        if (param.isEmpty()) return;
+
+        if(sql.endsWith(", ")) 
+        	sql = sql.substring(0, sql.length() - 2);
+        sql += " WHERE IdSessioneOnline = ?";
+        param.add(newSessione.getId() != 0 ? newSessione.getId() : oldSessione.getId());
+
+        try (PreparedStatement ps = conn.prepareStatement(sql))
+        {
+            for (int i = 0; i < param.size(); i++)
+                ps.setObject(i + 1, param.get(i));
+            ps.executeUpdate();
+        }
+        catch (SQLException e)
+        {
+            throw new DAOException("Errore DB durante update SessioneOnline (conn esterna)", e);
+        }
+    }
+	
+	/*
+	@Override
 	public void update(SessioneOnline oldSessione, SessioneOnline newSessione)
 	{
 		String sql = "UPDATE SessioneOnline SET ";
@@ -152,7 +210,7 @@ public class SessioneOnlineDAO_Postgres implements SessioneOnlineDAO
 				throw new DAOException("Errore DB durante update SessioneOnline", e);
 			}
 		}
-	}
+	}*/
 
     @Override
     public void delete(int idSessioneOnline)

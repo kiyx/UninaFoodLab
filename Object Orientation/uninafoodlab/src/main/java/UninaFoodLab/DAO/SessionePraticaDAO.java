@@ -12,5 +12,6 @@ public interface SessionePraticaDAO
 	SessionePratica getSessionePraticaById(int idSessionePratica);
     List<SessionePratica> getSessioniPraticheByIdCorso(int idCorso);
     void update(SessionePratica oldSessione, SessionePratica newSessione);
+    void update(SessionePratica oldSessione, SessionePratica newSessione, Connection conn);
     void delete(int IdSessioneOnline);
 }
