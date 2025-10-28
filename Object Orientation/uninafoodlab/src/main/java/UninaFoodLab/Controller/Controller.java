@@ -1239,7 +1239,7 @@ public class Controller
                     nuoveSessioniOnlineFuture.add(new SessioneOnline(durateOnline.get(i), orariOnline.get(i), dateOnline.get(i), linksOnline.get(i)));
             }
             
-            ricettaIdx = 0; // Resetta l'indice per le ricette
+            ricettaIdx = 0; 
             for(int i = 0; i < duratePratiche.size(); i++)
             {
                 if(!datePratiche.get(i).isBefore(today))
@@ -1280,14 +1280,13 @@ public class Controller
                 LOGGER.log(Level.INFO, "Data inizio corso ID {0} impostata alla prima sessione futura: {1}", new Object[]{idCorso, dataInizioDaSalvare});
             }
             
-            // 4. Costruisci DTO Corso Aggiornato (per il DAO.update)
-            // MOD: se il corso è già iniziato, NON forzare NumeroSessioni (lascia quello attuale)
-            int numeroSessioniToPersist = hadPastSessions ? corsoOriginale.getNumeroSessioni() : numeroSessioni; // MOD
+            // 4. Costruisci DTO Corso Aggiornato 
+            int numeroSessioniToPersist = hadPastSessions ? corsoOriginale.getNumeroSessioni() : numeroSessioni; 
 
             Corso corsoAggiornato = new Corso(
                 nomeCorso,                    
                 dataInizioDaSalvare,         
-                numeroSessioniToPersist,      // MOD
+                numeroSessioniToPersist,      
                 FrequenzaSessioni.valueOf(frequenza),
                 corsoOriginale.getLimite(),    
                 descrizione,                   
@@ -1304,10 +1303,8 @@ public class Controller
                 so.setCorso(corsoOriginale); 
             for(SessionePratica sp : nuoveSessioniPraticheFuture)
                 sp.setCorso(corsoOriginale);
-            
-            // --- OPERAZIONI DB ---
-            
-            // MOD: se il corso è già iniziato, non cancellare sessioni; altrimenti cancella solo le future
+          
+           
             if (!hadPastSessions) 
 			{
                 LocalDateTime now = LocalDateTime.now();
@@ -1347,7 +1344,6 @@ public class Controller
             
             if(hadPastSessions)
             {
-                // Upsert: aggiorna future esistenti e inserisci le nuove; nessuna delete
                 List<SessioneOnline> oldOnlineFuture = oldOnlineSessions.stream()
                     .filter(s -> !s.getData().toLocalDate().isBefore(today))
                     .sorted(Comparator.comparing(Sessione::getData).thenComparing(Sessione::getOrario))
@@ -1371,12 +1367,12 @@ public class Controller
                 {
                     SessioneOnline oldS = oldOnlineFuture.get(i);
                     SessioneOnline newS = nuoveOnlineOrd.get(i);
-                    newS.setId(oldS.getId()); // WHERE IdSessioneOnline = ?
+                    newS.setId(oldS.getId()); 
                     getSessioneOnlineDAO().update(oldS, newS);
                 }
                 for(int i=minOnline; i<nuoveOnlineOrd.size(); i++)
                 {
-                    getSessioneOnlineDAO().save(nuoveOnlineOrd.get(i), conn); // inserisce extra
+                    getSessioneOnlineDAO().save(nuoveOnlineOrd.get(i), conn); 
                 }
 
                 int minPrat = Math.min(oldPraticaFuture.size(), nuovePraticheOrd.size());
@@ -1384,12 +1380,12 @@ public class Controller
                 {
                     SessionePratica oldS = oldPraticaFuture.get(i);
                     SessionePratica newS = nuovePraticheOrd.get(i);
-                    newS.setId(oldS.getId()); // WHERE IdSessionePratica = ?
+                    newS.setId(oldS.getId()); 
                     getSessionePraticaDAO().update(oldS, newS);
                 }
                 for(int i=minPrat; i<nuovePraticheOrd.size(); i++)
                 {
-                    getSessionePraticaDAO().save(nuovePraticheOrd.get(i), conn); // inserisce extra
+                    getSessionePraticaDAO().save(nuovePraticheOrd.get(i), conn);
                 }
             }
             else
@@ -1405,13 +1401,13 @@ public class Controller
             // --- COMMIT TRANSAZIONE ---
             conn.commit();
             
-            // 9. Aggiorna cache (MOD: mantieni NumeroSessioni se corso già iniziato)
+            // 9. Aggiorna cache 
             cacheCorsi.removeIf(c -> c.getId() == idCorso);
             corsoOriginale.setNome(corsoAggiornato.getNome());
             corsoOriginale.setDescrizione(corsoAggiornato.getDescrizione());
             corsoOriginale.setDataInizio(dataInizioDaSalvare);
             corsoOriginale.setFrequenzaSessioni(FrequenzaSessioni.valueOf(frequenza));
-            corsoOriginale.setNumeroSessioni(numeroSessioniToPersist); // MOD
+            corsoOriginale.setNumeroSessioni(numeroSessioniToPersist); 
             cacheCorsi.add(corsoOriginale);		
             
             // 10. Aggiorna UI e chiudi finestre
@@ -1426,7 +1422,7 @@ public class Controller
                 idArgomenti, 
                 namesArgs,
                 Date.valueOf(dataInizioDaSalvare),
-                numeroSessioniToPersist // MOD
+                numeroSessioniToPersist 
             );
             
             if(courseFrame instanceof MyCoursesFrame)
@@ -1723,17 +1719,16 @@ public class Controller
 				String difficoltaRicetta, String allergeniRicetta, ArrayList<Integer> newIdIngredienti, ArrayList<Double> newQuantitaIngredienti, ArrayList<String> newUdmIngredienti,
 				ArrayList<Integer> oldIdIngredienti, ArrayList<Double> oldQuantitaIngredienti, ArrayList<String> oldUdmIngredienti, ArrayList<Integer> idIngredientiDeleted)
 		{
-			ArrayList<Utilizzo> toAddUtilizzi = new ArrayList<>();   // Corrisponde a newUtilizziRicetta
-			ArrayList<Utilizzo> toUpdateUtilizzi = new ArrayList<>(); // I vecchi ingredienti con valori cambiati
-			ArrayList<Utilizzo> toDeleteUtilizzi = new ArrayList<>(); // Gli ingredienti originali da eliminare
+			ArrayList<Utilizzo> toAddUtilizzi = new ArrayList<>();   
+			ArrayList<Utilizzo> toUpdateUtilizzi = new ArrayList<>(); 
+			ArrayList<Utilizzo> toDeleteUtilizzi = new ArrayList<>();
 			
-			ArrayList<Utilizzo> oldUtilizziInput = new ArrayList<>(); // La nuova versione degli ingredienti non eliminati
-			ArrayList<Utilizzo> allUtilizzi = new ArrayList<>();      // La lista completa per l'oggetto 'toChangeRicetta'
+			ArrayList<Utilizzo> oldUtilizziInput = new ArrayList<>(); 
+			ArrayList<Utilizzo> allUtilizzi = new ArrayList<>();     
 			
 			Ingrediente ingredienteUtil=null;
 			Ricetta original=null;
 			
-			// ricerco la ricetta nella lista del controller
 			for(Ricetta r: ricette) {
 				if(r.getId()==idRicetta) {
 					original=r;
@@ -1746,7 +1741,6 @@ public class Controller
 				return;
 			}
 			
-			// prendo gli utilizzi da eliminare
 			for(Utilizzo u: original.getUtilizzi())
 			{
 				for(int idDeleted : idIngredientiDeleted)
@@ -1759,43 +1753,38 @@ public class Controller
 				}				
 			}
 			
-			// prendo gli utilizzi nuovi
 			for(int i=0; i<newIdIngredienti.size(); i++)
 			{
-				ingredienteUtil = findOrCreateIngrediente(newIdIngredienti.get(i)); // Uso una funzione helper
+				ingredienteUtil = findOrCreateIngrediente(newIdIngredienti.get(i));
 					
 				Utilizzo u = new Utilizzo(newQuantitaIngredienti.get(i), UnitaDiMisura.valueOf(newUdmIngredienti.get(i)),
 						ingredienteUtil);
 				toAddUtilizzi.add(u);
 			}
 			
-			// prendo gli utilizzi vecchi che non sono stati eliminati, con i nuovi valori
 			for(int i=0; i<oldIdIngredienti.size(); i++)
 			{
-				ingredienteUtil = findOrCreateIngrediente(oldIdIngredienti.get(i)); // Uso una funzione helper
+				ingredienteUtil = findOrCreateIngrediente(oldIdIngredienti.get(i)); 
 				
 				Utilizzo u = new Utilizzo(oldQuantitaIngredienti.get(i), UnitaDiMisura.valueOf(oldUdmIngredienti.get(i)),
 						ingredienteUtil);
 				oldUtilizziInput.add(u);
 			}
 			
-			//confronto utilizzi da aggiornare
 			
 			for(Utilizzo newU : oldUtilizziInput)
 			{
 				for(Utilizzo oldU : original.getUtilizzi())
 				{
-					// Troviamo la corrispondenza
+					
 					if(newU.getIngrediente().getId() == oldU.getIngrediente().getId())
 					{
-						// E ora confrontiamo i valori per vedere se l'aggiornamento è necessario
+						
 						boolean quantitaChanged = newU.getQuantita() != oldU.getQuantita();
 						boolean udmChanged = !newU.getUdm().equals(oldU.getUdm());
 						
 						if(quantitaChanged || udmChanged)
 						{
-							// Se almeno un campo è cambiato, questo Utilizzo deve essere aggiornato
-							// Assegniamo l'IdRicetta e lo aggiungiamo alla lista 'toUpdateUtilizzi'
 							newU.setIdRicetta(original.getId()); 
 							toUpdateUtilizzi.add(newU);
 						}
@@ -1806,9 +1795,8 @@ public class Controller
 			
 			try
 			{
-				// Costruiamo la lista completa per l'oggetto DTO 'toChangeRicetta'
 				allUtilizzi.addAll(toAddUtilizzi); 
-				allUtilizzi.addAll(oldUtilizziInput); // I vecchi utilizzi (anche se non aggiornati)
+				allUtilizzi.addAll(oldUtilizziInput); 
 				
 				Ricetta toChangeRicetta = new Ricetta(nameRicetta, provenienzaRicetta, tempoRicetta, calorieRicetta,LivelloDifficolta.valueOf(difficoltaRicetta), allergeniRicetta, (Chef)getLoggedUser(), allUtilizzi);
 				toChangeRicetta.setId(original.getId()); 
@@ -1822,17 +1810,12 @@ public class Controller
 				}
 				else
 				{
-					// *** CHIAMATA CORRETTA AL DAO CON TUTTI I PARAMETRI ***
 					getRicettaDAO().update(original, toChangeRicetta, toAddUtilizzi, toUpdateUtilizzi, toDeleteUtilizzi);
-		
-					// Le operazioni DB di delete e update sugli utilizzi sono ora all'interno del DAO e transazionali.
-					// Il codice di delete e update sui Utilizzi è stato Rimosso da qui.
 					
 					LOGGER.log(Level.INFO, "Ricetta salvata con successo");	
 					currDialog.showSuccess("Ricetta salvata con successo");
 					currDialog.dispose();
-					
-					// Aggiornamento della UI e della lista locale (ricette)
+
 					((MyRecipesFrame)parent).updateRecipeCard(idRicetta, new RecipeCardPanel(idRicetta, toChangeRicetta.getNome(), toChangeRicetta .getDifficolta().toString(), toChangeRicetta.getCalorie()));
 					ricette.remove(original);
 					ricette.add(toChangeRicetta);
@@ -1842,7 +1825,6 @@ public class Controller
 			catch(DAOException e)
 			{
 				LOGGER.log(Level.SEVERE, "Errore salvataggio ricetta nel DB", e);	
-				// Il rollback avviene nel DAO se è stato implementato correttamente
 				currDialog.showError("Errore salvataggio ricetta nel DB");
 			}
 		}
@@ -1850,7 +1832,6 @@ public class Controller
 		private Ingrediente findOrCreateIngrediente(int idIngrediente) throws DAOException {
 		    Ingrediente ingredienteUtil = null;
 		    
-		    // Cerca prima nella lista locale (più veloce)
 		    for (Ingrediente u : ingredienti) {
 		        if (u.getId() == idIngrediente) {
 		            ingredienteUtil = u;
@@ -1858,7 +1839,6 @@ public class Controller
 		        }
 		    }
 		
-		    // Se non trovato localmente, lo cerca nel DB e lo restituisce
 		    ingredienteUtil = getIngredienteDAO().getIngredienteById(idIngrediente);   
 		    return ingredienteUtil;
 		}
@@ -2046,8 +2026,7 @@ public class Controller
        			String oldPath = System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" + File.separator + "resources" + File.separator + loggedUser.getUsername();
 	            	File oldFile = new File(oldPath);
 	            	File newFile = new File(oldFile.getParent(), username);
-	            	//oldFile.renameTo(newFile);
-       			Path oldPathNIO = Paths.get(oldPath); // oldPath deve essere il percorso completo
+       			Path oldPathNIO = Paths.get(oldPath);
        			Path newPathNIO = Paths.get(newFile.getAbsolutePath());
 
        			try {
@@ -2055,8 +2034,6 @@ public class Controller
        			    LOGGER.log(Level.INFO, "Cartella username rinominata da {0} a {1}", new Object[]{oldPath, newFile.getName()});
        			} catch (IOException e1) {
        			    LOGGER.log(Level.SEVERE, "Errore durante la rinomina della cartella username da {0} a {1}: {2}", new Object[]{oldPath, newFile.getName(), e.getMessage()});
-       			    // Questo è un errore grave che dovrebbe probabilmente bloccare la modifica del profilo
-       			    // o almeno farla fallire nell'interfaccia utente.
        			    throw new IOException("Impossibile rinominare la cartella del profilo. " + e.getMessage(), e);
        			}
 	            	
@@ -2100,7 +2077,7 @@ public class Controller
 	        Path destinationPath = destinationDir.resolve(selectedFile.getName());
 	        if (!selectedFile.exists()) {
 	            LOGGER.log(Level.SEVERE, "Source file does not exist: {0}", selectedFile.getAbsolutePath());
-	            return null; // Or throw a custom exception
+	            return null; 
 	        }
 	        if (!selectedFile.isFile()) {
 	            LOGGER.log(Level.SEVERE, "Source is not a file: {0}", selectedFile.getAbsolutePath());
@@ -2112,7 +2089,7 @@ public class Controller
 	        }
 	        catch(IOException e)
 	        {
-	            LOGGER.log(Level.SEVERE, "File non copiato: " + e.getMessage(), e); // Log the exception message and the exception itself
+	            LOGGER.log(Level.SEVERE, "File non copiato: " + e.getMessage(), e); 
 	        }
 
 	        LOGGER.log(Level.INFO, "File salvato con successo in: {0}", destinationPath);
