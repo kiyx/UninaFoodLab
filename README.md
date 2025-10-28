@@ -1,7 +1,7 @@
 # UninaFoodLab 🍲
 
 <p align="center">
-  <img src="Object Orientation/uninafoodlab/src/main/resources/logo_schermata.png" alt="UninaFoodLab Logo" width="200"/>
+  <img src="Object Orientation/uninafoodlab/src/main/resources/logo_finestra.png" alt="UninaFoodLab Logo" width="200"/>
 </p>
 
 <p align="center">
