@@ -12,15 +12,7 @@ import org.jdesktop.swingx.JXPanel;
 import UninaFoodLab.Controller.Controller;
 import net.miginfocom.swing.MigLayout;
 
-/**
- * Pannello popup per la selezione degli argomenti di un corso.
- * <p>
- * Carica dinamicamente la lista di argomenti dal {@link Controller},
- * crea una {@link JCheckBox} per ciascun argomento e un pulsante "Applica".
- * Al click di "Applica", raccoglie gli ID selezionati e invoca
- * {@code filterByTopicIds(List<Integer>)} sull'oggetto che implementa {@link TopicFilterable}.
- * </p>
- */
+
 public class FilterPanel extends JXPanel 
 {
     private static final long serialVersionUID = 1L;
@@ -46,16 +38,7 @@ public class FilterPanel extends JXPanel
     /** Listener per il pulsante "Applica" e "Reset" */
     private ActionListener applyBtnClicker, resetBtnClicker;
     
-    /**
-     * Costruisce un nuovo {@code FilterPanel}.
-     * <p>
-     * Carica gli argomenti dal {@link Controller}, costruisce
-     * dinamicamente le checkbox e aggiunge il pulsante "Applica".
-     * </p>
-     *
-     * @param filterable l’oggetto che implementa {@link TopicFilterable};
-     *                   riceverà la lista di ID selezionati al click
-     */
+
     public FilterPanel(ArgumentFilterable filterable) 
     {
         super(new MigLayout("wrap 1, insets 10", "[grow,fill]", ""));
@@ -71,16 +54,7 @@ public class FilterPanel extends JXPanel
         initListeners();
     }
     
-    /**
-     * Inizializza e compone le componenti del pannello di filtro:
-     * <ul>
-     *   <li>Carica gli argomenti tramite il Controller.</li>
-     *   <li>Crea dinamicamente una JCheckBox per ciascun argomento
-     *       e le aggiunge al contenitore verticale.</li>
-     *   <li>Incapsula le checkbox in uno JScrollPane con barre a scorrimento</li>
-     *   <li>Aggiunge il pulsante “Applica” per confermare la selezione.</li>
-     * </ul>
-     */
+
     private void initComponents()
     {
         argumentsContainer = new JPanel(new MigLayout("wrap 1", "[grow,fill]"));
@@ -166,10 +140,7 @@ public class FilterPanel extends JXPanel
         }
     }
    
-    /**
-     * Raccoglie gli ID degli argomenti selezionati e invoca
-     * {@link TopicFilterable#filterByTopicIds(List)} sull'oggetto passandoglieli.
-     */
+
     private void filterIds()
     {
     	List<Integer> selectedIds = new ArrayList<>();

@@ -10,29 +10,7 @@ import org.jdesktop.swingx.*;
 import UninaFoodLab.Controller.Controller;
 import net.miginfocom.swing.MigLayout;
 
-/**
- * {@code SidebarPanel} è un componente grafico riutilizzabile che rappresenta la barra
- * laterale sinistra per la navigazione.
- * <p>
- * Viene usato all'interno dei frame principali per offrire un accesso rapido alle sezioni:
- * <ul>
- *   <li><b>Homepage</b></li>
- *   <li><b>I miei corsi</b></li>
- *   <li><b>Le mie ricette</b> (se l'utente è uno chef)</li>
- *   <li><b>Visualizza Report</b> (se l'utente è uno chef)</li>
- * </ul>
- *
- * I pulsanti interagiscono con il {@link Controller} per gestire la navigazione tra le schermate.
- * Include anche effetti di hover e gestione sicura dei listener per evitare memory leak.
- *
- * <p><strong>Comportamento:</strong></p>
- * <ul>
- *   <li>Si adatta dinamicamente all'altezza residua del frame, ancorandosi sotto l'header.</li>
- *   <li>Supporta la personalizzazione visiva tramite {@code styleSidebarButton()}.</li>
- *   <li>Eventi gestiti automaticamente per ogni pulsante.</li>
- * </ul>
- *
- */
+
 
 public class SidebarPanel extends JXPanel
 {
@@ -51,11 +29,7 @@ public class SidebarPanel extends JXPanel
 	/** Listener per effetto hover sui pulsanti. */
 	private MouseAdapter hoverListener;
 
-	/**
-	 * Costruisce una nuova {@code SidebarPanel} per il frame specificato.
-	 *
-	 * @param frame Il {@code JXFrame} genitore a cui è associata la sidebar.
-	 */
+
 	public SidebarPanel(JXFrame parentFrame)
 	{
 		this.parentFrame = parentFrame;
@@ -108,9 +82,7 @@ public class SidebarPanel extends JXPanel
 	
 	/**
      * Inizializza i listener degli eventi click e hover dei pulsanti della sidebar.
-     * <p>
-     * Ogni pulsante è associato a un'azione gestita dal {@code Controller}.
-     * I listener hover evidenziano il pulsante al passaggio del mouse.
+     * 
      */
 	private void initListeners()
 	{
@@ -193,7 +165,6 @@ public class SidebarPanel extends JXPanel
 	
 	/**
 	 * Rimuove tutti i listener registrati su pulsanti e mouse.
-	 * <p>
 	 * Va chiamato prima di rimuovere la sidebar per evitare memory leak.
 	 */
 	public void disposeListeners() 
@@ -236,8 +207,6 @@ public class SidebarPanel extends JXPanel
 	 /**
      * Applica uno stile coerente a un pulsante della sidebar.
      * Imposta font, cursore, colori e bordi.
-     *
-     * @param button Il pulsante JXButton da stilizzare.
      */
     private void styleSidebarButton(JXButton button)
     {
@@ -252,16 +221,11 @@ public class SidebarPanel extends JXPanel
     /**
      * Aggiorna la posizione e le dimensioni della sidebar rispetto all'intestazione
      * e all'altezza complessiva del frame genitore.
-     * <p>
      * Questo metodo va chiamato ogni volta che il frame viene ridimensionato o spostato,
      * per mantenere la sidebar correttamente ancorata sotto l'header.
-     * <p>
      * La sidebar viene posizionata sempre allineata a sinistra (x = 0), subito sotto l'header,
      * con altezza adattata allo spazio residuo visibile nella finestra.
-     *
-     * @param header Il pannello header della finestra, usato per calcolare la posizione verticale.
-     * @param layeredPane Il layered pane del frame, necessario per ottenere le coordinate assolute.
-     * @param frameHeight L'altezza corrente della finestra, usata per calcolare l'altezza della sidebar.
+     
      */
     public void updatePosition(JXPanel header, JLayeredPane layeredPane, int frameHeight)
     {

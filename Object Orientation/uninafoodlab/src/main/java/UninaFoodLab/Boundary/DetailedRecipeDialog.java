@@ -215,9 +215,7 @@ public class DetailedRecipeDialog extends JDialog
         buttonPanel.add(eliminaButton, "grow, push");
 
         panel.add(buttonPanel, "center, gaptop 20"); 
-        
-        //if(Controller.getController().checkPreparazioni(idRicetta))
-        	//buttonPanel.setVisible(false);
+
     }
 
     private void initListeners() 

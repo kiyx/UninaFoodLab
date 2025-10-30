@@ -302,7 +302,6 @@ public class LoginFrame extends JXFrame
      * - non ci siano spazi, tab o newline
      * - la lunghezza sia tra 4 e 20 caratteri
      *
-     * @return true se il campo è valido, false altrimenti
      */
 	private boolean checkUser() 
 	{
@@ -334,7 +333,6 @@ public class LoginFrame extends JXFrame
      * Valida il campo password in tempo reale.
      * Controlla che la lunghezza sia tra 8 e 30 caratteri.
      *
-     * @return true se il campo è valido, false altrimenti
      */
 	private boolean checkPass()
 	{
@@ -360,7 +358,6 @@ public class LoginFrame extends JXFrame
      * Mostra un messaggio di errore tramite dialog.
      * Riabilita i pulsanti di login e registrazione
      * (usato dopo il fallimento di un login).
-     * @param msg messaggio da mostrare
      */
 	public void showError(String msg)
 	{

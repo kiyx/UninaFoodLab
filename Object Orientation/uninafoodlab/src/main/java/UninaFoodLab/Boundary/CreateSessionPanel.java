@@ -22,23 +22,6 @@ import java.time.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * La classe {@code CreateSessionPanel} rappresenta un pannello Swing responsabile della
- * configurazione, validazione e gestione interattiva di una singola sessione, sia pratica
- * che online, all'interno del dialogo {@link CreateCourseDialog}.
- * 
- * <p>Ogni pannello sessione include:</p>
- * <ul>
- *   <li>Selezione della data e orario</li>
- *   <li>Configurazione della durata tramite ore/minuti</li>
- *   <li>Input dell'indirizzo (per sessioni pratiche)</li>
- *   <li>Selezione multipla di ricette (per sessioni pratiche)</li>
- *   <li>Link riunione (per sessioni online)</li>
- *   <li>Validazione e focus automatico sui campi non validi</li>
- *   <li>Rimozione dinamica del pannello dal dialogo genitore</li>
- *   <li>Init e dispose sicura dei listener</li>
- * </ul>
- */
 
 public class CreateSessionPanel extends JXPanel
 {
@@ -76,13 +59,7 @@ public class CreateSessionPanel extends JXPanel
 	private List<String> namesRecipes = new ArrayList<>();
 	private List<Integer> idsSelectedRecipes = new ArrayList<>();
 
-	 /**
-     * Costruttore principale per creare un pannello di sessione.
-     * 
-     * @param numero Numero identificativo progressivo della sessione
-     * @param pratica {@code true} se la sessione è pratica, {@code false} se online
-     * @param parent Riferimento al dialogo contenitore {@link CreateCourseDialog}
-     */
+
 	public CreateSessionPanel(int numero, boolean pratica, CreateCourseDialog parent)
 	{
 		this.numero = numero;
@@ -93,41 +70,23 @@ public class CreateSessionPanel extends JXPanel
 		initListeners();
 	}
 	
-	/**
-	 * Restituisce il tipo della sessione come stringa.
-	 *
-	 * @return "Pratica" se la sessione è pratica, "Online" altrimenti
-	 */
+
 	public String getTipo()
 	{
 		return pratica ? "Pratica" : "Online";
 	}
 
-	/**
-	 * Restituisce la data selezionata per la sessione.
-	 *
-	 * @return Oggetto {@link LocalDate} rappresentante la data scelta, oppure {@code null} se non selezionata
-	 */
 	public LocalDate getDataSessione()
 	{
 		return datePicker.getDate();
 	}
 	
-	/**
-	 * Imposta la data selezionata nel componente {@link DatePicker}.
-	 * 
-	 * @param data Data da impostare
-	 */
 	public void setData(LocalDate data)
 	{
 	    datePicker.setDate(data);
 	}
 
-	/**
-	 * Restituisce il componente {@link DatePicker} della data.
-	 * 
-	 * @return Il componente {@link DatePicker} utilizzato per la selezione della data
-	 */
+
 	public DatePicker getDatePicker()
 	{
 		return datePicker;
@@ -136,8 +95,6 @@ public class CreateSessionPanel extends JXPanel
 	/**
 	 * Restituisce il listener registrato per gli eventi di cambio data associato a questo pannello.
 	 *
-	 * @return l'istanza di {@link DateChangeListener} attualmente registrata,
-	 *         oppure {@code null} se nessun listener è stato impostato.
 	 */
 	public DateChangeListener getDateChangeListener()
 	{
@@ -147,7 +104,6 @@ public class CreateSessionPanel extends JXPanel
 	/**
 	 * Restituisce l'orario selezionato per la sessione.
 	 *
-	 * @return Oggetto {@link LocalTime} rappresentante l'orario scelto, oppure {@code null} se non selezionato
 	 */
 	public LocalTime getOrario()
 	{
@@ -157,7 +113,6 @@ public class CreateSessionPanel extends JXPanel
 	/**
 	 * Restituisce la durata totale della sessione in minuti.
 	 *
-	 * @return Valore intero pari a (ore * 60 + minuti)
 	 */
 	public int getDurata()
 	{
@@ -176,7 +131,6 @@ public class CreateSessionPanel extends JXPanel
 	/**
 	 * Restituisce la lista degli ID delle ricette selezionate (solo per sessioni pratiche).
 	 *
-	 * @return Lista di ID numerici delle ricette selezionate
 	 */
 	public List<Integer> getIdRicetteSelezionate()
 	{
@@ -188,7 +142,6 @@ public class CreateSessionPanel extends JXPanel
 	/**
 	 * Restituisce il link della riunione (solo per sessioni online).
 	 *
-	 * @return Stringa contenente il link della riunione, oppure {@code null} per sessioni pratiche
 	 */
 	public String getLinkRiunione()
 	{
@@ -198,7 +151,6 @@ public class CreateSessionPanel extends JXPanel
 	/**
 	 * Restituisce l'indirizzo della sessione (solo per sessioni pratiche).
 	 *
-	 * @return Stringa contenente l'indirizzo, oppure {@code null} per sessioni online
 	 */
 	public String getIndirizzo()
 	{
@@ -355,17 +307,9 @@ public class CreateSessionPanel extends JXPanel
 		add(removeBtn, "span 2, center, gaptop 15");
 	}
 
-	 /**
-     * Inizializza e registra tutti i listener necessari per la validazione in tempo reale,
-     * l'interazione utente (clic, input, focus) e la gestione dinamica del pannello. 
-     * Ogni listener è associato al rispettivo campo e viene rimosso con {@link #disposeListeners()}.
-     */
 	private void initListeners()
 	{
-		/**
-		 * Listener associato al pulsante di rimozione della sessione.
-		 * <p>Invoca {@link CreateCourseDialog#removeSessionCard(CreateSessionPanel)} per eliminare dinamicamente il pannello dal dialogo genitore.
-		 */
+		
 	    removeBtnActionListener = new ActionListener()
 								  {
 								      @Override
@@ -378,10 +322,7 @@ public class CreateSessionPanel extends JXPanel
 
 	    if(pratica && addressField != null)
 	    {
-	    	/**
-	    	 * Listener che valida il campo indirizzo in tempo reale.
-	    	 * <p>Attivato su ogni modifica al contenuto del campo {@code addressField}.
-	    	 */
+	    	
 	        addressListener = new DocumentListener()
 					          {
 					              @Override
@@ -414,10 +355,7 @@ public class CreateSessionPanel extends JXPanel
 
 	    if(!pratica && linkField != null)
 	    {
-	    	/**
-	    	 * Listener che valida il campo link della riunione in tempo reale.
-	    	 * <p>Attivato su ogni modifica al contenuto del campo {@code linkField}.
-	    	 */
+	    	
 	        linkListener = new DocumentListener()
 					       {
 					           @Override
@@ -448,10 +386,7 @@ public class CreateSessionPanel extends JXPanel
 	        linkField.addFocusListener(linkFocusListener);
 	    }
 
-	    /**
-	     * Listener che valida la durata della sessione ogni volta che gli spinner cambiano.
-	     * <p>Controlla che ore e minuti sommati non siano zero.<p>
-	     */
+	 
 	    durataChangeListener = new ChangeListener()
 							   {
 							       @Override
@@ -489,10 +424,7 @@ public class CreateSessionPanel extends JXPanel
 	    oreSpinner.addFocusListener(oreFocusListener);
 	    minutiSpinner.addFocusListener(minutiFocusListener);
 
-	    /**
-	     * Listener per la validazione della data selezionata.
-	     * <p>Attivato ogni volta che l'utente seleziona o modifica la data tramite {@code datePicker}.
-	     */
+	  
 	    dateListener = new DateChangeListener()
 					   {
 					       @Override
@@ -518,10 +450,7 @@ public class CreateSessionPanel extends JXPanel
 	    // Nota: getComponent(0) è il campo testo
 	    datePicker.getComponent(0).addFocusListener(dateFocusListener);
 
-	    /**
-	     * Listener per la validazione dell’orario selezionato.
-	     * <p>Attivato ogni volta che l’utente modifica l’orario nel {@code timePicker}.
-	     */
+	 
 	    timeListener = new TimeChangeListener()
 					   {
 					       @Override
@@ -561,17 +490,7 @@ public class CreateSessionPanel extends JXPanel
 	        clearButton.addMouseListener(clearButtonListener);
 	    }
 	    
-	    /**    
-	     * <p><b>Filtro Ricette:</b> include un {@link DocumentListener} dinamico sul campo {@code ricercaRicetteField},
-	     * che filtra in tempo reale la lista di ricette visualizzate nel pannello. Il listener:</p>
-	     * <ul>
-	     *   <li>Recupera il testo di filtro digitato</li>
-	     *   <li>Mostra o nasconde il pulsante di reset</li>
-	     *   <li>Rimuove tutte le checkbox dal pannello</li>
-	     *   <li>Riaggiunge solo le checkbox che matchano il filtro</li>
-	     *   <li>Effettua repaint e revalidate del pannello ricette</li>
-	     * </ul>
-	     */
+	
 	    if(pratica && ricercaRicetteField != null)
 	    {
 	    	ricercaRicetteFieldListener = new DocumentListener()
@@ -613,8 +532,6 @@ public class CreateSessionPanel extends JXPanel
 	 * Se un listener era già presente, viene rimosso prima di aggiungere il nuovo.
 	 * Questo evita l'accumulo di listener multipli che causerebbero chiamate ripetute.
 	 * 
-	 * @param listener il nuovo {@link DateChangeListener} da associare;
-	 *                 può essere {@code null} per rimuovere il listener esistente senza sostituirlo.
 	 */
 	public void setDateChangeListener(DateChangeListener listener)
 	{
@@ -836,7 +753,6 @@ public class CreateSessionPanel extends JXPanel
 
 	/**
 	 * Controlla se la data della sessione è uguale o precedente ad oggi.
-	 * @return true se la sessione è passata (o è oggi), false altrimenti.
 	 */
 	public boolean isPassed()
 	{
@@ -844,18 +760,7 @@ public class CreateSessionPanel extends JXPanel
 	    return sessionDate != null && !sessionDate.isAfter(LocalDate.now());
 	}
 	
-	/**
-	 * Imposta la politica di selezione della data consentita nel selettore di date.
-	 * <p>
-	 * Se il parametro {@code disable} è {@code true}, il selettore viene disabilitato e la data viene impostata a {@code minDate}.
-	 * Altrimenti, il selettore viene abilitato e viene impostata una politica che consente solo le date comprese tra
-	 * {@code minDate} e {@code maxDate} (entrambe incluse).
-	 * </p>
-	 * 
-	 * @param minDate la data minima consentita (inclusa)
-	 * @param maxDate la data massima consentita (inclusa), oppure {@code null} se non è previsto un limite superiore
-	 * @param disable se {@code true}, disabilita il selettore e imposta la data fissa a {@code minDate}
-	 */
+	
 	public void setDataPrevista(LocalDate minDate, LocalDate maxDate, boolean disable)
 	{
 	    if(disable)
@@ -886,12 +791,7 @@ public class CreateSessionPanel extends JXPanel
 	    }
 	}
 	
-	/**
-	 * Crea un'etichetta {@link JXLabel} con font coerente.
-	 *
-	 * @param text Testo da visualizzare nell'etichetta
-	 * @return Etichetta formattata
-	 */
+
 	private JXLabel createLabel(String text)
 	{
 	    JXLabel label = new JXLabel(text);
@@ -899,13 +799,7 @@ public class CreateSessionPanel extends JXPanel
 	    return label;
 	}
 	
-	/**
-     * Mostra o rimuove un errore visivo su un componente Swing con tooltip e outline.
-     * 
-     * @param comp Componente target
-     * @param errore {@code true} per mostrare l'errore, {@code false} per rimuoverlo
-     * @param tooltip Messaggio di errore da visualizzare come tooltip
-     */
+
 	private void showError(JComponent comp, boolean errore, String tooltip)
 	{
 		if(errore)
@@ -920,28 +814,13 @@ public class CreateSessionPanel extends JXPanel
 			comp.setToolTipText(null);
 		}
 	}
-	
-	/**
-	 * Aggiorna l'etichetta con il nuovo numero progressivo della sessione.
-	 *
-	 * @param nuovoNumero Nuovo numero da visualizzare
-	 */
+
 	public void aggiornaNumero(int nuovoNumero)
 	{
 		numero = nuovoNumero;
 		numeroLabel.setText("Sessione #" + nuovoNumero);
 	}
 
-	/**
-     * Abilita o disabilita tutti i componenti di input del pannello.
-     * Usato in modalità modifica per bloccare le sessioni passate.
-     * @param enabled true per abilitare, false per disabilitare
-     */
-	/**
-     * Abilita o disabilita tutti i componenti di input del pannello.
-     * Usato in modalità modifica per bloccare le sessioni passate.
-     * @param enabled true per abilitare, false per disabilitare
-     */
     public void setPanelEnabled(boolean enabled)
     {
         datePicker.setEnabled(enabled);
@@ -977,11 +856,7 @@ public class CreateSessionPanel extends JXPanel
         }
     }
 	
-	 /**
-     * Valida tutti i campi della sessione e imposta il focus sul primo campo errato.
-     * 
-     * @return {@code true} se tutti i campi obbligatori sono validi, {@code false} altrimenti
-     */
+	
 	public boolean isValidSession()
 	{
 	    focusSet = false;
@@ -1032,14 +907,7 @@ public class CreateSessionPanel extends JXPanel
 	    return valido;
 	}
 
-	/**
-	 * Metodo di utilità per validare un singolo campo e impostare il focus se errato.
-	 *
-	 * @param comp Componente da validare
-	 * @param errore {@code true} se c'è errore, {@code false} altrimenti
-	 * @param tooltip Messaggio di errore da mostrare
-	 * @return {@code true} se il campo è valido, {@code false} se c'è errore
-	 */
+
 	private boolean validateField(JComponent comp, boolean errore, String tooltip)
 	{
 	    showError(comp, errore, tooltip);
@@ -1051,51 +919,30 @@ public class CreateSessionPanel extends JXPanel
 	    return !errore;
 	}
 
-	/**
-	 * Verifica che la data sia selezionata.
-	 *
-	 * @return {@code true} se la data è valida, {@code false} altrimenti
-	 */
+
 	private boolean validateData()
 	{
 	    return validateField(datePicker, datePicker.getDate() == null, "Data obbligatoria");
 	}
 
-	/**
-	 * Verifica che l'orario sia selezionato.
-	 *
-	 * @return {@code true} se l'orario è valido, {@code false} altrimenti
-	 */
+
 	private boolean validateTime()
 	{
 	    return validateField(timePicker, timePicker.getTime() == null, "Orario obbligatorio");
 	}
 
-	/**
-	 * Verifica che la durata sia maggiore di zero.
-	 *
-	 * @return {@code true} se la durata è valida, {@code false} altrimenti
-	 */
+	
 	private boolean validateDurata()
 	{
 	    return validateField(oreSpinner, getDurata() <= 0, "Durata non valida") && validateField(minutiSpinner, getDurata() <= 0, "Durata non valida");
 	}
 
-	/**
-	 * Verifica che l'indirizzo sia compilato correttamente (solo per sessioni pratiche).
-	 *
-	 * @return {@code true} se l'indirizzo è valido, {@code false} altrimenti
-	 */
+	
 	private boolean validateAddress()
 	{
 	    return validateField(addressField, addressField.getText().trim().isEmpty(), "Indirizzo obbligatorio");
 	}
 
-	 /**
-     * Verifica che una ricetta sia selezionata e scrolla sulla prima ricetta visibile non selezionata.
-     * 
-     * @return {@code true} se almeno una ricetta è selezionata, {@code false} altrimenti
-     */
 	private boolean validateRicetta()
 	{
 	    boolean errore = idsSelectedRecipes.isEmpty();
@@ -1125,11 +972,7 @@ public class CreateSessionPanel extends JXPanel
 	    return !errore;
 	}
 
-	/**
-	 * Verifica che il link della riunione sia compilato (solo per sessioni online).
-	 *
-	 * @return {@code true} se il link è valido, {@code false} altrimenti
-	 */
+
 	private boolean validateLink()
 	{
 	    return validateField(linkField, linkField.getText().trim().isEmpty(), "Link riunione obbligatorio");

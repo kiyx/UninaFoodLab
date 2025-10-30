@@ -95,10 +95,7 @@ public class ChangeRecipeDialog extends JDialog
     private ArrayList<Integer> oldIdIngredienti = new ArrayList<>();
     private ArrayList<Double> oldQuantitaIngredienti = new ArrayList<>();
     private ArrayList<String> oldUdmIngredienti = new ArrayList<>();
-    //private ArrayList<Integer> idIngredientiRicetta = new ArrayList<>();
-    //private ArrayList<Double> quantitaIngredienti = new ArrayList<>();
-    //private ArrayList<String> udmIngredienti = new ArrayList<>();
-    
+
     private JXFrame parent;
     String nomeRicetta;
     String provenienzaRicetta;

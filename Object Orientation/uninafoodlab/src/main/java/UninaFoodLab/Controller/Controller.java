@@ -333,12 +333,7 @@ public class Controller
 	 * -------------------------
 	 */
 
-	/**
-	 * Cifra la password in modo sicuro usando BCrypt.
-	 * 
-	 * @param plainPassword array di caratteri della password in chiaro
-	 * @return stringa con hash cifrato
-	 */
+
 	public String hashPassword(char[] plainPassword)
 	{
 		String hashed = BCrypt.hashpw(new String(plainPassword), BCrypt.gensalt(11));
@@ -346,53 +341,21 @@ public class Controller
 		return hashed;
 	}
 
-	/**
-	 * Notifica il successo della registrazione loggando l'evento e tornando alla
-	 * schermata di login per l'autenticazione.
-	 * 
-	 * @param currFrame il frame di registrazione da chiudere
-	 * @param username  l'username dell'utente appena registrato
-	 */
+
 	private void registerSuccess(RegisterFrame currFrame, String username)
 	{
 		LOGGER.log(Level.INFO, "Registrazione riuscita per utente: {0}", username);
 		goToLogin(currFrame);
 	}
 
-	/**
-	 * Notifica il fallimento della registrazione loggando l'errore e mostrando un
-	 * messaggio all'utente.
-	 * 
-	 * @param currFrame il frame di registrazione
-	 * @param message   messaggio di errore da mostrare
-	 */
+
 	private void registerFailed(RegisterFrame currFrame, String message)
 	{
 		LOGGER.log(Level.WARNING, "Tentativo di registrazione fallito: {0}", message);
 		currFrame.showError(message);
 	}
 
-	/**
-	 * Registra un nuovo partecipante dopo aver verificato che:
-	 * <ul>
-	 * <li>non esista già un account con lo stesso codice fiscale</li>
-	 * <li>non esista già un account con la stessa email</li>
-	 * <li>non esista già un utente con lo stesso username</li>
-	 * </ul>
-	 * Se tutte le verifiche hanno esito positivo, il partecipante viene salvato nel
-	 * database e l’utente viene reindirizzato alla schermata di login.
-	 *
-	 * @param currFrame il frame di registrazione attuale
-	 * @param username  lo username scelto
-	 * @param nome      il nome del partecipante
-	 * @param cognome   il cognome del partecipante
-	 * @param codFisc   il codice fiscale
-	 * @param data      la data di nascita
-	 * @param luogo     il luogo di nascita
-	 * @param email     l'indirizzo email
-	 * @param pass      la password in chiaro (verrà hashata e svuotata)
-	 * @throws DAOException se si verifica un errore durante l'accesso al database
-	 */
+	
 	private void registerPartecipante(RegisterFrame currFrame, String username, String nome, String cognome,
 			String codFisc, LocalDate data, String luogo, String email, char[] pass) throws DAOException
 	{
@@ -417,35 +380,7 @@ public class Controller
 		}
 	}
 
-	/**
-	 * Registra un nuovo chef dopo aver verificato che:
-	 * <ul>
-	 * <li>non esista già un account con lo stesso codice fiscale</li>
-	 * <li>non esista già un account con la stessa email</li>
-	 * <li>non esista già un utente con lo stesso username</li>
-	 * </ul>
-	 * Se tutte le verifiche hanno esito positivo:
-	 * <ul>
-	 * <li>il curriculum viene salvato nella cartella
-	 * {@code resources/<username>/Curriculum/}</li>
-	 * <li>lo chef viene inserito nel database</li>
-	 * <li>l’utente viene reindirizzato alla schermata di login</li>
-	 * </ul>
-	 *
-	 * @param currFrame    il frame di registrazione attuale
-	 * @param username     lo username scelto
-	 * @param nome         il nome dello chef
-	 * @param cognome      il cognome dello chef
-	 * @param codFisc      il codice fiscale
-	 * @param data         la data di nascita
-	 * @param luogo        il luogo di nascita
-	 * @param email        l'indirizzo email
-	 * @param pass         la password in chiaro (verrà hashata e svuotata)
-	 * @param selectedFile il file PDF del curriculum da salvare
-	 * @throws DAOException se si verifica un errore durante l’accesso al database
-	 * @throws IOException  se si verifica un errore durante il salvataggio del
-	 *                      curriculum
-	 */
+	
 	private void registerChef(RegisterFrame currFrame, String username, String nome, String cognome, String codFisc,
 			LocalDate data, String luogo, String email, char[] pass, File selectedFile) throws DAOException, IOException
 	{
@@ -471,15 +406,7 @@ public class Controller
 		}
 	}
 
-	/**
-	 * Salva il file PDF del curriculum per uno Chef in una directory locale del
-	 * progetto. Sovrascrive eventuali file esistenti con lo stesso nome.
-	 *
-	 * @param username     lo username dell’utente
-	 * @param selectedFile file PDF selezionato da salvare
-	 * @return percorso relativo del file salvato, da memorizzare nel database
-	 * @throws IOException in caso di errori durante la scrittura
-	 */
+
 	private String saveCurriculumFile(String username, File selectedFile) throws IOException
 	{
 		String relativePath = "resources" + File.separator + username + File.separator + "Curriculum";
@@ -496,28 +423,7 @@ public class Controller
 		return relativePath + File.separator + selectedFile.getName();
 	}
 
-	/**
-	 * Gestisce la registrazione di un nuovo utente, determinando dinamicamente se
-	 * registrarlo come Chef o Partecipante. Effettua tutte le validazioni di
-	 * unicità (username, email, codice fiscale) e salva i dati nel database.
-	 * <p>
-	 * In caso di Chef, salva anche il curriculum su disco prima dell'inserimento.
-	 * Mostra messaggi d'errore in caso di dati duplicati, problemi di I/O o errori
-	 * sul database.
-	 *
-	 * @param currFrame      il frame attivo da chiudere dopo la registrazione
-	 * @param isPartecipante true se l'utente è un partecipante, false se è uno chef
-	 * @param nome           nome dell’utente
-	 * @param cognome        cognome dell’utente
-	 * @param data           data di nascita
-	 * @param luogo          luogo di nascita
-	 * @param codFisc        codice fiscale (univoco)
-	 * @param email          email dell’utente
-	 * @param username       username scelto
-	 * @param pass           password dell’utente (in chiaro, verrà subito hashata)
-	 * @param selectedFile   curriculum in PDF, obbligatorio solo per Chef (null per
-	 *                       Partecipanti)
-	 */
+	
 	public void checkRegister(RegisterFrame currFrame, boolean isPartecipante, String nome, String cognome,
 			LocalDate data, String luogo, String codFisc, String email, String username, char[] pass, File selectedFile)
 	{
@@ -548,13 +454,7 @@ public class Controller
 	 * -------------------------
 	 */
 
-	/**
-	 * Verifica se la password fornita corrisponde all'hash salvato.
-	 * 
-	 * @param hashedPassword hash della password da DB
-	 * @param inputPassword  password inserita da GUI
-	 * @return true se corrispondono
-	 */
+
 	private boolean checkPassword(String hashedPassword, char[] inputPassword)
 	{
 		boolean match = BCrypt.checkpw(new String(inputPassword), hashedPassword);
@@ -562,19 +462,7 @@ public class Controller
 		return match;
 	}
 
-	/**
-	 * Recupera l'utente associato allo username fornito, cercando prima tra i
-	 * partecipanti, poi tra gli chef. Usato sia per la validazione in fase di login
-	 * che in fase di registrazione.
-	 *
-	 * @param username username da cercare
-	 * @return istanza di {@link Utente} (può essere {@link Chef} o
-	 *         {@link Partecipante})
-	 * @throws DAOException            se si verifica un errore durante l'accesso al
-	 *                                 database
-	 * @throws RecordNotFoundException se non esiste nessun utente con lo username
-	 *                                 fornito
-	 */
+	
 	private Utente tryGetUser(String username) throws DAOException, RecordNotFoundException
 	{
 		try
@@ -594,12 +482,7 @@ public class Controller
 		}
 	}
 
-	/**
-	 * Gestisce il successo del login: aggiorna lo stato e naviga alla homepage.
-	 *
-	 * @param currFrame il frame di login da chiudere
-	 * @param currUser  l'utente autenticato
-	 */
+
 	private void loginSuccess(LoginFrame currFrame, Utente currUser)
 	{
 		LOGGER.log(Level.INFO, "Login riuscito per utente: {0}", currUser.getUsername());
@@ -607,26 +490,14 @@ public class Controller
 		goToHomepage(currFrame);
 	}
 
-	/**
-	 * Gestisce il fallimento del login: mostra errore e logga l'evento.
-	 *
-	 * @param currFrame il frame di login
-	 * @param message   messaggio di errore da mostrare
-	 */
+
 	private void loginFailed(LoginFrame currFrame, String message)
 	{
 		LOGGER.log(Level.WARNING, "Tentativo di Login fallito: {0}", message);
 		currFrame.showError(message);
 	}
 
-	/**
-	 * Controlla se le credenziali inserite sono corrette. In caso positivo,
-	 * effettua login e naviga alla homepage.
-	 *
-	 * @param currFrame il frame di login corrente
-	 * @param username  username inserito
-	 * @param pass      password inserita
-	 */
+
 	public void checkLogin(LoginFrame currFrame, String username, char[] pass)
 	{
 		try
@@ -1919,11 +1790,7 @@ public class Controller
 	 * -------------------------
 	 */
 
-	/**
-	 * Carica e apre il report mensile dello Chef autenticato.
-	 * 
-	 * @param parent frame genitore da cui si accede
-	 */
+
 	public void openMonthlyReport(JFrame parent, JXButton reportBtn)
 	{
 		EventQueue.invokeLater(() -> {

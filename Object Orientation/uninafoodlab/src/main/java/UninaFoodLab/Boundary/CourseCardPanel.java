@@ -14,20 +14,7 @@ import org.kordamp.ikonli.swing.FontIcon;
 
 import net.miginfocom.swing.MigLayout;
 
-/**
- * {@code CourseCardPanel} rappresenta una card di un corso,
- * contenente nome, argomenti, data di inizio e numero di sessioni.
- * <p>
- * La card mostra:
- * <ul>
- *   <li>Intestazione color arancione con il nome del corso in grassetto.</li>
- *   <li>Elenco dei nomi degli argomenti come etichette.</li>
- *   <li>Data di inizio formattata.</li>
- *   <li>Numero di sessioni.</li>
- * </ul>
- * Supporta l'aggiunta e rimozione di listener per il click su tutta la card.
- * </p>
- */
+
 public class CourseCardPanel extends JXPanel 
 {
     private static final long serialVersionUID = 1L;
@@ -44,16 +31,7 @@ public class CourseCardPanel extends JXPanel
     private JTextArea tagLabel;
     private DropShadowBorder shadow; 
     
-    /**
-     * Crea una nuova card per il corso.
-     * 
-     * @param id              identificativo univoco del corso
-     * @param name            nome del corso
-     * @param idsArguments    lista di ID degli argomenti associati
-     * @param namesArguments  lista di nomi degli argomenti associati
-     * @param startDate       data di inizio del corso
-     * @param sessionNumber   numero di sessioni del corso
-     */
+    
     public CourseCardPanel(int id, String name, List<Integer> idsArguments, List<String> namesArguments, Date startDate, int sessionNumber) 
     {
     	super(new MigLayout("fill, gapy 0", "[grow,fill]", "[40!][pref!][pref!][pref!]"));
@@ -129,33 +107,19 @@ public class CourseCardPanel extends JXPanel
         add(lblSessions, "cell 0 3, growx");
     }
     
-    /**
-     * Restituisce l'ID del corso associato a questa card.
-     * 
-     * @return ID del corso
-     */
+    
     public int getId() 
     {
         return id;
     }
     
-    /**
-     * Determina se il nome del corso contiene la stringa di ricerca.
-     * 
-     * @param search stringa di ricerca
-     * @return {@code true} se il nome contiene la ricerca, {@code false} altrimenti
-     */
+   
     public boolean matchesText(String search) 
     {
     	return (search == null || search.isBlank()) ? true : name.toLowerCase().contains(search.trim().toLowerCase());
     }
 
-     /**
-     * Verifica se tutti gli ID argomenti selezionati sono associati al corso.
-     *
-     * @param selectedArgIds lista di ID argomenti da filtrare
-     * @return {@code true} se tutti gli ID selezionati sono contenuti, {@code false} altrimenti
-     */
+    
     public boolean matchesArguments(List<Integer> selectedArgIds) 
     {
         if(selectedArgIds == null || selectedArgIds.isEmpty())
@@ -164,21 +128,13 @@ public class CourseCardPanel extends JXPanel
         return idsArguments.containsAll(selectedArgIds);
     }
 
-    /**
-     * Registra un listener per il click su tutta la card
-     *
-     * @param l il listener da aggiungere
-     */
+   
     public void addCourseClickListener(MouseListener ml) 
     {
         this.addMouseListener(ml);
     }
 
-    /**
-     * Rimuove un listener per il click su tutta la card
-     *
-     * @param ml il listener da rimuovere
-     */
+    
     public void removeCourseClickListener(MouseListener ml) 
     {
         this.removeMouseListener(ml);

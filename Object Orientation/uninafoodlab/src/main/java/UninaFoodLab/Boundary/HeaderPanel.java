@@ -11,29 +11,7 @@ import org.kordamp.ikonli.swing.*;
 import net.miginfocom.swing.*;
 import UninaFoodLab.Controller.Controller;
 
-/**
- * Pannello header personalizzato.
- * 
- * Questo pannello contiene:
- * <ul>
- *   <li>Logo cliccabile per tornare alla homepage.</li>
- *   <li>Bottone hamburger per mostrare/nascondere la sidebar laterale.</li>
- *   <li>Bottone filtri (non implementato in listeners, ma pronto per estensioni).</li>
- *   <li>Campo di ricerca con pulsante di ricerca.</li>
- *   <li>Bottone profilo che mostra un pannello dropdown del profilo utente.</li>
- * </ul>
- * 
- * Gestisce dinamicamente la posizione e la visibilità della sidebar e del dropdown profilo,
- * reagendo a eventi di ridimensionamento e click esterni.
- * 
- * I listener sono mantenuti come campi e possono essere rimossi con {@link #disposeListeners()} 
- * per evitare memory leak.
- * 
- * <p>Supporta anche il filtraggio dinamico dei corsi tramite
- * l'interfaccia {@link CourseFilterable}, se fornita nel costruttore.
- * In tal caso vengono aggiunti listener per aggiornare il filtro al variare del testo di ricerca
- * o al click sul pulsante Cerca.</p>
- */
+
 public class HeaderPanel extends JXPanel
 {
 	private static final long serialVersionUID = 1L;
@@ -104,18 +82,8 @@ public class HeaderPanel extends JXPanel
         EventQueue.invokeLater(() -> searchField.requestFocusInWindow());
 	}
 
-	/**
-     * Costruisce un HeaderPanel associato a un frame genitore e a un layered pane,
-     * aggiungendo la funzionalità di filtraggio dei corsi tramite un callback.
-     * 
-     * <p>Se il parametro {@code filterCallback} è non null,
-     * vengono aggiunti listener sul campo di testo e sul pulsante Cerca
-     * che richiamano il metodo {@code filtraCorsi(String)} del callback.</p>
-     * 
-     * @param parentFrame il frame genitore che contiene questo header
-     * @param layeredPane il layered pane dove saranno aggiunti sidebar e dropdown
-     * @param filterCallback callback per filtrare i corsi in base al testo di ricerca
-     */
+
+    
 	public HeaderPanel(JXFrame parentFrame, JLayeredPane layeredPane, SearchFilterable filterCallback)
 	{
 	    this(parentFrame, layeredPane);
@@ -207,17 +175,7 @@ public class HeaderPanel extends JXPanel
         profileBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         add(profileBtn, "cell 8 0, w 40!, h 40!, align right");
     }
-	
-	 /**
-     * Inizializza tutti i listener per gestire interazioni utente:
-     * <ul>
-     *  <li>Click sul logo (navigazione homepage)</li>
-     *  <li>Click sul pulsante profilo (toggle dropdown)</li>
-     *  <li>Click sul pulsante hamburger (toggle sidebar)</li>
-     *  <li>Click esterni per chiudere il dropdown profilo</li>
-     *  <li>Eventi di ridimensionamento e spostamento finestra per aggiornare posizione sidebar e dropdown</li>
-     * </ul>
-     */
+
 	private void initListeners()
 	{
 		 /*
@@ -287,28 +245,6 @@ public class HeaderPanel extends JXPanel
         };
         hamburgerBtn.addActionListener(hamburgerBtnListener);
 
-        /**
-         * Listener globale AWT per la gestione della chiusura automatica del dropdown del profilo.
-         * <p>
-         * Questo listener viene registrato sul {@link Toolkit} per intercettare tutti gli eventi
-         * di tipo {@link MouseEvent} nell'intera finestra. Viene utilizzato per rilevare clic
-         * effettuati al di fuori del pannello {@code dropdownPanel} o del pulsante {@code profileBtn}
-         * e, in tal caso, nascondere il menu dropdown del profilo utente.
-         * <p>
-         * Il controllo viene effettuato confrontando le coordinate dello schermo del clic
-         * con i bounding box (in coordinate schermo) del pannello dropdown e del pulsante profilo.
-         * 
-         * <p><b>Funzionalità:</b>
-         * <ul>
-         *   <li>Chiude automaticamente il dropdown quando si clicca fuori da esso</li>
-         *   <li>Evita conflitti con il clic sul pulsante profilo stesso</li>
-         *   <li>Utilizza coordinate assolute dello schermo per una maggiore precisione</li>
-         * </ul>
-         *
-         * @see Toolkit#addAWTEventListener(AWTEventListener, long)
-         * @see MouseEvent
-         * @see ProfileDropdownPanel
-         */
         dropdownClickListener = new AWTEventListener()
         {
             @Override
@@ -364,24 +300,10 @@ public class HeaderPanel extends JXPanel
         
     }
 	
-	/**
-     * Inizializza i listener dedicati al filtraggio dei corsi.
-     * 
-     * <p>Aggiunge un {@link DocumentListener} al campo di testo di ricerca
-     * per aggiornare dinamicamente il filtro ad ogni modifica del testo.
-     * Inoltre aggiunge un {@link ActionListener} al pulsante Cerca
-     * per applicare il filtro al click.</p>
-     * 
-     * <p>Questi listener richiamano il metodo
-     * {@link SearchFilterable#filter(String)} con il testo corrente.</p>
-     */
+
 	private void initSearchFilterListeners()
 	{  
-		/**
-		 * Un {@link DocumentListener} collegato al documento
-         * del campo di testo {@code searchField} che intercetta ogni modifica del testo,
-         * richiamando il metodo {@code filter} del callback con il testo aggiornato.
-		 */
+	
     	searchListener = new DocumentListener()
 				         {
     						 @Override	
@@ -400,10 +322,6 @@ public class HeaderPanel extends JXPanel
 				         };
         searchField.getDocument().addDocumentListener(searchListener);
 
-        /**
-         * Un {ActionListener} collegato al pulsante {@code searchBtn}
-         * che, al click, esegue la stessa azione di filtraggio con il testo corrente.
-         */
         searchBtnListener = new ActionListener()
 			        		{
         						@Override
@@ -417,15 +335,7 @@ public class HeaderPanel extends JXPanel
         searchBtn.addActionListener(searchBtnListener);      
 	}
     
-    /**
-     * Inizializza il listener per il pulsante “Filtri”.
-     * <p>
-     * Ad ogni clic sul {@code filterBtn} alterna la visibilità del
-     * {@link FilterPanel} degli argomenti. Quando il pannello viene mostrato,
-     * ne calcola la posizione subito sotto al bottone, ne imposta la dimensione
-     * ideale e lo rende visibile.
-     * </p>
-     */
+
 	private void initArgumentFilterListeners()
 	{
 		filterBtnClicker = new ActionListener() 
@@ -449,16 +359,6 @@ public class HeaderPanel extends JXPanel
 		filterBtn.addActionListener(filterBtnClicker);
 	}
 	
-	
-    /**
-     * Rimuove tutti i listener aggiunti ai componenti e al toolkit,
-     * da chiamare quando il pannello non è più utilizzato per evitare memory leak.
-     * Rimuove inoltre listener da sidebar e dropdownPanel.
-     * 
-     * <p>Rimuove anche i listener di filtraggio se è stato impostato un
-     * {@link CourseFilterable} e sono stati registrati i listener su
-     * {@code searchField} e {@code searchBtn}.</p>
-     */
 	public void disposeListeners()
     {
 		if(logoLabel != null && logoClickListener != null)

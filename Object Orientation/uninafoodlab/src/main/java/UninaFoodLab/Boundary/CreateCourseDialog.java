@@ -750,11 +750,7 @@ public class CreateCourseDialog extends JDialog
         }
     }
     
-    /**
-     * Reschedula le date delle sessioni per frequenza fissa (giornaliera, settimanale, etc.).
-     * @param dataInizio Data di inizio del corso.
-     * @param frequenza Stringa che rappresenta la frequenza.
-     */
+ 
     private void rescheduleFissa(LocalDate dataInizioCorso, String frequenza)
     {
         int giorniFrequenza = switch (frequenza) 
@@ -797,13 +793,7 @@ public class CreateCourseDialog extends JDialog
         }
     }
 
-    
-    /**
-     * Abilita la selezione manuale delle date delle sessioni (frequenza libera)
-     * e imposta le Veto Policy corrette.
-     * @param dataInizioCorso Data minima consentita per le sessioni.
-     */
-
+ 
     private void rescheduleLibera(LocalDate dataInizioCorso)
     {
         LocalDate today = LocalDate.now();
@@ -832,12 +822,7 @@ public class CreateCourseDialog extends JDialog
         }
     }
     
-    /**
-     * Crea una politica di veto sulle date per evitare sovrapposizioni o date antecedenti.
-     * @param dataInizio Data di inizio obbligatoria per le sessioni.
-     * @param currentPanel Pannello della sessione corrente.
-     * @return Politica di veto per il DatePicker.
-     */
+
     private DateVetoPolicy getVetoPolicy(final LocalDate dataInizio, final CreateSessionPanel currentPanel)
     {
         return new DateVetoPolicy()
@@ -858,13 +843,7 @@ public class CreateCourseDialog extends JDialog
         };
     }
     
-    /**
-     * Imposta la data selezionata su un pannello se mancante o precedente al minimo.
-     * Garantisce che tutte le schede di sessione abbiano sempre una data valida, sia che non ne abbiano mai avuta una, 
-     * sia che la precedente non sia più conforme ai nuovi vincoli. 
-     * @param panel Pannello di sessione da aggiornare.
-     * @param dataInizio Data minima consentita.
-     */
+  
     private void updateSelectedDate(CreateSessionPanel panel, LocalDate dataInizio)
     {
         LocalDate selected = panel.getDatePicker().getDate();
@@ -882,10 +861,6 @@ public class CreateCourseDialog extends JDialog
         }
     }
 
-    /**
-     * Aggiorna il listener di modifica data di un pannello di sessione.
-     * @param panel Pannello di sessione da aggiornare.
-     */
     private void updateSessionListener(CreateSessionPanel panel)
     {
     	 if(panel.getDateChangeListener() != null)
@@ -904,10 +879,6 @@ public class CreateCourseDialog extends JDialog
         SwingUtilities.invokeLater(() -> panel.getDatePicker().addDateChangeListener(listener));
     }
   
-    /**
-     * Aggiunge una nuova scheda di sessione al container.
-     * @param pratica True se la sessione è pratica, false se online.
-     */
     private void addNewSessionCard(boolean pratica)
     {
         if(!canAddSessions) 
@@ -920,10 +891,7 @@ public class CreateCourseDialog extends JDialog
         rescheduleSessions();
     }
 
-    /**
-     * Rimuove una scheda di sessione e riorganizza le restanti.
-     * @param panel Pannello di sessione da rimuovere.
-     */
+  
     public void removeSessionCard(CreateSessionPanel panel)
     {  
         sessionCards.remove(panel);
@@ -937,10 +905,7 @@ public class CreateCourseDialog extends JDialog
         rescheduleSessions();
     }
     
-    /**
-     * Chiamato dal Controller quando una sessione viene rimossa in modalità modifica.
-     * Forza la ComboBox della Frequenza su "Libera" (Rule 4).
-     */
+  
     public void setFrequenzaToLibera()
     {
         frequencyList.setSelectedItem(FrequenzaSessioni.Libera.toString());
@@ -1083,12 +1048,7 @@ public class CreateCourseDialog extends JDialog
             togglePartecipantiLimit(false);
     }
     
-    /**
-     * Applica o rimuove uno stato di errore visivo su un componente.
-     * @param comp Componente target.
-     * @param errore True per mostrare l'errore, false per rimuoverlo.
-     * @param tooltip Testo del tooltip di errore.
-     */
+ 
 	private void showError(JComponent comp, boolean errore, String tooltip)
 	{
 		if(errore)
@@ -1104,10 +1064,7 @@ public class CreateCourseDialog extends JDialog
 		}
 	}
 	    
-	 /**
-     * Valida i campi obbligatori del corso e mostra un messaggio di errore se necessario.
-     * @return True se tutti i campi sono validi.
-     */
+	
 	public boolean isValidCourse()
 	{
 	    focusSet = false;
@@ -1144,14 +1101,7 @@ public class CreateCourseDialog extends JDialog
 	    return valido;
 	}
 
-	/**
-	 * Metodo di utilità per validare un singolo campo e impostare il focus se errato.
-	 *
-	 * @param comp Componente da validare
-	 * @param errore {@code true} se c'è errore, {@code false} altrimenti
-	 * @param tooltip Messaggio di errore da mostrare
-	 * @return {@code true} se il campo è valido, {@code false} se c'è errore
-	 */
+	
 	private boolean validateField(JComponent comp, boolean errore, String tooltip)
 	{
 	    showError(comp, errore, tooltip);
@@ -1163,37 +1113,25 @@ public class CreateCourseDialog extends JDialog
 	    return !errore;
 	}
 
-	 /**
-     * Controlla la validità del nome del corso.
-     * @return True se il nome non è vuoto.
-     */
+	
 	private boolean validateNome()
 	{
 	    return validateField(nameField, nameField.getText().length()<=0 , "Nome Corso obbligatorio");
 	}
 	
-    /**
-     * Controlla la validità della data di inizio.
-     * @return True se è stata selezionata una data.
-     */
+   
 	private boolean validateDataInizio()
 	{
 	    return validateField(dataInizioField, dataInizioField.getDate() == null, "Data obbligatoria");
 	}
 
-    /**
-     * Controlla che sia stato selezionato almeno un argomento.
-     * @return True se c'è almeno un argomento selezionato.
-     */
+ 
 	private boolean validateArgomenti()
 	{
 	    return validateField(argomentiPanel, idsSelectedArguments.size() <= 0, "Inserire almeno un argomento");
 	}
 
-	 /**
-     * Controlla la validità della descrizione del corso.
-     * @return True se la descrizione non è vuota.
-     */
+	
 	private boolean validateDescrizione()
 	{
 	    return validateField(descrizioneArea, descrizioneArea.getText().length() <= 0 , "Descrizione Corso obbligatoria");
@@ -1237,10 +1175,7 @@ public class CreateCourseDialog extends JDialog
         sessionsContainer.setLayout(new MigLayout("wrap " + Math.min(count, 3) + ", gap 10 10, insets 5", columns));
     }
     
-    /**
-     * Mostra o nasconde i campi per il limite di partecipanti.
-     * @param visibile True per mostrare, false per nascondere.
-     */
+ 
     private void togglePartecipantiLimit(boolean visibile)
     {
         limitLabel.setVisible(visibile);
@@ -1249,10 +1184,6 @@ public class CreateCourseDialog extends JDialog
         detailPanel.repaint();
     }
 
-    /**
-     * Rimuove i pulsanti di aumento/diminuzione da uno spinner per uno stile più pulito.
-     * @param spinner Spinner da cui rimuovere i pulsanti.
-     */
     private void removeSpinnerButtons(JSpinner spinner)
     {
         JComponent editor = spinner.getEditor();
@@ -1269,10 +1200,7 @@ public class CreateCourseDialog extends JDialog
         }
     }
     
-    /**
-     * Applica un tema arancione al componente DatePicker.
-     * @param settings Impostazioni del DatePicker da personalizzare.
-     */
+   
     public void applyOrangeTheme(DatePickerSettings settings)
     {
         Color orange = new Color(225, 126, 47);

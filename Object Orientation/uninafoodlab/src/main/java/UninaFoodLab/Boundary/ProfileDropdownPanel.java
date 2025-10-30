@@ -32,12 +32,7 @@ public class ProfileDropdownPanel extends JXPanel
 	private MouseAdapter hoverListener;
 	
 	
-	  /**
-     * Costruisce un nuovo {@code ProfileDropdownPanel} associato al frame principale dell'applicazione.
-     * Inizializza componenti, stile e listener.
-     *
-     * @param parentFrame Il {@code JXFrame} genitore a cui è associato questo menu.
-     */
+
 	public ProfileDropdownPanel(JXFrame parentFrame)
 	{
 		this.parentFrame = parentFrame;
@@ -55,7 +50,6 @@ public class ProfileDropdownPanel extends JXPanel
 	 /**
      * Inizializza i componenti del dropdown: etichetta utente, separatore,
      * pulsanti "Profilo" e "Logout".
-     * <p>
      */
 	private void initComponents()
 	{
@@ -83,8 +77,7 @@ public class ProfileDropdownPanel extends JXPanel
 	  /**
      * Inizializza i listener di azione per i pulsanti "Profilo" e "Logout"
      * e i listener per gli effetti hover.
-     * <p>
-     * I listener chiamano i metodi corrispondenti nel {@code Controller}.
+
      */
 	private void initListeners()
 	{
@@ -146,7 +139,6 @@ public class ProfileDropdownPanel extends JXPanel
 	
 	  /**
      * Rimuove tutti i listener registrati su pulsanti e mouse.
-     * <p>
      * Va chiamato prima di rimuovere il dropdown per evitare memory leak.
      * Rimuove in sicurezza anche i listener hover.
      */
@@ -183,7 +175,6 @@ public class ProfileDropdownPanel extends JXPanel
 	
 	 /**
      * Applica lo stile grafico di base a tutti i componenti del dropdown.
-     * <p>
      * Imposta colori, font, padding e altri attributi visivi.
      */
 	private void styleComponents()
@@ -199,7 +190,6 @@ public class ProfileDropdownPanel extends JXPanel
      * Applica uno stile coerente a un pulsante all'interno del menu dropdown del profilo.
      * Imposta allineamento, font, colori e bordi.
      *
-     * @param button Il pulsante JXButton da stilizzare.
      */
     private void styleDropdownButton(JXButton button)
     {
@@ -216,19 +206,10 @@ public class ProfileDropdownPanel extends JXPanel
     /**
      * Posiziona dinamicamente il pannello dropdown del profilo subito sotto l'header
      * e allineato al margine destro del frame.
-     * <p>
      * Questo metodo deve essere chiamato ogni volta che il frame viene ridimensionato o
      * che l'header cambia posizione, in modo da mantenere il dropdown ancorato
      * visivamente sotto l'icona del profilo utente.
-     * <p>
-     * Il pannello viene posizionato con:
-     * <ul>
-     *   <li><b>x</b> = larghezza del layered pane - larghezza del pannello - 1 (margine destro)</li>
-     *   <li><b>y</b> = altezza dell'header (calcolata rispetto al layered pane)</li>
-     * </ul>
-     *
-     * @param header Il pannello header della finestra, utilizzato per calcolare l'altezza da cui iniziare il dropdown.
-     * @param layeredPane Il layered pane del frame, necessario per il calcolo delle coordinate assolute.
+   
      */
     public void updatePosition(JXPanel header, JLayeredPane layeredPane)
     {
